@@ -2,6 +2,8 @@
 
 class eZTextFileUserTest extends ezpDatabaseTestCase
 {
+    protected $backupGlobals = false;
+
     public $username = 'foobar';
     public $password = 'foobar';
     public $firstname = 'Foo';
@@ -36,9 +38,8 @@ class eZTextFileUserTest extends ezpDatabaseTestCase
 
     public function tearDown()
     {
-        parent::tearDown();
-
         ezpINIHelper::restoreINISettings();
+        parent::tearDown();
     }
 
     /**

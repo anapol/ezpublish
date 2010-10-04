@@ -199,7 +199,7 @@ class eZContentOperationCollection
         /* Check if current class is the user class, and if so, clean up the user-policy cache */
         if ( in_array( $classID, eZUser::contentClassIDs() ) )
         {
-            eZUser::cleanupCache();
+            eZUser::purgeUserCacheByUserId( $object->attribute( 'id' ) );
         }
     }
 
@@ -802,7 +802,7 @@ class eZContentOperationCollection
             // clear user policy cache if this was a user object
             if ( in_array( $object->attribute( 'contentclass_id' ), $userClassIDArray ) )
             {
-                eZUser::cleanupCache();
+                eZUser::purgeUserCacheByUserId( $object->attribute( 'id' ) );
             }
 
 
@@ -889,7 +889,7 @@ class eZContentOperationCollection
         // clear user policy cache if this was a user object
         if ( in_array( $object->attribute( 'contentclass_id' ), $userClassIDArray ) )
         {
-            eZUser::cleanupCache();
+            eZUser::purgeUserCacheByUserId( $object->attribute( 'id' ) );
         }
 
         // we don't clear template block cache here since it's cleared in eZContentObjectTreeNode::removeNode()
@@ -968,7 +968,7 @@ class eZContentOperationCollection
             // clear user policy cache if this was a user object
             if ( in_array( $object->attribute( 'contentclass_id' ), $userClassIdList ) )
             {
-                eZUser::cleanupCache();
+                eZUser::purgeUserCacheByUserId( $object->attribute( 'id' ) );
             }
         }
 
@@ -1073,10 +1073,14 @@ class eZContentOperationCollection
         $selectedNode->store();
 
         // clear user policy cache if this was a user object
-        if ( in_array( $object->attribute( 'contentclass_id' ), $userClassIDArray ) or
-             in_array( $selectedObject->attribute( 'contentclass_id' ), $userClassIDArray ) )
+        if ( in_array( $object->attribute( 'contentclass_id' ), $userClassIDArray ) )
         {
-            eZUser::cleanupCache();
+            eZUser::purgeUserCacheByUserId( $object->attribute( 'id' ) );
+        }
+
+        if ( in_array( $selectedObject->attribute( 'contentclass_id' ), $userClassIDArray ) )
+        {
+            eZUser::purgeUserCacheByUserId( $selectedObject->attribute( 'id' ) );
         }
 
         // modify path string
@@ -1428,13 +1432,13 @@ class eZContentOperationCollection
             {
                 $feedObjectAttributeMap = $config->variable( $iniSection, 'FeedObjectAttributeMap' );
                 $subNodesMap = $config->hasVariable( $iniSection, 'Subnodes' ) ? $config->variable( $iniSection, 'Subnodes' ) : array();
-    
+
                 $rssExportItem = eZRSSExportItem::create( $rssExportID );
                 $rssExportItem->setAttribute( 'class_id', eZContentObjectTreeNode::classIDByIdentifier( $classIdentifier ) );
                 $rssExportItem->setAttribute( 'title', $feedObjectAttributeMap['title'] );
                 if ( isset( $feedObjectAttributeMap['description'] ) )
                     $rssExportItem->setAttribute( 'description', $feedObjectAttributeMap['description'] );
-        
+
                 if ( isset( $feedObjectAttributeMap['category'] ) )
                     $rssExportItem->setAttribute( 'category', $feedObjectAttributeMap['category'] );
 
@@ -1453,7 +1457,7 @@ class eZContentOperationCollection
         }
 
         $db->commit();
-        
+
         eZContentCacheManager::clearContentCacheIfNeeded( $objectID );
 
         return array( 'status' => true );

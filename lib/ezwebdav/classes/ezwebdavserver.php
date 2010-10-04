@@ -545,7 +545,7 @@ class eZWebDAVServer
     /*!
       \protected
       Outputs the data \a $output using print().
-      \param $output Is an array which can contain:
+      \param $output Is an array which can contain (both must be set):
                      - data - String or byte data
                      - file - The path to the file, the contents of the file will be output
       \return The WebDAV status code

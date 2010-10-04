@@ -93,12 +93,13 @@ class eZDFSFileHandler implements eZClusterFileHandlerInterface
         {
             $filePath = eZDBFileHandler::cleanPath( $filePath );
             eZDebugSetting::writeDebug( 'kernel-clustering', "dfs::ctor( '$filePath' )" );
-            $this->filePath = $filePath;
         }
         else
         {
             eZDebugSetting::writeDebug( 'kernel-clustering', "dfs::ctor()" );
         }
+
+        $this->filePath = $filePath;
     }
 
     /**
@@ -816,6 +817,7 @@ class eZDFSFileHandler implements eZClusterFileHandlerInterface
         {
             eZDebugSetting::writeDebug( 'kernel-clustering',
                 "Not storing this cache", __METHOD__ );
+            $this->abortCacheGeneration();
             return $result;
         }
 
@@ -1284,6 +1286,7 @@ class eZDFSFileHandler implements eZClusterFileHandlerInterface
         // generation granted
         if ( $ret['result'] == 'ok' )
         {
+            eZClusterFileHandler::addGeneratingFile( $this );
             $this->realFilePath = $this->filePath;
             $this->filePath = $generatingFilePath;
             $this->generationStartTimestamp = $ret['mtime'];
@@ -1312,6 +1315,7 @@ class eZDFSFileHandler implements eZClusterFileHandlerInterface
         {
             $this->filePath = $this->realFilePath;
             $this->realFilePath = null;
+            eZClusterFileHandler::removeGeneratingFile( $this );
             return true;
         }
         else
@@ -1332,6 +1336,7 @@ class eZDFSFileHandler implements eZClusterFileHandlerInterface
         self::$dbbackend->_abortCacheGeneration( $this->filePath );
         $this->filePath = $this->realFilePath;
         $this->realFilePath = null;
+        eZClusterFileHandler::removeGeneratingFile( $this );
     }
 
     /**
@@ -1402,7 +1407,7 @@ class eZDFSFileHandler implements eZClusterFileHandlerInterface
      * eZDFS does require binary purge.
      * It does store files in DB + on NFS, and therefore doesn't remove files
      * in real time
-     * 
+     *
      * @since 4.3
      */
     public function requiresBinaryPurge()

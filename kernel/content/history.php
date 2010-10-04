@@ -45,7 +45,7 @@ if ( $http->hasPostVariable( 'BackButton' )  )
         $http->removeSessionVariable( 'LastAccessesVersionURI' );
         return $Module->redirectTo( $redurectURI );
     }
-    if ( $http->hasSessionVariable( "LastAccessesURI" ) )
+    if ( $http->hasSessionVariable( "LastAccessesURI", false ) )
         $userRedirectURI = $http->sessionVariable( "LastAccessesURI" );
     return $Module->redirectTo( $userRedirectURI );
 }
@@ -344,15 +344,15 @@ $res->setKeys( array( array( 'object', $object->attribute( 'id' ) ), // Object I
                       array( 'remote_id', $object->attribute( 'remote_id' ) ),
                       array( 'class', $object->attribute( 'contentclass_id' ) ), // Class ID
                       array( 'class_identifier', $object->attribute( 'class_identifier' ) ), // Class identifier
-                      array( 'section_id', $object->attribute( 'section_id' ) ) // Section ID
+                      array( 'section_id', $object->attribute( 'section_id' ) ), // Section ID, typo, deprecated
+                      array( 'section', $object->attribute( 'section_id' ) ) // Section ID
                       ) ); // Section ID, 0 so far
 
 $section = eZSection::fetch( $object->attribute( 'section_id' ) );
 if( $section )
 {
-    $res->setKeys( array( array( 'section_identifier', $section->attribute( 'section_identifier' ) ) ) );
+    $res->setKeys( array( array( 'section_identifier', $section->attribute( 'identifier' ) ) ) );
 }
-eZSection::setGlobalID( $object->attribute( 'section_id' ) );
 
 $versionArray =( isset( $versionArray ) and is_array( $versionArray ) ) ? array_unique( $versionArray ) : array();
 $LastAccessesVersionURI = $http->hasSessionVariable( 'LastAccessesVersionURI' ) ? $http->sessionVariable( 'LastAccessesVersionURI' ) : null;

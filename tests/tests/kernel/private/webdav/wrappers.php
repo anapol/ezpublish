@@ -7,7 +7,7 @@
  * @package tests
  */
 
-class ezcWebdavTransportWrapper extends ezcWebdavTransport
+class ezcWebdavTransportWrapper extends ezcWebdavKonquerorCompatibleTransport//ezcWebdavTransport
 {
     protected function retrieveBody()
     {
@@ -17,7 +17,6 @@ class ezcWebdavTransportWrapper extends ezcWebdavTransport
     protected function sendResponse( ezcWebdavOutputResult $output )
     {
         $response = '';
-
         // Sends HTTP headers
         foreach ( $output->headers as $name => $content )
         {
@@ -57,7 +56,6 @@ class eZWebDAVContentServerWrapper extends eZWebDAVContentServer
         if ( $output["file"] )
         {
             $realPath = $output["file"];
-            require_once( 'kernel/classes/ezclusterfilehandler.php' );
             $file = eZClusterFileHandler::instance( $realPath );
             $file->fetch();
         }

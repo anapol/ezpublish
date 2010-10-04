@@ -31,8 +31,10 @@
 /*! \file
 */
 
-define( 'TABLE_METADATA',     'ezdbfile' );
-define( 'TABLE_DATA',         'ezdbfile_data' );
+if ( !defined( 'TABLE_METADATA' ) )
+    define( 'TABLE_METADATA', 'ezdbfile' );
+if ( !defined( 'TABLE_DATA' ) )
+    define( 'TABLE_DATA', 'ezdbfile_data' );
 
 /*
 CREATE TABLE ezdbfile (
@@ -65,9 +67,9 @@ class eZDBFileHandlerMysqlBackend
 {
     function _connect( $newLink = false )
     {
+        $siteINI = eZINI::instance( 'site.ini' );
         if ( !isset( $GLOBALS['eZDBFileHandlerMysqlBackend_dbparams'] ) )
         {
-            $siteINI = eZINI::instance( 'site.ini' );
             $fileINI = eZINI::instance( 'file.ini' );
 
             $params['host']       = $fileINI->variable( 'ClusteringSettings', 'DBHost' );
@@ -110,6 +112,20 @@ class eZDBFileHandlerMysqlBackend
 
         if ( !mysql_select_db( $params['dbname'], $this->db ) )
             return $this->_die( "Unable to select database {$params['dbname']}" );
+
+        $charset = trim( $siteINI->variable( 'DatabaseSettings', 'Charset' ) );
+        if ( $charset === '' )
+        {
+            $charset = eZTextCodec::internalCharset();
+        }
+
+        if ( $charset )
+        {
+            if ( !mysql_query( "SET NAMES '" . eZMySQLCharset::mapTo( $charset ) . "'", $this->db ) )
+            {
+                return $this->_die( "Failed to set Database charset to $charset." );
+            }
+        }
     }
 
     function _copy( $srcFilePath, $dstFilePath, $fname = false )
@@ -1392,7 +1408,6 @@ class eZDBFileHandlerMysqlBackend
                              'expired' => 0 );
         $query = 'INSERT INTO ' . TABLE_METADATA . ' ( '. implode(', ', array_keys( $insertData ) ) . ' ) ' .
                  "VALUES(" . implode( ', ', $insertData ) . ")";
-
         if ( !$this->_query( $query, "_startCacheGeneration( $filePath )", false ) )
         {
             $errno = mysql_errno();
@@ -1486,7 +1501,6 @@ class eZDBFileHandlerMysqlBackend
                 return false;
             }
             $generatingMetaData = mysql_fetch_assoc( $res );
-
             $res = $this->_query( "SELECT * FROM " . TABLE_METADATA . " WHERE name_hash=MD5('$filePath') FOR UPDATE", $fname, false );
             // the original file does not exist: we move the generating file
             if ( mysql_num_rows( $res ) == 0 )
@@ -1494,6 +1508,7 @@ class eZDBFileHandlerMysqlBackend
                 $metaData = $generatingMetaData;
                 $metaData['name'] = $filePath;
                 $metaData['name_hash'] = md5( $filePath );
+                // $metaData['scope'] = '';
                 $metaData['name_trunk'] = $this->nameTrunk( $filePath, $metaData['scope'] );
                 $insertSQL = "INSERT INTO " . TABLE_METADATA . " ( " . implode( ', ', array_keys( $metaData ) ) . " ) " .
                              "VALUES( " . $this->_sqlList( $metaData ) . ")";

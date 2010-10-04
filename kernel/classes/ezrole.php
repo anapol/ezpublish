@@ -287,7 +287,6 @@ class eZRole extends eZPersistentObject
         // Expire role cache
         eZExpiryHandler::registerShutdownFunction();
         $handler = eZExpiryHandler::instance();
-        $handler->setTimestamp( 'user-access-cache', time() );
         $handler->setTimestamp( 'user-info-cache', time() );
         $handler->setTimestamp( 'user-class-cache', time() );
         $handler->store();
@@ -560,18 +559,11 @@ class eZRole extends eZPersistentObject
     {
         $http = eZHTTPTool::instance();
 
-        $http->removeSessionVariable( 'UserPolicies' );
-        $http->removeSessionVariable( 'UserLimitations' );
-        $http->removeSessionVariable( 'UserLimitationValues' );
-        $http->removeSessionVariable( 'CanInstantiateClassesCachedForUser' );
         $http->removeSessionVariable( 'CanInstantiateClassList' );
         $http->removeSessionVariable( 'ClassesCachedForUser' );
 
-        // Expire role cache
-        eZExpiryHandler::registerShutdownFunction();
-        $handler = eZExpiryHandler::instance();
-        $handler->setTimestamp( 'user-access-cache', time() );
-        $handler->store();
+        // Expire user (role) cache
+        eZUser::cleanupCache();
     }
 
     /**
@@ -642,9 +634,11 @@ class eZRole extends eZPersistentObject
     {
         if ( !isset( $this->Policies ) )
         {
-            $policies = eZPersistentObject::fetchObjectList( eZPolicy::definition(),
-                                                              null, array( 'role_id' => $this->attribute( 'id') ), null, null,
-                                                              true );
+            $policies = eZPersistentObject::fetchObjectList(
+                eZPolicy::definition(),
+                null,
+                array( 'role_id' => $this->attribute( 'id' ), 'original_id' => 0 ),
+                null, null, true );
 
             if ( $this->LimitIdentifier )
             {

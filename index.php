@@ -193,7 +193,6 @@ function eZDBCleanup()
         $db = eZDB::instance();
         $db->setIsSQLOutputEnabled( false );
     }
-//     session_write_close();
 }
 
 function eZFatalError()
@@ -334,7 +333,6 @@ eZDebug::addTimingPoint( "Script start" );
 
 $uri = eZURI::instance( eZSys::requestURI() );
 $GLOBALS['eZRequestedURI'] = $uri;
-require_once "pre_check.php";
 
 // Check for extension
 require_once( 'kernel/common/ezincludefunctions.php' );
@@ -388,7 +386,7 @@ if ( !$useCronjob )
 
     // Fill in hooks
     eZSession::addCallback( 'destroy_pre', 'eZSessionBasketDestroy');
-    eZSession::addCallback( 'gc_pre', 'eZSessionBasketGarbageCollector');
+    eZSession::addCallback( 'gc_pre',      'eZSessionBasketGarbageCollector');
     eZSession::addCallback( 'cleanup_pre', 'eZSessionBasketCleanup');
 }
 
@@ -404,9 +402,27 @@ eZSession::addCallback( 'regenerate_post', 'eZSessionBasketRegenerate');
 $moduleRepositories = eZModule::activeModuleRepositories();
 eZModule::setGlobalPathList( $moduleRepositories );
 
-$check = eZHandlePreChecks( $siteBasics, $uri );
-
 require_once( 'kernel/common/i18n.php' );
+
+// start: eZCheckValidity
+// pre check, setup wizard related so needs to be before session/db init
+if ( $ini->variable( 'SiteAccessSettings', 'CheckValidity' ) === 'true' )
+{
+    $check = array( 'module' => 'setup',
+                    'function' => 'init' );
+    // Turn off some features that won't bee needed yet
+    $siteBasics['policy-check-omit-list'][] = 'setup';
+    $siteBasics['show-page-layout'] = $ini->variable( 'SetupSettings', 'PageLayout' );
+    $siteBasics['validity-check-required'] = true;
+    $siteBasics['session-required'] = $siteBasics['user-object-required'] = false;
+    $siteBasics['db-required'] = $siteBasics['no-cache-adviced'] = $siteBasics['url-translator-allowed'] = false;
+    $siteBasics['site-design-override'] = $ini->variable( 'SetupSettings', 'OverrideSiteDesign' );
+    $access = array( 'name' => 'setup',
+                     'type' => eZSiteAccess::TYPE_URI );
+    $access = eZSiteAccess::change( $access );
+    eZTranslatorManager::enableDynamicTranslations();
+}
+// stop: eZCheckValidity
 
 if ( $sessionRequired )
 {
@@ -417,17 +433,22 @@ $db = false;
 if ( $dbRequired )
 {
     $db = eZDB::instance();
-    if ( $sessionRequired and
-         $db->isConnected() )
+    if ( $sessionRequired )
     {
-        eZSession::start();
+        if ( $ini->variable( 'Session', 'ForceStart' ) === 'enabled' )
+            eZSession::start();
+        else
+            eZSession::lazyStart();
     }
-
-    if ( !$db->isConnected() )
+    else if ( !$db->isConnected() )
         $warningList[] = array( 'error' => array( 'type' => 'kernel',
                                                   'number' => eZError::KERNEL_NO_DB_CONNECTION ),
                                 'text' => 'No database connection could be made, the system might not behave properly.' );
 }
+
+// pre check, RequireUserLogin & FORCE_LOGIN related so needs to be after session init
+if ( !isset( $check ) )
+    $check = eZUserLoginHandler::preCheck( $siteBasics, $uri );
 
 // Initialize with locale settings
 $locale = eZLocale::instance();
@@ -462,8 +483,6 @@ foreach( $headerList as $key => $value )
 {
     header( $key . ': ' . $value );
 }
-
-eZSection::initGlobalID();
 
 // Read role settings
 $globalPolicyCheckOmitList = $ini->variable( 'RoleSettings', 'PolicyOmitList' );
@@ -890,9 +909,10 @@ if ( $module->exitStatus() == eZModule::STATUS_REDIRECT )
 }
 
 // Store the last URI for access history for login redirection
-// Only if database is connected and only if there was no error or no redirects happen
-if ( is_object( $db ) and $db->isConnected() and
-     $module->exitStatus() == eZModule::STATUS_OK )
+// Only if database is connected, user has session and only if there was no error or no redirects happen
+if ( eZSession::hasStarted() &&
+    is_object( $db ) && $db->isConnected() &&
+    $module->exitStatus() == eZModule::STATUS_OK )
 {
     $currentURI = $completeRequestedURI;
     if ( strlen( $currentURI ) > 0 and $currentURI[0] != '/' )

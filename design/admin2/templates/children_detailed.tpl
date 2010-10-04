@@ -1,7 +1,32 @@
+{def $section         = fetch( 'section', 'object', hash( 'section_id', $node.object.section_id ) )
+    $visible_columns  = ezini('SubItems', 'VisibleColumns', 'admininterface.ini')
+    $locales          = fetch( 'content', 'translation_list' ) }
+
 {literal}
 <script type="text/javascript">
 (function() {
 {/literal}
+
+var icons = {ldelim}
+
+{foreach $locales as $locale}
+    '{$locale.locale_code}': '{$locale.locale_code|flag_icon()}'{delimiter},
+
+{/delimiter}
+{/foreach}
+
+{rdelim};
+
+var vcols = {ldelim}
+
+{foreach $visible_columns as $index => $object}
+    {$index} : '{$object}'.split(';'){delimiter},
+
+{/delimiter}
+{/foreach}
+
+{rdelim};
+
 
 var confObj = {ldelim}
 
@@ -19,10 +44,15 @@ var confObj = {ldelim}
     dataSourceURL: "{concat('ezjscore/call/ezjscnode::subtree::', $node.node_id)|ezurl('no')}",
     rowsPrPage: {$number_of_items},
     sortOrder: {$node.sort_order},
-    currentURL: "{$node.url|wash( javascript )}",
-    previewURL: {"/content/versionview/%objectID%/%version%"|ezurl},
-    editURL: {"/content/edit/%objectID%"|ezurl},
-    hiddenColumns: "{ezpreference( 'admin_hidden_columns' )}".split(',')
+    defaultShownColumns: vcols,
+    navigationPart: "{$section.navigation_part_identifier}",
+    cookieName: "eZSubitemColumns",
+    cookieSecure: false,
+    cookieDomain: "{ezsys(hostname)}",
+    languagesString: "{$node.object.language_js_array}",
+    classesString: "{$node.classes_js_array}",
+    flagIcons: icons
+
 {rdelim}
 
 
@@ -36,6 +66,7 @@ var labelsObj = {ldelim}
 
     DATA_TABLE_COLS: {ldelim}
 
+                        thumbnail: "{'Thumbnail'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         name: "{'Name'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         visibility: "{'Visibility'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         type: "{'Type'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
@@ -43,9 +74,12 @@ var labelsObj = {ldelim}
                         modified: "{'Modified'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         published: "{'Published'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         section: "{'Section'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
+                        translations: "{'Translations'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         priority: "{'Priority'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         nodeid: "{'Node ID'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
-                        contentid: "{'Object ID'|i18n( 'design/admin/node/view/full' )|wash('javascript')}"
+                        objectid: "{'Object ID'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
+                        noderemoteid: "{'Node remote ID'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
+                        objectremoteid: "{'Object remote ID'|i18n( 'design/admin/node/view/full' )|wash('javascript')}"
                     {rdelim},
 
     TABLE_OPTIONS: {ldelim}
@@ -70,13 +104,8 @@ var labelsObj = {ldelim}
                         previous_page: "&lsaquo;&nbsp;{'prev'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         next_page: "{'next'|i18n( 'design/admin/node/view/full' )|wash('javascript')}&nbsp;&rsaquo;",
                         last_page: "{'last'|i18n( 'design/admin/node/view/full' )|wash('javascript')}&nbsp;&raquo;"
-                    {rdelim},
-
-    CONTEXT_MENU: {ldelim}
-
-                        preview: "{'Preview'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
-                        edit: "{'Edit'|i18n( 'design/admin/node/view/full' )|wash('javascript')}"
                     {rdelim}
+
 
 {rdelim};
 
@@ -132,17 +161,16 @@ var labelsObj = {ldelim}
 {/if}
 
 {literal}
-YUILoader.require(['datatable', 'button', 'container']);
+YUILoader.require(['datatable', 'button', 'container', 'cookie']);
 YUILoader.onSuccess = function() {
-sortableSubitems.init(confObj, labelsObj, createGroups, createOptions);
-//    ss.init(confObj, labelsObj, createGroups, createOptions);
+    sortableSubitems.init(confObj, labelsObj, createGroups, createOptions);
 };
 var options = [];
 YUILoader.insert(options, 'js');
 
 })();
 {/literal}
-
+{undef $section $visible_columns $locales}
 </script>
 
 <div id="action-controls-container">

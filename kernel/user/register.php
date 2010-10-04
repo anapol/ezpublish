@@ -52,23 +52,29 @@ $Params['TemplateObject'] = $tpl;
 
 // $http->removeSessionVariable( "RegisterUserID" );
 
+if ( $redirectNumber == '3' )
+{
+    $tpl->setVariable( 'content_attributes', false );
+
+    $Result = array();
+    $Result['content'] = $tpl->fetch( 'design:user/register.tpl' );
+    $Result['path'] = array( array( 'url' => false,
+                            'text' => ezpI18n::tr( 'kernel/user', 'User' ) ),
+                        array( 'url' => false,
+                            'text' => ezpI18n::tr( 'kernel/user', 'Register' ) ) );
+    return $Result;
+}
+
 $db = eZDB::instance();
 $db->begin();
 
 // Create new user object if user is not logged in
 if ( !$http->hasSessionVariable( "RegisterUserID" ) )
 {
-    // flag if user client supports cookies and session validates + if we should do redirect
+    // flag if user client supports cookies and if we should do redirect
     $userClientValidates  = true;
     $doValidationRedirect = false;
     if ( !eZSession::userHasSessionCookie() )
-    {
-        if ( $redirectNumber == '2' )
-            $userClientValidates = false;
-        else
-            $doValidationRedirect = true;
-    }
-    else if ( !eZSession::userSessionIsValid() )
     {
         if ( $redirectNumber == '2' )
             $userClientValidates = false;
@@ -86,7 +92,7 @@ if ( !$http->hasSessionVariable( "RegisterUserID" ) )
         $db->rollback();
 
         $tpl->setVariable( 'user_has_cookie', eZSession::userHasSessionCookie(), 'User' );
-        $tpl->setVariable( 'user_session_validates', eZSession::userSessionIsValid(), 'User' );      
+        $tpl->setVariable( 'user_session_validates', true, 'User' );
 
         $Result = array();
         $Result['content'] = $tpl->fetch( 'design:user/register_user_not_valid.tpl' );
@@ -197,6 +203,14 @@ if ( !function_exists( 'checkContentActions' ) )
             $user = eZUser::currentUser();
             $operationResult = eZOperationHandler::execute( 'content', 'publish', array( 'object_id' => $object->attribute( 'id' ),
                                                                                          'version' => $version->attribute( 'version') ) );
+
+            // Break here if the publishing failed
+            if ( $operationResult['status'] !== eZModuleOperationInfo::STATUS_CONTINUE )
+            {
+                eZDebug::writeError( 'User object(' . $object->attribute( 'id' ) . ') could not be published.', 'user/register' );
+                $module->redirectTo( '/user/register/3' );
+                return;
+            }
 
             $object = eZContentObject::fetch( $object->attribute( 'id' ) );
 

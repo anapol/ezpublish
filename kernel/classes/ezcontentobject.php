@@ -518,24 +518,24 @@ class eZContentObject extends eZPersistentObject
     /**
      * Generates a map with all the content object attributes where the keys are
      * the attribute identifiers grouped by class attribute category.
-     * 
+     *
      * @note Result is not cached, so make sure you don't call this over and over.
-     * 
-     * @return array 
+     *
+     * @return array
      */
     public function groupedDataMap()
     {
         return self::createGroupedDataMap( $this->fetchDataMap() );
     }
-    
+
     /**
      * Generates a map with all the content object attributes where the keys are
      * the attribute identifiers grouped by class attribute category.
-     * 
+     *
      * @note Result is not cached, so make sure you don't call this over and over.
-     * 
+     *
      * @param array $contentObjectAttributes Array of eZContentObjectAttribute objects
-     * @return array 
+     * @return array
      */
     public static function createGroupedDataMap( $contentObjectAttributes )
     {
@@ -555,7 +555,7 @@ class eZContentObject extends eZPersistentObject
                 $groupedDataMap[ $attributeCategory ] = array();
 
             $groupedDataMap[ $attributeCategory ][$attributeIdentifier] = $attribute;
-            
+
         }
         return $groupedDataMap;
     }
@@ -1143,8 +1143,7 @@ class eZContentObject extends eZPersistentObject
             if ( !isset( $eZContentObjectVersionCache ) ) // prevent PHP warning below
                 $eZContentObjectVersionCache = array();
 
-            if ( array_key_exists( $this->ID, $eZContentObjectVersionCache ) &&
-                 array_key_exists( $version, $eZContentObjectVersionCache[$this->ID] ) )
+            if ( isset( $eZContentObjectVersionCache[$this->ID][$version] ) )
             {
                 return $eZContentObjectVersionCache[$this->ID][$version];
             }
@@ -2897,8 +2896,40 @@ class eZContentObject extends eZPersistentObject
         {
             if ( isset( $params['SortBy'] ) )
             {
-                $sortingInfo = eZContentObjectTreeNode::createSortingSQLStrings( $params['SortBy'] );
-                $sortingString = ' ORDER BY ' . $sortingInfo['sortingFields'];
+                $validSortBy = array( 'class_identifier', 'class_name', 'modified', 'name', 'published', 'section' );
+                $sortByParam = array();
+                if ( is_array( $params['SortBy'] ) )
+                {
+                    // only one SortBy, as a simple array
+                    if ( !is_array( $params['SortBy'][0] ) )
+                    {
+                        if ( !in_array( $params['SortBy'][0], $validSortBy ) )
+                            eZDebug::writeWarning( "Unsupported sort_by parameter {$params['SortBy'][0]}; check the online documentation for the list of supported sort types", __METHOD__ );
+                        else
+                            $sortByParam[] = $params['SortBy'];
+                    }
+                    // multiple SortBy, check each of them one by one, and keep valid ones
+                    else
+                    {
+                        $invalidSortBy = array();
+                        foreach( $params['SortBy'] as $sortByTuple )
+                        {
+                            if ( !in_array( $sortByTuple[0], $validSortBy ) )
+                                $invalidSortBy[] = $sortByTuple[0];
+                            else
+                                $sortByParam[] = $sortByTuple;
+                        }
+                        if ( count( $invalidSortBy ) > 0 )
+                        {
+                            eZDebug::writeWarning( "Unsupported sort_by parameter(s) " . implode( ', ', $invalidSortBy ) . "; check the online documentation for the list of supported sort types", __METHOD__ );
+                        }
+                    }
+                }
+                if ( count( $sortByParam ) > 0 )
+                {
+                    $sortingInfo = eZContentObjectTreeNode::createSortingSQLStrings( $sortByParam );
+                    $sortingString = ' ORDER BY ' . $sortingInfo['sortingFields'];
+                }
             }
             if ( isset( $params['IgnoreVisibility'] ) )
             {
@@ -4768,23 +4799,16 @@ class eZContentObject extends eZPersistentObject
         // Fetch content actions if not already fetched
         if ( $this->ContentActionList === false )
         {
-
-            $contentActionList = array();
             foreach ( $attributeList as $attribute )
             {
-                $contentActions = $attribute->contentActionList();
-                if ( count( $contentActions ) > 0 )
+                $contentActionList = $attribute->contentActionList();
+                if ( is_array( $contentActionList ) && !empty( $contentActionList ) )
                 {
-                    $contentActionList = $attribute->contentActionList();
-
-                    if ( is_array( $contentActionList ) )
+                    foreach ( $contentActionList as $action )
                     {
-                        foreach ( $contentActionList as $action )
+                        if ( !$this->hasContentAction( $action['action'] ) )
                         {
-                            if ( !$this->hasContentAction( $action['action'] ) )
-                            {
-                                $this->ContentActionList[] = $action;
-                            }
+                            $this->ContentActionList[] = $action;
                         }
                     }
                 }

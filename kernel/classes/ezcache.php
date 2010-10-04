@@ -134,7 +134,7 @@ class eZCache
                                        'id' => 'user_info_cache',
                                        'is-clustered' => true,
                                        'tag' => array( 'user' ),
-                                       'expiry-key' => 'user-access-cache',
+                                       'expiry-key' => 'user-info-cache',
                                        'enabled' => true,
                                        'path' => 'user-info',
                                        'function' => array( 'eZCache', 'clearUserInfoCache' ) ),
@@ -452,7 +452,7 @@ class eZCache
         $cacheItem['iterationMax']   = $iterationMax;
         $cacheItem['expiry']         = $expiry;
         $functionName = 'function';
-        if ( $purge )
+        if ( $purge && isset( $cacheItem['purge-function'] ) )
             $functionName = 'purge-function';
         if ( isset( $cacheItem[$functionName] ) )
         {
@@ -464,6 +464,12 @@ class eZCache
         }
         else
         {
+            if ( !isset( $cacheItem['path'] ) || strlen( $cacheItem['path'] ) < 1 )
+            {
+                eZDebug::writeError( "No path specified for cache item '$cacheItem[name]', can not clear cache.", __METHOD__ );
+                return;
+            }
+
             $cachePath = eZSys::cacheDirectory() . "/" . $cacheItem['path'];
 
             if ( isset( $cacheItem['is-clustered'] ) )
@@ -568,13 +574,13 @@ class eZCache
     }
 
     /**
-     * Clears all user-info caches by setting a new expiry value for the key *user-access-cache*.
+     * Clears all user-info caches by setting a new expiry value for the key *user-info-cache*.
      */
     static function clearUserInfoCache( $cacheItem )
     {
         eZExpiryHandler::registerShutdownFunction();
         $handler = eZExpiryHandler::instance();
-        $handler->setTimestamp( 'user-access-cache', time() );
+        $handler->setTimestamp( 'user-info-cache', time() );
         $handler->store();
     }
 

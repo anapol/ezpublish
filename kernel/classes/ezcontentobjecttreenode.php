@@ -500,6 +500,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
         return $rows[0]['count'];
     }
 
+
     /*!
      Fetches a list of nodes and returns it. Offset and limitation can be set if needed.
     */
@@ -849,7 +850,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
 
             $filter['tables']   = $sqlResult['tables'];
             $filter['joins']    = $sqlResult['joins'];
-            $filter['columns']  = $sqlResult['columns'];
+            $filter['columns']  = isset( $sqlResult['columns'] ) ? $sqlResult['columns'] : '';
 
             if( isset( $sqlResult['group_by'] ) )
                 $filter['group_by'] =  $sqlResult['group_by'];
@@ -2286,6 +2287,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                       'group_field' => "( $field / $divisor )" );
     }
 
+
     /*!
      \sa subTreeCount
     */
@@ -2772,26 +2774,10 @@ class eZContentObjectTreeNode extends eZPersistentObject
                                                       'Comment' => 'Assigned a section to the current node and all child objects: eZContentObjectTreeNode::assignSectionToSubTree()' ) );
 
         $objectSimpleIDArray = array();
-        $inSQL   = array();
-        $inSQLs  = array();
-        $counter = 0;
         foreach ( $objectIDArray as $objectID )
         {
             $objectSimpleIDArray[] = $objectID['id'];
-            if ( $counter < 99 )
-            {
-                $inSQL[] = $objectID['id'];
-                ++$counter;
-            }
-            else
-            {
-                $inSQL[]  = $objectID['id'];
-                $counter  = 0;
-                $inSQLs[] = $inSQL;
-                $inSQL    = array();
-            }
         }
-        $inSQLs[] = $inSQL;
 
         $filterPart = '';
         if ( $oldSectionID !== false )
@@ -2800,14 +2786,11 @@ class eZContentObjectTreeNode extends eZPersistentObject
             $filterPart = " section_id = '$oldSectionID' and ";
         }
 
-        $sets = count( $inSQLs );
-
         $db->begin();
-        for ( $i = 0; $i < $sets; ++$i )
+        foreach ( array_chunk( $objectSimpleIDArray, 100 ) as $pagedObjectIDs )
         {
-            $inPart = implode( ',', $inSQLs[$i] );
-            $db->query( "UPDATE ezcontentobject SET section_id='$sectionID' WHERE $filterPart id IN ( $inPart )" );
-            $db->query( "UPDATE ezsearch_object_word_link SET section_id='$sectionID' WHERE $filterPart contentobject_id IN ( $inPart )" );
+            $db->query( "UPDATE ezcontentobject SET section_id='$sectionID' WHERE $filterPart " . $db->generateSQLINStatement( $pagedObjectIDs, 'id', false, true, 'int' ) );
+            $db->query( "UPDATE ezsearch_object_word_link SET section_id='$sectionID' WHERE $filterPart " . $db->generateSQLINStatement( $pagedObjectIDs, 'contentobject_id', false, true, 'int' ) );
         }
         $db->commit();
 
@@ -2921,27 +2904,17 @@ class eZContentObjectTreeNode extends eZPersistentObject
     static function findMainNode( $objectID, $asObject = false )
     {
         $objectID = (int)$objectID;
-        $query="SELECT ezcontentobject.*,
-                           ezcontentobject_tree.*,
-                           ezcontentclass.serialized_name_list as class_serialized_name_list,
-                           ezcontentclass.identifier as class_identifier,
-                           ezcontentclass.is_container as is_container
-                    FROM ezcontentobject_tree,
-                         ezcontentobject,
-                         ezcontentclass
-                    WHERE ezcontentobject_tree.contentobject_id=$objectID AND
-                          ezcontentobject_tree.main_node_id = ezcontentobject_tree.node_id AND
-                          ezcontentobject_tree.contentobject_id=ezcontentobject.id AND
-                          ezcontentclass.version=0  AND
-                          ezcontentclass.id = ezcontentobject.contentclass_id";
+        $query = "SELECT node_id
+                  FROM ezcontentobject_tree
+                  WHERE contentobject_id=$objectID AND
+                  main_node_id = node_id";
         $db = eZDB::instance();
         $nodeListArray = $db->arrayQuery( $query );
         if ( count( $nodeListArray ) == 1 )
         {
             if ( $asObject )
             {
-                $retNodeArray = eZContentObjectTreeNode::makeObjectsArray( $nodeListArray );
-                return $retNodeArray[0];
+                 return eZContentObjectTreeNode::fetch( $nodeListArray[0]['node_id'] );
             }
             else
             {
@@ -3671,23 +3644,24 @@ class eZContentObjectTreeNode extends eZPersistentObject
 
     /*!
       Removes the current node.
+      Use ->removeNodeFromTree() if you need to handle main node change + remove object if needed
 
       \note Transaction unsafe. If you call several transaction unsafe methods you must enclose
      the calls within a db transaction; thus within db->begin and db->commit.
     */
-    function removeThis( )
+    function removeThis()
     {
         $ini = eZINI::instance();
 
+        $object = $this->object();
+        $nodeID = $this->attribute( 'node_id' );
         if ( eZAudit::isAuditEnabled() )
         {
             // Set audit params.
-            $nodeIDAudit = $this->attribute( 'node_id' );
-            $object = $this->object();
             $objectID = $object->attribute( 'id' );
             $objectName = $object->attribute( 'name' );
 
-            eZAudit::writeAudit( 'content-delete', array( 'Node ID' => $nodeIDAudit, 'Object ID' => $objectID, 'Content Name' => $objectName,
+            eZAudit::writeAudit( 'content-delete', array( 'Node ID' => $nodeID, 'Object ID' => $objectID, 'Content Name' => $objectName,
                                                           'Comment' => 'Removed the current node: eZContentObjectTreeNode::removeNode()' ) );
         }
 
@@ -3725,10 +3699,17 @@ class eZContentObjectTreeNode extends eZPersistentObject
         }
 
         // Clean up URL alias entries
-        eZURLAliasML::removeByAction( 'eznode', $this->attribute( 'node_id' ) );
+        eZURLAliasML::removeByAction( 'eznode', $nodeID );
 
         // Clean up content cache
         eZContentCacheManager::clearContentCacheIfNeeded( $this->attribute( 'contentobject_id' ) );
+
+        // clean up user cache
+        if ( in_array( $object->attribute( 'contentclass_id' ), eZUser::contentClassIDs() ) )
+        {
+            eZUser::removeSessionData( $object->attribute( 'id' ) );
+            eZUser::purgeUserCacheByUserId( $object->attribute( 'id' ) );
+        }
 
         $parentNode = $this->attribute( 'parent' );
         if ( is_object( $parentNode ) )
@@ -3741,7 +3722,6 @@ class eZContentObjectTreeNode extends eZPersistentObject
         eZRole::cleanupByNode( $this );
 
         // Clean up recent items
-        $nodeID = $this->attribute( 'node_id' );
         eZContentBrowseRecent::removeRecentByNodeID( $nodeID );
 
         // Clean up bookmarks
@@ -3813,10 +3793,10 @@ class eZContentObjectTreeNode extends eZPersistentObject
         $db->begin();
 
         $userClassIDArray = eZUser::contentClassIDs();
-        $usersWereRemoved = false;
 
         foreach ( $deleteIDArray as $deleteID )
         {
+            $hasPendingObject = false;
             $node = eZContentObjectTreeNode::fetch( $deleteID );
             if ( $node === null )
                 continue;
@@ -3883,6 +3863,42 @@ class eZContentObjectTreeNode extends eZPersistentObject
                         $canRemoveSubtree = ( $removeableChildCount == $childCount );
                         $canRemove = $canRemoveSubtree;
                     }
+                    //check if there is sub object in pending status
+                    $limitCount = 100;
+                    $offset = 0;
+                    while( 1 )
+                    {
+                        $children = $node->subTree( array( 'Limitation' => array(),
+                                                            'SortBy' => array( 'path' , false ),
+                                                            'Offset' => $offset,
+                                                            'Limit' => $limitCount,
+                                                            'AsObject' => false ) );
+                        // fetch pending node assignment(pending object)
+                        $idList = array();
+                        //add node itself into idList
+                        if( $offset === 0 )
+                        {
+                            $idList[] = $nodeID;
+                        }
+                        foreach( $children as $child )
+                        {
+                            $idList[] = $child['node_id'];
+                        }
+
+                        if( count( $idList ) === 0 )
+                        {
+                            break;
+                        }
+                        $childCount = eZNodeAssignment::fetchChildCountByVersionStatus( $idList,
+                                                                                       eZContentObjectVersion::STATUS_PENDING );
+                        if( $childCount !== 0 )
+                        {
+                            // there is pending object
+                            $hasPendingObject = true;
+                            break;
+                        }
+                        $offset += $limitCount;
+                    }
                 }
 
                 // We will only remove the subtree if are allowed
@@ -3893,9 +3909,8 @@ class eZContentObjectTreeNode extends eZPersistentObject
                     if ( !$moveToTrashAllowed )
                         $moveToTrashTemp = false;
 
-                    eZContentCacheManager::clearContentCacheIfNeeded( $node->attribute( 'contentobject_id' ) );
-
                     // Remove children, fetching them by 100 to avoid memory overflow.
+                    // removeNodeFromTree -> removeThis handles cache clearing
                     while ( 1 )
                     {
                         // We should remove the latest subitems first,
@@ -3910,22 +3925,11 @@ class eZContentObjectTreeNode extends eZPersistentObject
                         {
                             $childObject = $child->attribute( 'object' );
                             $child->removeNodeFromTree( $moveToTrashTemp );
-                            if ( in_array( $childObject->attribute( 'contentclass_id' ), $userClassIDArray ) )
-                            {
-                                eZUser::removeSessionData( $childObject->attribute( 'id' ) );
-                                $usersWereRemoved = true;
-                            }
                             eZContentObject::clearCache();
                         }
                     }
 
                     $node->removeNodeFromTree( $moveToTrashTemp );
-
-                    if ( $isUserClass )
-                    {
-                        eZUser::removeSessionData( $object->attribute( 'id' ) );
-                        $usersWereRemoved = true;
-                    }
                 }
             }
             if ( !$canRemove )
@@ -3957,14 +3961,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
             $deleteResult[] = $item;
         }
 
-        if ( $usersWereRemoved )
-        {
-            // clean up the user-policy cache
-            eZUser::cleanupCache();
-        }
-
         $db->commit();
-
 
         if ( !$infoOnly )
             return true;
@@ -3976,6 +3973,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                       'total_child_count' => $totalChildCount,
                       'can_remove_all' => $canRemoveAll,
                       'delete_list' => $deleteResult,
+                      'has_pending_object' => $hasPendingObject,
                       'reverse_related_count' => eZContentObjectTreeNode::reverseRelatedCount( $deleteIDArray ) );
     }
 
@@ -4063,16 +4061,12 @@ class eZContentObjectTreeNode extends eZPersistentObject
                                                            $object->attribute( 'id' ),
                                                            $object->attribute( 'current_version' ),
                                                            $newMainNode->attribute( 'parent_node_id' ) );
-
-                eZContentCacheManager::clearContentCacheIfNeeded( $this->attribute( 'contentobject_id' ) );
                 $this->removeThis();
                 $db->commit();
             }
             else
             {
                 // This is the last assignment so we remove the object too
-                eZContentCacheManager::clearContentCacheIfNeeded( $this->attribute( 'contentobject_id' ) );
-
                 $db = eZDB::instance();
                 $db->begin();
                 $this->removeThis();
@@ -4096,7 +4090,6 @@ class eZContentObjectTreeNode extends eZPersistentObject
         }
         else
         {
-            eZContentCacheManager::clearContentCacheIfNeeded( $this->attribute( 'contentobject_id' ) );
             $this->removeThis();
         }
     }

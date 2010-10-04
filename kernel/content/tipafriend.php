@@ -120,7 +120,7 @@ if ( $http->hasPostVariable( 'SendButton' ) )
     if ( $http->hasSessionVariable('ezpContentTipafriendList') )
     {
         if ( strpos( $http->sessionVariable('ezpContentTipafriendList'), $NodeID . '|' . $receiversEmail ) !== false )
-            $error_strings[] = ezpI18n::tr( 'kernel/content', "You have already sent a tipafriend mail to this reciver regarding '$nodeName' content" );
+            $error_strings[] = ezpI18n::tr( 'kernel/content', "You have already sent a tipafriend mail to this receiver regarding '%1' content", null, array( $nodeName ) );
     }
 
     if ( !isset( $error_strings[0] ) && !eZTipafriendRequest::checkReceiver( $receiversEmail ) )
@@ -145,7 +145,7 @@ if ( $http->hasPostVariable( 'SendButton' ) )
                               array( 'class_identifier', $object->attribute( 'class_identifier' ) ),
                               array( 'class_group',      $object->attribute( 'match_ingroup_id_list' ) ),
                               array( 'section',          $object->attribute( 'section_id' ) ),
-                              array( 'section_identifier', $section->attribute( 'section_identifier' ) ),
+                              array( 'section_identifier', $section->attribute( 'identifier' ) ),
                               array( 'node',             $NodeID ),
                               array( 'parent_node',      $node->attribute( 'parent_node_id' ) ),
                               array( 'depth',            $node->attribute( 'depth' ) ),
@@ -219,7 +219,7 @@ if ( !$overrideKeysAreSet )
                           array( 'class_identifier', $object->attribute( 'class_identifier' ) ),
                           array( 'class_group',      $object->attribute( 'match_ingroup_id_list' ) ),
                           array( 'section',          $object->attribute( 'section_id' ) ),
-                          array( 'section_identifier', $section->attribute( 'section_identifier' ) ),
+                          array( 'section_identifier', $section->attribute( 'identifier' ) ),
                           array( 'node',             $NodeID ),
                           array( 'parent_node',      $node->attribute( 'parent_node_id' ) ),
                           array( 'depth',            $node->attribute( 'depth' ) ),

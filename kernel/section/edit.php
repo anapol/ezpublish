@@ -59,24 +59,24 @@ if ( $http->hasPostVariable( "StoreButton" ) )
     $errorMessage = '';
     if( $sectionIdentifier === '' )
     {
-        $errorMessage = ezi18n( 'design/admin/section/edit', 'Identifier can not be empty' );
+        $errorMessage = ezpI18n::tr( 'design/admin/section/edit', 'Identifier can not be empty' );
 
     }
     else if( preg_match( '/(^[^A-Za-z])|\W/', $sectionIdentifier ) )
     {
-        $errorMessage = ezi18n( 'design/admin/section/edit', 'Identifier should consist of letters, numbers or \'_\' with letter prefix.' );
+        $errorMessage = ezpI18n::tr( 'design/admin/section/edit', 'Identifier should consist of letters, numbers or \'_\' with letter prefix.' );
     }
     else
     {
-        $conditions = array( 'section_identifier' => $sectionIdentifier,
+        $conditions = array( 'identifier' => $sectionIdentifier,
                              'id' => array( '!=', $SectionID ) );
         $existingSection = eZSection::fetchFilteredList( $conditions );
         if( count( $existingSection ) > 0 )
         {
-            $errorMessage = ezi18n( 'design/admin/section/edit', 'The identifier has been used in another section.' );
+            $errorMessage = ezpI18n::tr( 'design/admin/section/edit', 'The identifier has been used in another section.' );
         }
     }
-    $section->setAttribute( 'section_identifier', $sectionIdentifier );
+    $section->setAttribute( 'identifier', $sectionIdentifier );
     $section->setAttribute( 'navigation_part_identifier', $http->postVariable( 'NavigationPartIdentifier' ) );
     if ( $http->hasPostVariable( 'Locale' ) )
         $section->setAttribute( 'locale', $http->postVariable( 'Locale' ) );

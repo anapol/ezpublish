@@ -93,7 +93,7 @@ elseif ( $cacheType == 'ContentSubtree' )
     }
 }
 
-$uri = $http->sessionVariable( "LastAccessedModifyingURI" );
+$uri = $http->postVariable( 'RedirectURI', $http->sessionVariable( 'LastAccessedModifyingURI', '/' ) );
 $module->redirectTo( $uri );
 
 ?>

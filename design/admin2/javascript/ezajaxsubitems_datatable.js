@@ -5,7 +5,29 @@ var sortableSubitems = function () {
     var createGroups;
     var createOptions;
     var dataTable;
-    var menuItems;
+    var shownColumns;
+
+    //Retrieves multiple values delimited by '|'
+    function getCookieSubMultiValue(subName) {
+        var sub = YAHOO.util.Cookie.getSub(confObj.cookieName, subName);
+        if (sub) { sub = unescape(sub).split('|'); }
+        return sub;
+    }
+
+    // Adds or replaces subcookie with multiple delimited ('|') values
+    // Sets expiry date 10 years from now
+    function setCookieSubMultiValue(subName, values) {
+        var joined = values.join('|');
+        var expiresDate = new Date();
+        expiresDate.setFullYear(expiresDate.getFullYear() + 10);
+
+        YAHOO.util.Cookie.setSub(confObj.cookieName, subName, escape(joined), {
+            path : "/",
+            expires : expiresDate,
+            secure : confObj.cookieSecure,
+            domain : confObj.cookieDomain
+        });
+    }
 
     function initDataTable(){
         var formatName = function(cell, record, column, data) {
@@ -16,10 +38,27 @@ var sortableSubitems = function () {
             cell.innerHTML = '<input type="checkbox" name="DeleteIDArray[]" value="' + record.getData('node_id') + '" />';
         }
 
-        var customButton = function(cell, record, column, data) {
-            cell.innerHTML = '<button class="yui-dt-button" type="button"><div class="hide">Click</div></button>';
+        var customMenu = function(cell, rec, column, data) {
+            var createhereMenu = (confObj.classesString != '') ? -1 : "\'child-menu-create-here\'";
+            cell.innerHTML = '<a href="#" onclick="ezpopmenu_showTopLevel(event, \'SubitemsContextMenu\', \{\'%nodeID%\':' + rec.getData('node_id') + ',\'%objectID%\':' + rec.getData('contentobject_id') + ',\'%version%\':' + rec.getData('version') + ',\'%languages%\':' + confObj.languagesString + ',\'%classList%\':' + confObj.classesString + '\ }, \'' + rec.getData('name') + '\', ' + rec.getData('node_id') + ', ' + createhereMenu + '); return false;"><div class="crankfield"></div></a>';
         }
-        
+
+        var thumbView = function(cell, record, column, data) {
+            var th = record.getData('thumbnail_url');
+            if (th)
+                cell.innerHTML = '<div class="thumbview"><div id="thumbfield" class="thumbfield"></div><span><img src="' + th + '" /></span></div>';
+            else
+                cell.innerHTML = '';
+        }
+
+        var translationView = function(cell, record, column, data) {
+            var html = '';
+            jQuery(data).each(function(i, e) {
+                html += '<img src="' + confObj.flagIcons[e] + '" style="margin-right: 4px;" alt="' + e + '" title="' + e + '"/>';
+            });
+            cell.innerHTML = html;
+        }
+
         var updatePriority = function(callback, v) {
             var record = this.getRecord(), dataTable = this.getDataTable(), sortedBy = dataTable.get('sortedBy'), paginator = dataTable.get('paginator');
             
@@ -36,32 +75,43 @@ var sortableSubitems = function () {
         }
 
         var columnDefs = [
-            {key:"", label:"", formatter:customCheckbox},
-            {key:"", label:"", sortable:false, formatter:customButton},
+            {key:"checkbox", label:"", formatter:customCheckbox, resizeable:false},
+            {key:"crank", label:"", sortable:false, formatter:customMenu, resizeable:false},
+            {key:"thumbnail", label:labelsObj.DATA_TABLE_COLS.thumbnail, sortable:false, formatter:thumbView, resizeable:false},
             {key:"name", label:labelsObj.DATA_TABLE_COLS.name, sortable:true, resizeable:true, formatter:formatName},
             {key:"hidden_status_string", label: labelsObj.DATA_TABLE_COLS.visibility, sortable:false, resizeable:true},
             {key:"class_name", label:labelsObj.DATA_TABLE_COLS.type, sortable:true, resizeable:true},
             {key:"creator", label:labelsObj.DATA_TABLE_COLS.modifier, sortable:false, resizeable:true},
             {key:"modified_date", label:labelsObj.DATA_TABLE_COLS.modified, sortable:true, resizeable:true},
             {key:"published_date", label:labelsObj.DATA_TABLE_COLS.published, sortable:true, resizeable:true},
+            {key:"translations", label:labelsObj.DATA_TABLE_COLS.translations, sortable:false, resizeable:true, formatter:translationView},
             {key:"section", label:labelsObj.DATA_TABLE_COLS.section, sortable:true, resizeable:true},
             {key:"node_id", label:labelsObj.DATA_TABLE_COLS.nodeid, sortable:true, resizeable:true},
-            {key:"contentobject_id", label:labelsObj.DATA_TABLE_COLS.contentid, sortable:true, resizeable:true},
+            {key:"node_remote_id", label:labelsObj.DATA_TABLE_COLS.noderemoteid, sortable:false, resizeable:true},
+            {key:"contentobject_id", label:labelsObj.DATA_TABLE_COLS.objectid, sortable:true, resizeable:true},
+            {key:"contentobject_remote_id", label:labelsObj.DATA_TABLE_COLS.objectremoteid, sortable:false, resizeable:true},
             {key:"priority", label: labelsObj.DATA_TABLE_COLS.priority, sortable:true, resizeable:true, 
                 editor: new YAHOO.widget.TextboxCellEditor({asyncSubmitter: updatePriority, disableBtns:true, validator:YAHOO.widget.DataTable.validateNumber}) }
         ];
 
-        // Hide columns
-        var defsLength = columnDefs.length;
-        for (var i = 0, l = defsLength; i < l; i++) {
-            var columnDef = columnDefs[i];
-            
-            if ((jQuery.inArray(columnDef.key, confObj.hiddenColumns) != -1) && columnDef.key != '')
-                columnDef.hidden = true;
+        // Hide columns based on cookie with ini setting as fallback
+        // If neither cookie or ini is set: show all columns
+        // Thumbnail column header has label, but is hidden w/CSS
+        if (shownColumns && shownColumns.length != 0) {
+            var defsLength = columnDefs.length;
+            for (var i = 0, l = defsLength; i < l; i++) {
+                var columnDef = columnDefs[i];
+                if ((jQuery.inArray(columnDef.key, shownColumns) == -1) && columnDef.label != '')
+                    columnDef.hidden = true;
+            }
         }
 
         var sectionParser = function(section) {
             return section.name;
+        }
+        
+        var translationsParser = function(translations) {
+            return translations.language_list;
         }
 
         var creatorParser = function(creator) {
@@ -74,19 +124,24 @@ var sortableSubitems = function () {
             resultsList: "content.list",
             fields: [
                 {key:"name"},
-                {key:"modified_date"},
                 {key:"hidden_status_string"},
                 {key:"class_name"},
                 {key:"creator", parser:creatorParser},
-                {key:"section", parser:sectionParser},
-                {key:"priority"},
-                {key:"url"},
-                {key:"class_icon"},
-                {key:"node_id"},
-                {key:"parent_node_id"},
+                {key:"modified_date"},
                 {key:"published_date"},
+                {key:"section", parser:sectionParser},
+                {key:"translations", parser:translationsParser},
+                {key:"version"},
+                {key:"node_id"},
+                {key:"node_remote_id"},
                 {key:"contentobject_id"},
-                {key:"version"}
+                {key:"contentobject_remote_id"},
+                {key:"priority"},
+                {key:"class_icon"},
+                {key:"thumbnail_url"},
+                {key:"url"},
+                {key:"parent_node_id"},
+                {key:"can_edit"}
             ],
             metaFields: {
                 totalRecords: "content.total_count" // Access to value in the server response
@@ -126,7 +181,7 @@ var sortableSubitems = function () {
             return "::" + state.pagination.rowsPerPage +
                    "::" + state.pagination.recordOffset +
                    "::" + state.sortedBy.key +
-                   "::" + ((state.sortedBy.dir === YAHOO.widget.DataTable.CLASS_ASC) ? "1" : "0") +
+                   "::" + ((state.sortedBy.dir === YAHOO.widget.DataTable.CLASS_ASC) ? "0" : "1") +
                    "?ContentType=json";
         }
 
@@ -145,18 +200,15 @@ var sortableSubitems = function () {
                                                         dataSource,
                                                         tableConfig );
 
-        // Cell editing
-        var highlightEditableCell = function(oArgs) {
-            var elCell = oArgs.target;
-            if (YAHOO.util.Dom.hasClass(elCell, "yui-dt-editable")) {
-                this.highlightCell(elCell);
+        // Enables the cell editing when row has can_edit=true
+        subItemsTable.subscribe("cellClickEvent", function (oArgs) {
+            var target = oArgs.target,
+            record = this.getRecord(target);
+            if (record.getData('can_edit') === true) {
+                this.showCellEditor(target);
             }
-        }
-        
-        subItemsTable.subscribe("cellMouseoverEvent", highlightEditableCell);
-        subItemsTable.subscribe("cellMouseoutEvent", subItemsTable.onEventUnhighlightCell);
-        subItemsTable.subscribe("cellClickEvent", subItemsTable.onEventShowCellEditor);
-        
+        });
+
         // Update totalRecords on the fly with value from server
         subItemsTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
             oPayload.totalRecords = oResponse.meta.totalRecords;
@@ -205,7 +257,7 @@ var sortableSubitems = function () {
                         continue;
 
                     colOptionsHTML += '<div class="table-options-row"><span class="table-options-key">'+ label + '</span>';
-                    colOptionsHTML += '<span class="table-options-value"><input id="table-option-col-btn-' + i + '" type="checkbox" name="TableOptionColumn" value="' + key + '"' + ( jQuery.inArray( key, confObj.hiddenColumns ) < 0 ? ' checked="checked"' : ''  ) + ' /></span></div>';
+                    colOptionsHTML += '<span class="table-options-value"><input id="table-option-col-btn-' + i + '" type="checkbox" name="TableOptionColumn" value="' + key + '"' + ( jQuery.inArray( key, shownColumns ) != -1 ? ' checked="checked"' : ''  ) + ' /></span></div>';
 
                     YAHOO.util.Event.on("table-option-col-btn-" + i, "click", function(e, a) {
                         if (this.checked) {
@@ -214,13 +266,15 @@ var sortableSubitems = function () {
                         else {
                             subItemsTable.hideColumn(a);
                         }
-                        var hiddenKeys = [];
+                        var shownKeys = [];
                         $('#to-dialog-container input[name=TableOptionColumn]').each(function(i, e) {
-                            if ($(this).attr('checked') == false)
-                                hiddenKeys.push( $(this).attr('value') );
+                            if ($(this).attr('checked') == true)
+                                shownKeys.push( $(this).attr('value') );
                         });
-                       
-                        jQuery.post( jQuery.ez.url.replace( 'ezjscore/', 'user/preferences/set_and_exit/admin_hidden_columns/' ) + hiddenKeys.join(',') );
+
+                        // Update cookie and local variable
+                        setCookieSubMultiValue(confObj.navigationPart, shownKeys);
+                        shownColumns = shownKeys;
                     }, key);
                 }
 
@@ -256,7 +310,7 @@ var sortableSubitems = function () {
         tblOptsDialog.setHeader(labelsObj.TABLE_OPTIONS.header);
         tblOptsDialog.render();
 
-        
+
         // Toolbar buttons: Select, Create new, More actions
 
         var selectItemsBtnAction = function( type, args, item ) {
@@ -286,6 +340,9 @@ var sortableSubitems = function () {
                                                      name: "create-new-button",
                                                      menu: createOptions,
                                                      container:"action-controls" });
+
+        // Disable button if user has no available content classes to create objects of
+        if (createGroups.length === 0) createNewBtn.set('disabled',true);
 
         var createNewBtnMenu  = createNewBtn.getMenu();
         createNewBtnMenu.cfg.setProperty("scrollincrement", 5);
@@ -324,7 +381,7 @@ var sortableSubitems = function () {
                                                    menu: noMoreActBtnActions,
                                                    container:"action-controls" });
 
-        //  enable menuitems when rows are checked
+        //  enable 'more actions' when rows are checked
         moreActBtn.getMenu().subscribe("beforeShow", function () {
             if ($('form[name=children] input[name=DeleteIDArray[]]:checked').length == 0) {
                 this.clearContent();
@@ -343,172 +400,7 @@ var sortableSubitems = function () {
                                                         onclick: { fn: showTblOptsDialog, obj: this, scope: true } });
     
     return subItemsTable;
-    };
-
-
-    // Menu items are taken from the DOM array menuArray used by the ezpopupmenu.js
-    function menuContent() {
-        
-        // Accepted menus from menuArray (note: using keys, since not all menus have headerID)
-        var whiteList = ['advanced', 'contextmenu'];
-        var items = [];
-        
-        items.push({ text: labelsObj.CONTEXT_MENU.edit, id: "ezopt-menu-edit", url: confObj.editURL});
-        items.push({ text: labelsObj.CONTEXT_MENU.preview, id: "ezopt-menu-preview", url: confObj.previewURL});
-
-        $(menuArray).each(function() {                                      // Loop array returned from jquery
-            $.each(this, function(key, value) {                             // Loop menuArray
-                var k = jQuery.trim(key).toLowerCase();
-                if (jQuery.inArray(k, whiteList) != -1) {                   // Validate menu against whiteList
-                    if (this.elements && this.elements.length != 0) {       // check for valid menu items
-                        $.each( this.elements, function(key, value) {       // Loop menu element per group
-                            if ($('#' + key).text() && value.url) {         // Check if element has html-markup'ed text
-                                items.push({ text: $('#' + key).text(), id:"ezopt-" + key, url: value.url });
-                            }
-                        });
-                    }
-                }
-            });
-        });
-
-        return items;
-    };
-
-
-    // Updates URL-"macros" in menuitems according to the selected node
-    function formatMenuItems(menu, nodeId, objectId, version){ 
-        
-        $.each(menu.getItems(), function(index, item) {
-            var url = item.cfg.getProperty('url');
-            url = url.replace('%nodeID%', nodeId);
-            url = url.replace('%objectID%', objectId);
-            url = url.replace('%currentURL%', confObj.currentURL);
-            url = url.replace('%version%', version);
-            item.cfg.setProperty('url', url);
-        });
-    };
-
-
-    // Action wrapper for context menu
-    function formatMenuItemsAction(type, args, dt){ 
-        
-        var row = dt.getTrEl(this.contextEventTarget);
-        var record = dt.getRecord(row);
-        var nodeId = record.getData('node_id');
-        var objectId = record.getData('contentobject_id');
-        var version = record.getData('version');
-        
-        formatMenuItems(this, nodeId, objectId, version);
     }
-
-
-    // Replaces all menu items with the macro URLs parsed from the menuArray
-    var resetMenuItemsAction = function(type, args, menu) {
-        menu.clearContent();
-        menu.addItems(menuItems);
-        menu.render();
-    }
-
-
-    // Unselect all selected rows in datatable
-    var unselectTableAction = function(type, args, dt) {
-        $.each(dt.getSelectedRows(), function(i, e) {
-            dt.unselectRow(e);
-        });
-    }
-
-
-    // Hide the focus outline for MenuItem instances
-    var hideFocusAction = function(type, args, menu) {
-        $.each(menu.getItems(), function(i,e) {
-            e.element.firstChild.hideFocus = true;
-        });
-    }
-
-
-    // Context menu on right-click
-    function initContextMenu() {
-        
-        var contextMenuItemAction = function(type, args, dt) {
-            var task = args[1];
-            if (!task)
-                return;
-
-            var row = dt.getTrEl(this.contextEventTarget);
-            if (!row)
-                return;
-        }
-
-        // Selects a table row based on the context event
-        var contextMenuSelectAction = function(type, args, dt) {
-            var row = dt.getTrEl(this.contextEventTarget);
-            dt.selectRow(row);
-        }
-
-        var contextMenu = new YAHOO.widget.ContextMenu("ezdt-context-menu", {trigger:dataTable.getTbodyEl()});
-        contextMenu.cfg.setProperty("scrollincrement", 5);
-        contextMenu.cfg.setProperty("lazyLoad", true);
-        contextMenu.addItems(menuItems);
-        
-        //contextMenu.subscribe("render", hideFocusAction, contextMenu);
-
-        // Render the ContextMenu instance to the parent container of the DataTable
-        contextMenu.render(dataTable.configs.element);
-        contextMenu.clickEvent.subscribe(contextMenuItemAction, dataTable);
-        contextMenu.subscribe('beforeShow', formatMenuItemsAction, dataTable);
-        contextMenu.subscribe('beforeShow', contextMenuSelectAction, dataTable);
-        contextMenu.subscribe('hide', unselectTableAction, dataTable);
-        contextMenu.subscribe('hide', resetMenuItemsAction, contextMenu);
-    };
-
-
-    function initLeftClickMenu() {
-    
-        var leftClickMenu = new YAHOO.widget.Menu("ezdt-leftclick-menu");
-        leftClickMenu.cfg.setProperty("scrollincrement", 5);
-        leftClickMenu.cfg.setProperty("lazyLoad", true);
-        leftClickMenu.addItems(menuItems);
-        leftClickMenu.render(dataTable.configs.element);
-        
-        // Hide menu when clicking Esc
-        dataTable.subscribe("keydown", function(e){
-            if (e.keyCode == 27) {
-                leftClickMenu.hide();
-                this.focus();
-            }
-        });
-        
-        leftClickMenu.subscribe('hide', unselectTableAction, dataTable);
-        leftClickMenu.subscribe('hide', resetMenuItemsAction, leftClickMenu);
-        
-        // NOTE: Regardless of this attempt, the focus is stuck on the clicked button
-        leftClickMenu.subscribe('show', function(args){
-            leftClickMenu.focus();
-        });
-        
-        //leftClickMenu.subscribe("render", hideFocusAction, leftClickMenu);
-        
-        dataTable.subscribe("buttonClickEvent", function(args){
-            var trgt = args.target;
-            var row = this.getTrEl(trgt);
-            var record = this.getRecord(trgt);
-            var nodeId = record.getData('node_id');
-            var objectId = record.getData('contentobject_id');
-            var version = record.getData('version');
-            
-            // Mark clicked row as selected
-            this.selectRow(row);
-            
-            // Set alignment of menu
-            leftClickMenu.cfg.setProperty("context", [trgt, "tr", "bl"]);
-            
-            // Update menu items & show
-            formatMenuItems(leftClickMenu, nodeId, objectId, version);
-            leftClickMenu.show();
-        });
-        
-    };
-
 
     return {
         init: function (conf, labels, groups, options) {
@@ -517,10 +409,10 @@ var sortableSubitems = function () {
             createGroups = groups;
             createOptions = options;
 
-            menuItems = menuContent();      // Parsing DOM object menuArray once
-            dataTable = initDataTable();    // dataTable used by menus
-            initContextMenu();              // dataTable's context menu. Available in Opera via ctrl+left-click
-            initLeftClickMenu();            // dataTable's left-click alternative to the context menu
+            shownColumns = getCookieSubMultiValue(confObj.navigationPart);
+            if (shownColumns == null) shownColumns = confObj.defaultShownColumns[confObj.navigationPart];
+
+            dataTable = initDataTable();
         }
     };
  

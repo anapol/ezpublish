@@ -33,6 +33,18 @@ $gcSessionsCompleted = true;
 $http = eZHTTPTool::instance();
 
 $module = $Params['Module'];
+
+
+if ( !eZSession::getHandlerInstance()->hasBackendAccess() )
+{
+    $Result = array();
+    $Result['content'] = $tpl->fetch( "design:setup/session_no_db.tpl" );
+    $Result['path'] = array( array( 'url' => false,
+                                    'text' => ezpI18n::tr( 'kernel/setup', 'Session admin' ) ) );
+    return $Result;
+}
+
+
 $param['limit'] = 50;
 
 $filterType = 'registered';
@@ -98,13 +110,7 @@ else if ( $module->isCurrentAction( 'RemoveSelectedSessions' ) )
             $userIDArray = $http->postVariable( 'UserIDArray' );
             if ( count( $userIDArray ) > 0 )
             {
-                $db = eZDB::instance();
-                $userINString = $db->generateSQLINStatement( $userIDArray, 'user_id', false, false, 'int' );
-                $rows = $db->arrayQuery( "SELECT session_key FROM ezsession WHERE $userINString" );
-                foreach ( $rows as $row )
-                {
-                    eZSession::destroy( $row['session_key'] );
-                }
+                eZSession::getHandlerInstance()->deleteByUserIDs( $userIDArray );
             }
         }
     }
