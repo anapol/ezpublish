@@ -77,7 +77,9 @@ class eZSimplePrice
             $discountPercent = eZDiscount::discountPercent( eZUser::currentUser(),
                                                             array( 'contentclass_id' => $object->attribute( 'contentclass_id'),
                                                                    'contentobject_id' => $object->attribute( 'id' ),
-                                                                   'section_id' => $object->attribute( 'section_id') ) );
+                                                                   'section_id' => $object->attribute( 'section_id'),
+                                                                   'currentversion' => $object->CurrentVersion,
+                                                                   'languagemask' => $object->LanguageMask ) );
         }
         $this->setDiscountPercent( $discountPercent );
     }

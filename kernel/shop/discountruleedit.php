@@ -68,7 +68,8 @@ if ( $http->hasPostVariable( 'BrowseProductButton' ) )
                                                                 'discountrule_percent' => $http->postVariable( 'discountrule_percent' ),
                                                                 'Contentclasses' => ( $http->hasPostVariable( 'Contentclasses' ) )? serialize( $http->postVariable( 'Contentclasses' ) ): '',
                                                                 'Sections' => ( $http->hasPostVariable( 'Sections' ) )? serialize( $http->postVariable( 'Sections' ) ): '',
-                                                                'Products' => ( $http->hasPostVariable( 'Products' ) )? serialize( $http->postVariable( 'Products' ) ): '' ),
+                                                                'Products' => ( $http->hasPostVariable( 'Products' ) )? serialize( $http->postVariable( 'Products' ) ): '',
+                                                                'Relates' => ( $http->hasPostVariable( 'Relates' ) )? serialize( $http->postVariable( 'Relates' ) ): '' ),
                                     'from_page' => "/shop/discountruleedit/$discountGroupID/$discountRuleID" ),
                              $module );
     return;
@@ -112,6 +113,16 @@ if ( $http->hasPostVariable( 'discountrule_name' ) )
         }
     }
 
+    $discountRuleSelectedRelates = array();
+    if ( $http->hasPostVariable( 'Relates' ) && $http->postVariable( 'Relates' ) )
+    {
+        $discountRuleSelectedRelates = $http->postVariable( 'Relates' );
+        if ( !is_array( $discountRuleSelectedRelates ) )
+        {
+            $discountRuleSelectedRelates = unserialize( $discountRuleSelectedRelates );
+        }
+    }
+
     $discountRule = array( 'id' => $discountRuleID ,
                            'name' => $discountRuleName,
                            'discount_percent' => $discountRulePercent );
@@ -150,6 +161,18 @@ else
             $discountRuleSelectedSections[] = -1;
         }
 
+ 
+        $discountRuleSelectedRelates = array();
+        $discountRuleSelectedRelatesValues = eZDiscountSubRuleValue::fetchBySubRuleID( $discountRuleID, 100, false );
+        foreach( $discountRuleSelectedRelatesValues as $value )
+        {
+            $discountRuleSelectedRelates[] = $value['value'];
+        }
+        if ( count( $discountRuleSelectedRelates ) == 0 )
+        {
+            $discountRuleSelectedRelates[] = -1;
+        }
+
         $discountRuleSelectedProductsValues = eZDiscountSubRuleValue::fetchBySubRuleID( $discountRuleID, 2, false );
         foreach( $discountRuleSelectedProductsValues as $value )
         {
@@ -163,6 +186,7 @@ else
         $discountRulePercent = 0.0;
         $discountRuleSelectedClasses = array( -1 );
         $discountRuleSelectedSections = array( -1 );
+        $discountRuleSelectedRelates = array( -1 );
         $discountRuleSelectedProducts = array();
 
         $discountRule = array( 'id' => 0,
@@ -258,6 +282,15 @@ if ( $http->hasPostVariable( 'StoreButton' ) )
             }
             $discountRule->setAttribute( 'limitation', false );
         }
+        if ( $discountRuleSelectedRelates && !in_array( -1, $discountRuleSelectedRelates ) )
+        {
+            foreach( $discountRuleSelectedRelates as $relateeID )
+            {
+                $ruleValue = eZDiscountSubRuleValue::create( $discountRuleID, $relateeID, 100 );
+                $ruleValue->store();
+            }
+            $discountRule->setAttribute( 'limitation', false );
+        }
     }
 
     $discountRule->store();
@@ -279,6 +312,17 @@ foreach ( $classList as $class )
 
 $sectionList = eZSection::fetchList();
 
+// FIXME: hardcoded id 34  of vydavatel class
+$relatesList = eZPersistentObject::fetchObjectList( eZContentObject::definition(),
+                                                   null,
+                                                   array( 'contentclass_id' => 34 ),
+                                                   array( 'name' => 'asc' ) );    
+foreach ($relatesList as $relatee)
+{
+    $relatesList[] = $relatee->attribute('object');
+}
+
+
 $tpl = eZTemplate::factory();
 
 $tpl->setVariable( 'module', $module );
@@ -287,13 +331,16 @@ $tpl->setVariable( 'discountrule', $discountRule );
 
 $tpl->setVariable( 'product_class_list', $productClassList );
 $tpl->setVariable( 'section_list', $sectionList );
+$tpl->setVariable( 'relates_list', $relatesList );
 
 $tpl->setVariable( 'class_limitation_list', $discountRuleSelectedClasses );
 $tpl->setVariable( 'section_limitation_list', $discountRuleSelectedSections );
+$tpl->setVariable( 'relates_limitation_list', $discountRuleSelectedRelates );
 $tpl->setVariable( 'product_list', $productList );
 
 $tpl->setVariable( 'class_any_selected', in_array( -1, $discountRuleSelectedClasses ) );
 $tpl->setVariable( 'section_any_selected', in_array( -1, $discountRuleSelectedSections ) );
+$tpl->setVariable( 'relates_any_selected', in_array( -1, $discountRuleSelectedRelates ) );
 
 $Result = array();
 $Result['content'] = $tpl->fetch( 'design:shop/discountruleedit.tpl' );
