@@ -35,8 +35,10 @@ class eZDiscount
                 $asObject = false 
             );
             if ($relationAttribute)
+            {
                 $publisherID = $relationAttribute['data_int'];
                 $params['contentobject_publisher_id'] = $publisherID;
+            }
         }
 
         $bestMatch = 0.0;
