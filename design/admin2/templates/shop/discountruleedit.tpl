@@ -66,6 +66,26 @@
 </select>
 </div>
 
+{* Relates *}
+<div class="element">
+<label>{'related to'|i18n( 'design/admin/shop/discountruleedit' )}:</label>
+{section show=$product_list}
+    {section var=relatee loop=$relates_limitation_list}
+    <input type="hidden" name="Relates[]" value="{$relatee}" />
+    {/section}
+    <select name="RelatesDisabled[]" size="5" multiple="multiple" disabled="disabled">
+{section-else}
+    <select name="Relates[]" size="10" multiple="multiple">
+{/section}
+<option value="-1" {if $relates_any_selected}selected="selected"{/if}>{'Any'|i18n( 'design/admin/shop/discountruleedit' )}</option>
+{section name=Relates loop=$relates_list}
+<option value="{$Relates:item.id}" {switch match=$Relates:item.id}{case in=$relates_limitation_list} selected="selected"{/case}{case/}{/switch}>
+{$Relates:item.name|wash}
+</option>
+{/section}
+</select>
+</div>
+
 </div>
 
 {* Objects *}
