@@ -23,6 +23,21 @@ class eZDiscount
     */
     static function discountPercent( $user, $params )
     {
+
+        // FIXME: hardcoded class and attribute id
+        if ( $params["contentclass_id"] == 36 ) {
+            $publisherID = -1;
+            $relationAttribute = eZContentObjectAttribute::fetchByClassAttributeID(
+                298,
+                $params["contentclass_id"],
+                $params["currentversion"],
+                $params["languagemask"],
+                $asObject = false 
+            );
+            if ($relationAttribute)
+                $publisherID = $relationAttribute['data_int'];
+        }
+
         $bestMatch = 0.0;
 
         if ( is_object( $user ) )
@@ -71,9 +86,11 @@ class eZDiscount
                             $hasSectionLimitation = false;
                             $hasClassLimitation = false;
                             $hasObjectLimitation = false;
+                            $hasRelatedLimitation = false;
                             $objectMatch = false;
                             $sectionMatch = false;
                             $classMatch = false;
+                            $relatedMatch = false;
                             foreach ( $limitationArray as $limitation )
                             {
                                 if ( $limitation['issection'] == '1' )
@@ -89,6 +106,14 @@ class eZDiscount
 
                                     if ( isset( $params['contentobject_id'] ) && $params['contentobject_id'] == $limitation['value'] )
                                         $objectMatch = true;
+                                }
+                                elseif ( $limitation['issection'] == '100' )
+                                {
+                                    $hasRelatedLimitation = true;
+
+                                    if ( isset( $params['contentobject_publisher_id'] ) &&
+                                         $params['contentobject_publisher_id'] == $limitation['value'] )
+                                        $relatedMatch = true;
                                 }
                                 else
                                 {
@@ -106,6 +131,9 @@ class eZDiscount
                                 $match = false;
 
                             if ( ( $hasObjectLimitation == true ) and ( $objectMatch == false ) )
+                                $match = false;
+
+                            if ( ( $hasRelatedLimitation == true ) and ( $relatedMatch == false ) )
                                 $match = false;
 
                             if ( $match == true  )

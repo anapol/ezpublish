@@ -169,6 +169,38 @@ foreach ( $ruleList as $rule )
         {
             $limitation .= ' '.ezpI18n::tr( 'kernel/shop', 'in any section' );
         }
+
+        $relatesRuleValues = eZDiscountSubRuleValue::fetchBySubRuleID( $discountRuleID, 100 );
+        if ( $relatesRuleValues != null )
+        {
+            $limitation .= ' '.ezpI18n::tr( 'kernel/shop', 'in relation to' ).' ';
+            $firstLoop = true;
+            foreach ( $relatesRuleValues as $relatesRuleValue )
+            {
+                $relatedObjectID = $relatesRuleValue->attribute( 'value' );
+                $relatee = eZContentObject::fetch( $relatedObjectID );
+
+                if ( $relatee )
+                {
+                    if ( !$firstLoop )
+                    {
+                        $limitation .= ', ';
+                    }
+                    else
+                    {
+                        $firstLoop = false;
+                    }
+                    $relateeName = $relatee->attribute( 'name' );
+                    $limitation .= "'".$relateeName . "'";
+                }
+            }
+        }
+        else
+        {
+            $limitation .= ' '.ezpI18n::tr( 'kernel/shop', 'in any relation' );
+        }
+
+
         $productRuleValues = eZDiscountSubRuleValue::fetchBySubRuleID( $discountRuleID, 2 );
 
         if ( $productRuleValues != null )
