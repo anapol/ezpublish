@@ -52,7 +52,7 @@ class eZDiscount
             $publisherID = -1;
             $relationAttribute = eZContentObjectAttribute::fetchByClassAttributeID(
                 298,
-                $params["contentclass_id"],
+                $params["contentobject_id"],
                 $params["currentversion"],
                 $params["languagemask"],
                 $asObject = false 
