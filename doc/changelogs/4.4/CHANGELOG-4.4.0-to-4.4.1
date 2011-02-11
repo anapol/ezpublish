@@ -6,7 +6,6 @@ Changes from 4.4.0 to 4.4.1
 
 *eZTemplate:
 
-
 *eZLocale:
 
 *Package system:
@@ -16,7 +15,21 @@ Changes from 4.4.0 to 4.4.1
 *Translations:
 
 *Bugfixes:
-- Fixed bug #014846: Template function 'attribute_view_gui' with view=plain param doesn't work properly
-  (Merged from master (4.5.0alpha1) commit 611b21a)
-- Fixed bug #015376: ezmultiupload doesn't handle upload_max_filesize and post_max_size limitations
-  (Merged from master (4.5.0alpha1) commit 0db1a30)
+- Fixed bug #015128: Losing input when assigning Object state in edit form
+  (Merged from master (4.5.0) commit 56df817)
+- Fixed bug #015793: eZDFS: Image files and aliases are not removed when a objectversion is deleted
+  (Merged from master (4.5.0) commit c72c21c)
+- Fixed bug #016312: Problem creating folders with eZDFS
+  (Merged from master (4.5.0) commit 29a4446)
+- Fixed bug #017632: Wrong language used for URL alias with a non-default language node
+  (Merged from master (4.5.0) commit edb08f9)
+- Fixed bug #017684: eZDFSFileHandler::purge with a directory doesn't purge local files
+  (Merged from master (4.5.0) commit 008570f)
+- Fixed bug #017685: RSS GUID is not persistent
+  (Merged from master (4.5.0) commit b284778)
+- Fixed bug #017686: ezdatetime "use seconds" is not supported in admin2 templates
+  (Merged from master (4.5.0) commit 0870ede)
+- Fixed bug #017761: ezcache.php --purge does not purge template-blocks
+  (Merged from master (4.5.0) commit 587efba)
+- Fixed bug #017820: Change priorities don't clear the cache (patch by Damien Pobel)
+  (Merged from master (4.5.0) commit 8657e67)
