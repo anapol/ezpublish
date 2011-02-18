@@ -40,7 +40,14 @@ var sortableSubitems = function () {
 
         var customMenu = function(cell, rec, column, data) {
             var createhereMenu = (confObj.classesString != '') ? -1 : "\'child-menu-create-here\'";
-            cell.innerHTML = '<a href="#" onclick="ezpopmenu_showTopLevel(event, \'SubitemsContextMenu\', \{\'%nodeID%\':' + rec.getData('node_id') + ',\'%objectID%\':' + rec.getData('contentobject_id') + ',\'%version%\':' + rec.getData('version') + ',\'%languages%\':' + confObj.languagesString + ',\'%classList%\':' + confObj.classesString + '\ }, \'' + rec.getData('name') + '\', ' + rec.getData('node_id') + ', ' + createhereMenu + '); return false;"><div class="crankfield"></div></a>';
+            var languagesString = '';
+            var translationArray = [];
+            jQuery(rec.getData('translations')).each(function(i, e) {
+                translationArray.push("{locale:'" + e + "',name:'" + confObj.languages[e] + "'}");
+            });
+            languagesString = '[' + translationArray.join(',') + ']';
+            var itemName = String(rec.getData('name')).replace(/'/g,"\\'").replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            cell.innerHTML = '<a href="#" onclick="ezpopmenu_showTopLevel(event, \'SubitemsContextMenu\', \{\'%nodeID%\':' + rec.getData('node_id') + ',\'%objectID%\':' + rec.getData('contentobject_id') + ',\'%version%\':' + rec.getData('version') + ',\'%languages%\':' + languagesString + ',\'%classList%\':' + confObj.classesString + '\ }, \'' + itemName + '\', ' + rec.getData('node_id') + ', ' + createhereMenu + '); return false;"><div class="crankfield"></div></a>';
         }
 
         var thumbView = function(cell, record, column, data) {
@@ -69,6 +76,7 @@ var sortableSubitems = function () {
             }
             
             jQuery.post(jQuery.ez.url + 'call/ezjscnode::updatepriority', { ContentNodeID: record.getData('parent_node_id'), 
+                                                                            ContentObjectID: record.getData('contentobject_id'),
                                                                             PriorityID: [record.getData('node_id')], 
                                                                             Priority:  [v] }, onSuccess );
             callback(true, v);
