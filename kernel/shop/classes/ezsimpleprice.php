@@ -290,7 +290,7 @@ class eZSimplePrice
     {
         $discountPercent = $this->discountPercent();
         $incVATPrice = $this->calcIncVATPrice( $priceValue );
-        return $incVATPrice * ( 100 - $discountPercent ) / 100;
+        return round($incVATPrice * ( 100 - $discountPercent ) / 100);
     }
 
     function calcDiscountExVATPrice( $priceValue )
