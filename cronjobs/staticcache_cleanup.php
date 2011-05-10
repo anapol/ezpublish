@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -29,8 +29,7 @@
 /*! \file
 */
 
-if ( !$isQuiet )
-    $cli->output( "Starting processing pending static cache cleanups" );
+$cli->output( "Starting processing pending static cache cleanups" );
 
 $db = eZDB::instance();
 
@@ -59,8 +58,7 @@ do
 
         if ( !isset( $fileContentCache[$source] ) )
         {
-            if ( !$isQuiet )
-                $cli->output( "Fetching URL: $source" );
+            $cli->output( "Fetching URL: $source" );
 
             $fileContentCache[$source] = eZHTTPTool::getDataByURL( $source, false, eZStaticCache::USER_AGENT );
         }
@@ -105,7 +103,6 @@ do
     }
 } while ( true );
 
-if ( !$isQuiet )
-    $cli->output( "Done" );
+$cli->output( "Done" );
 
 ?>

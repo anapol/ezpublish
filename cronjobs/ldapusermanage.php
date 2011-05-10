@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -35,8 +35,7 @@
 $cli->output( "ldapusermanage is deprecated as of eZ Publish 4.3.0, and will be removed in a future eZ Publish release." );
 eZDebug::writeWarning( "ldapusermanage is deprecated as of eZ Publish 4.3.0, and will be removed in a future eZ Publish release.", __FILE__ );
 
-if ( !$isQuiet )
-    $cli->output( "Checking LDAP users ..."  );
+$cli->output( "Checking LDAP users ..."  );
 
 // fetching ldap users already stored in the database
 $db = eZDB::instance();
@@ -544,6 +543,5 @@ foreach ( $LDAPUsers as $LDAPUser )
 }
 $db->commit();
 
-if ( !$isQuiet )
-    $cli->output( "All LDAP users have been updated!" );
+$cli->output( "All LDAP users have been updated!" );
 ?>

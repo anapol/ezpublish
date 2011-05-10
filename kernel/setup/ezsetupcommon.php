@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -51,9 +51,15 @@ function eZSetupOptionalTests()
 
 function eZSetupDatabaseMap()
 {
-    return array( 'mysql' => array( 'type' => 'mysql',
+    return array( 'mysqli' => array( 'type' => 'mysqli',
+                                     'driver' => 'ezmysqli',
+                                     'name' => 'MySQL Improved',
+                                     'required_version' => '4.1.1',
+                                     'has_demo_data' => true,
+                                     'supports_unicode' => true ),
+                  'mysql' => array( 'type' => 'mysql',
                                     'driver' => 'ezmysql',
-                                    'name' => 'MySQL',
+                                    'name' => 'MySQL (Deprecated)',
                                     'required_version' => '4.1.1',
                                     'has_demo_data' => true,
                                     'supports_unicode' => false ),
@@ -63,12 +69,6 @@ function eZSetupDatabaseMap()
                                     'required_version' => '8.0',
                                     'has_demo_data' => false,
                                     'supports_unicode' => true ),
-                  'mysqli' => array( 'type' => 'mysqli',
-                                     'driver' => 'ezmysqli',
-                                     'name' => 'MySQL Improved',
-                                     'required_version' => '4.1.1',
-                                     'has_demo_data' => true,
-                                     'supports_unicode' => true )
                    );
 }
 

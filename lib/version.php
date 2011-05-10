@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -33,11 +33,11 @@
 class eZPublishSDK
 {
     const VERSION_MAJOR = 4;
-    const VERSION_MINOR = 4;
+    const VERSION_MINOR = 5;
     const VERSION_RELEASE = 0;
     const VERSION_STATE = '';
     const VERSION_DEVELOPMENT = false;
-    const VERSION_ALIAS = '4.4';
+    const VERSION_ALIAS = '4.5';
 
     /*!
       \return the SDK version as a string

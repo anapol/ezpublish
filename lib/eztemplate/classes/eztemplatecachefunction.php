@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -83,9 +83,9 @@ class eZTemplateCacheFunction
 
         if ( isset( $parameters['expiry'] ) )
         {
-            if ( eZTemplateNodeTool::isStaticElement( $parameters['expiry'] ) )
+            if ( eZTemplateNodeTool::isConstantElement( $parameters['expiry'] ) )
             {
-                $expiryValue = eZTemplateNodeTool::elementStaticValue( $parameters['expiry'] );
+                $expiryValue = eZTemplateNodeTool::elementConstantValue( $parameters['expiry'] );
                 $ttlCode = $expiryValue > 0 ? eZPHPCreator::variableText( $expiryValue , 0, 0, false ) : 'null';
             }
             else
@@ -101,7 +101,7 @@ class eZTemplateCacheFunction
 
         if ( isset( $parameters['ignore_content_expiry'] ) )
         {
-            $ignoreContentExpiry = eZTemplateNodeTool::elementStaticValue( $parameters['ignore_content_expiry'] );
+            $ignoreContentExpiry = eZTemplateNodeTool::elementConstantValue( $parameters['ignore_content_expiry'] );
         }
 
         $keysData = false;
@@ -116,10 +116,10 @@ class eZTemplateCacheFunction
         if ( isset( $parameters['subtree_expiry'] ) )
         {
             $subtreeExpiryData = $parameters['subtree_expiry'];
-            if ( !eZTemplateNodeTool::isStaticElement( $subtreeExpiryData ) )
+            if ( !eZTemplateNodeTool::isConstantElement( $subtreeExpiryData ) )
                 $hasKeys = true;
             else
-                $subtreeValue = eZTemplateNodeTool::elementStaticValue( $subtreeExpiryData );
+                $subtreeValue = eZTemplateNodeTool::elementConstantValue( $subtreeExpiryData );
 
             $ignoreContentExpiry = true;
         }
@@ -133,15 +133,14 @@ class eZTemplateCacheFunction
             $newNodes[] = eZTemplateNodeTool::createVariableNode( false, $keysData, false, array(), 'cacheKeys' );
             $newNodes[] = eZTemplateNodeTool::createVariableNode( false, $subtreeExpiryData, false, array(), 'subtreeExpiry' );
 
-            $code = ( "//include_once( 'lib/eztemplate/classes/eztemplatecacheblock.php' );\n" .
-                      "\$cacheKeys = array( \$cacheKeys, $placementKeyStringText, $accessNameText );\n" );
+            $code = "\$cacheKeys = array( \$cacheKeys, $placementKeyStringText, $accessNameText );\n";
             $cachePathText = "\$cachePath";
         }
         else
         {
             $nodeID = $subtreeValue ? eZTemplateCacheBlock::decodeNodeID( $subtreeValue ) : false;
             $cachePath = eZTemplateCacheBlock::cachePath( eZTemplateCacheBlock::keyString( array( $placementKeyString, $accessName ) ), $nodeID );
-            $code = ( "//include_once( 'lib/eztemplate/classes/eztemplatecacheblock.php' );\n" );
+            $code = "";
             $cachePathText = eZPHPCreator::variableText( $cachePath, 0, 0, false );
         }
 

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -91,7 +91,7 @@ class eZSMTPTransport extends eZMailTransport
         {
             $options->connectionType = $parameters['connectionType'];
         }
-        $smtp = new ezcMailSmtpTransport( $parameters['host'], $user, $password, 
+        $smtp = new ezcMailSmtpTransport( $parameters['host'], $user, $password,
         $parameters['port'], $options );
 
         // If in debug mode, send to debug email address and nothing else
@@ -110,7 +110,7 @@ class eZSMTPTransport extends eZMailTransport
         }
         catch ( ezcMailException $e )
         {
-            eZDebug::writeError( $e->getMessage(), 'eZSMTPTransport::sendMail' );
+            eZDebug::writeError( $e->getMessage(), __METHOD__ );
             return false;
         }
 

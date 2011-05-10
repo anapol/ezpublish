@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -151,7 +151,7 @@ function updateObjects_1_2_0()
 
     $templateLookData = array( "tag_cloud_url" => array( "DataText" => "Tag cloud",
                                                          "Content" => "/content/view/tagcloud/2" ),
-                               "footer_text" => array( "DataText" => "Copyright &#169; 1999-2010 eZ Systems AS. All rights reserved." ) );
+                               "footer_text" => array( "DataText" => "Copyright &#169; 1999-2011 eZ Systems AS. All rights reserved." ) );
 
     $installer->updateContentObjectAttributes( array( 'object_id' => $installer->setting( 'template_look_object_id' ),
                                                       'attributes_data' => $templateLookData ) );
@@ -287,15 +287,15 @@ function updateINI_1_4_0()
         $ini->setReadOnlySettingsCheck( false );
         $ini->setVariables( $settings );
         $ini->save( false, '.append.php', false, false, 'settings/siteaccess/' . $siteaccess, false );
-        
+
         /* Get site.ini for ContentObjectLocale code */
         $ini = eZINI::instance( 'site.ini', 'settings/siteaccess/' . $siteaccess, null, null, false, true );
         $contentObjectLocale = explode( '-', $ini->variable( 'RegionalSettings', 'ContentObjectLocale' ) );
-        
+
         $translationSA[$siteaccess] = ucfirst( $contentObjectLocale[0] );
     }
-    
-    $settings = array( array( 'name' => 'site.ini', 
+
+    $settings = array( array( 'name' => 'site.ini',
                               'settings' => array( 'RegionalSettings' => array( 'TranslationSA' => $translationSA ) ) ),
                        array( 'name' => 'content.ini',
                               'settings' => array( 'table' => array( 'CustomAttributes' => array( '0' => 'summary',
@@ -339,7 +339,7 @@ function updateINI_1_4_0()
         if ( file_exists( 'settings/override/' . $iniName . '.append' ) ||
              file_exists( 'settings/override/' . $iniName . '.append.php' ) )
         {
-        
+
             $ini = eZINI::instance( $iniName, 'settings/override', null, null, false, true );
         }
         else
@@ -378,7 +378,7 @@ $script = eZScript::instance( array( 'description' => ( "\n" .
                                                         "This script will upgrade ezwebin." ),
                                      'use-session' => false,
                                      'use-modules' => true,
-                                     'use-extensions' => false,
+                                     'use-extensions' => true,
                                      'user' => true ) );
 $script->startup();
 

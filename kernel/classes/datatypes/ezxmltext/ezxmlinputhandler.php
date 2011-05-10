@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -45,7 +45,11 @@ class eZXMLInputHandler
     */
     function eZXMLInputHandler( $xmlData, $aliasedType, $contentObjectAttribute )
     {
-        $this->XMLData = $xmlData;
+        $this->XMLData = preg_replace( '/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', '', $xmlData, -1, $count );
+        if ( $count > 0 )
+        {
+            eZDebug::writeWarning( "$count invalid character(s) detected. They have been removed from input.", __METHOD__ );
+        }
         $this->ContentObjectAttribute = $contentObjectAttribute;
         $this->AliasedHandler = null;
         // use of $aliasedType is deprecated as of 4.1 and setting is ignored  in aliased_handler
@@ -109,7 +113,7 @@ class eZXMLInputHandler
             }break;
             default:
             {
-                eZDebug::writeError( "Attribute '$name' does not exist", 'eZXMLInputHandler::attribute' );
+                eZDebug::writeError( "Attribute '$name' does not exist", __METHOD__ );
                 return null;
             }break;
         }

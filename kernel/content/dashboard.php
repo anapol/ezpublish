@@ -1,11 +1,11 @@
-<?php 
+<?php
 //
 // Created on: <15-Jan-2010 13:06:01 ls>
 //
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.3.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -85,10 +85,10 @@ foreach( $dashboardBlocks as $blockIdentifier )
     $template = null;
     if ( $ini->hasVariable( $blockGroupName, 'Template' ) )
         $template = $ini->variable( $blockGroupName, 'Template' );
-    
+
     while( isset( $orderedBlocks[$priority]  ) )
         $priority++;
-        
+
     $orderedBlocks[$priority] = array( 'identifier' => $blockIdentifier,
                                        'template' => $template,
                                        'number_of_items' => $numberOfItems );

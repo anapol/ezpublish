@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -45,6 +45,7 @@ class eZContentObjectVersion extends eZPersistentObject
     const STATUS_INTERNAL_DRAFT = 5;
     // used when a workflow event returns FETCH_TEMPLATE_REPEAT to allow editing again
     const STATUS_REPEAT = 6;
+    const STATUS_QUEUED = 7;
 
     function eZContentObjectVersion( $row=array() )
     {
@@ -976,13 +977,13 @@ class eZContentObjectVersion extends eZPersistentObject
         $checkIntersect = array_intersect( $versionStatus, $statuses );
         if ( count( $checkIntersect ) != count( $versionStatus ) )
         {
-            eZDebug::writeError( 'Invalid version status was passed in.', 'eZContentObjectVersion::removeVersions()' );
+            eZDebug::writeError( 'Invalid version status was passed in.', __METHOD__ );
             return false;
         }
 
         if ( $limit !== false and ( !is_numeric( $limit ) or $limit < 0 ) )
         {
-            eZDebug::writeError( '$limit must be either false or positive numeric value.', 'eZContentObjectVersion::removeVersions()' );
+            eZDebug::writeError( '$limit must be either false or positive numeric value.', __METHOD__ );
             return false;
         }
 

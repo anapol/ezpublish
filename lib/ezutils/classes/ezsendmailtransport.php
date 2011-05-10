@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -109,11 +109,18 @@ class eZSendmailTransport extends eZMailTransport
 
             $extraHeaders = $mail->headerText( array( 'exclude-headers' => $excludeHeaders ) );
 
-            return mail( $receiverEmailText, $mail->subject(), $message, $extraHeaders, $sendmailOptions );
+            $returnedValue = mail( $receiverEmailText, $mail->subject(), $message, $extraHeaders, $sendmailOptions );
+            if ( $returnedValue === false )
+            {
+                eZDebug::writeError( 'An error occurred while sending e-mail. Check the Sendmail error message for further information (usually in /var/log/messages)',
+                                     __METHOD__ );
+            }
+
+            return $returnedValue;
         }
         else
         {
-            eZDebug::writeWarning( "Unable to send mail: 'mail' function is not compiled into PHP.", 'eZSendmailTransport::sendMail' );
+            eZDebug::writeWarning( "Unable to send mail: 'mail' function is not compiled into PHP.", __METHOD__ );
         }
 
         return false;

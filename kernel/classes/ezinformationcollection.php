@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -488,7 +488,7 @@ class eZInformationCollection extends eZPersistentObject
             return $sorts;
         }
 
-        eZDebug::writeWarning( 'Unknown sort field: ' . $sortField, 'eZInformationCollection ::fetchCollectionsList::getSortArrayFromParam' );
+        eZDebug::writeWarning( 'Unknown sort field: ' . $sortField, __METHOD__ );
         return null;
     }
 
@@ -547,7 +547,7 @@ class eZInformationCollection extends eZPersistentObject
             }
             else
             {
-                eZDebug::writeWarning( 'Too few parameters for setting sorting in fetch, ignoring', 'eZInformationCollection ::fetchCollectionsList' );
+                eZDebug::writeWarning( 'Too few parameters for setting sorting in fetch, ignoring', __METHOD__ );
             }
         }
 
@@ -653,7 +653,7 @@ class eZInformationCollection extends eZPersistentObject
     */
     function dataMap()
     {
-        // Retreive the indexed information collection attributes
+        // Retrieve the indexed information collection attributes
         $informationCollectionAttributes = $this->informationCollectionAttributes();
 
         $retArray = array();

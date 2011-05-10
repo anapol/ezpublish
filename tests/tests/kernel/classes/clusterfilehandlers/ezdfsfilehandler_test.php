@@ -2,7 +2,7 @@
 /**
  * File containing the eZDFSFileHandlerTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -11,7 +11,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 {
     /**
      * @var string
-     **/
+     */
     protected $DFSPath = 'var/dfsmount/';
 
     protected $backupGlobals = false;
@@ -20,7 +20,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * @var array
-     **/
+     */
     protected $sqlFiles = array( 'tests/tests/kernel/classes/clusterfilehandlers/sql/cluster_dfs_schema.sql' );
 
     protected $previousFileHandler;
@@ -39,15 +39,13 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      *
      * Load an instance of file.ini
      * Assigns DB parameters for cluster
-     **/
+     */
     public function setUp()
     {
-        parent::setUp();
+        if ( ezpTestRunner::dsn()->dbsyntax !== 'mysql' && ezpTestRunner::dsn()->dbsyntax !== 'mysqli' )
+            self::markTestSkipped( "Not running MySQL, skipping" );
 
-        if ( !( $this->sharedFixture instanceof eZMySQLDB ) and !( $this->sharedFixture instanceof eZMySQLiDB ) )
-        {
-            self::markTestSkipped( "Not using mysql interface, skipping" );
-        }
+        parent::setUp();
 
         // We need to clear the existing handler if it was loaded before the INI
         // settings changes
@@ -134,7 +132,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      */
     protected function DBFileExists( $filePath )
     {
-        $escapedFilePath = mysql_real_escape_string( $filePath );
+        $escapedFilePath = $this->db->escapeString( $filePath );
         $sql = "SELECT * FROM " . eZDFSFileHandlerMySQLBackend::TABLE_METADATA .
                " WHERE name_hash = MD5('{$escapedFilePath}')";
         $rows = $this->db->arrayQuery( $sql );
@@ -151,7 +149,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      */
     protected function DBFileExistsAndIsValid( $filePath )
     {
-        $escapedFilePath = mysql_real_escape_string( $filePath );
+        $escapedFilePath = $this->db->escapeString( $filePath );
         $sql = "SELECT * FROM " . eZDFSFileHandlerMySQLBackend::TABLE_METADATA .
                " WHERE name LIKE '{$escapedFilePath}'";
         $rows = $this->db->arrayQuery( $sql );
@@ -179,7 +177,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Removes the test file $filePath on FS, DFS and DB
-     **/
+     */
     protected function removeFile( $filePath )
     {
         $DFSPath = $this->makeDFSPath( $filePath );
@@ -204,7 +202,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      *        if remove is set to true, the file will be removed before it is
      *        created
      * @return void
-     **/
+     */
     protected function createFile( $filePath, $fileContents = 'foobar', $params = array() )
     {
         $datatype = isset( $params['datatype'] ) ? $params['datatype'] : 'text/test';
@@ -242,7 +240,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      * Returns the DFS path for a given file
      * @param string $filePath local file path
      * @return string DFS file path
-     **/
+     */
     protected function makeDFSPath( $filePath )
     {
         return $this->DFSPath . $filePath;
@@ -251,7 +249,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     /**
      * Constructor test
      * Will test if the constructor returns the correct instance
-     **/
+     */
     public function testConstructor()
     {
         $clusterHandler = eZClusterFileHandler::instance();
@@ -263,7 +261,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests storage of a new, non existent file to cluster
-     **/
+     */
     public function testFileStore()
     {
         $testFile = 'var/testStore.txt';
@@ -286,8 +284,8 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     }
 
     /**
-    * Tests the fileStore() method, removing the local file afterwards
-    **/
+     * Tests the fileStore() method, removing the local file afterwards
+     */
     public function testFileStoreDeleteFile()
     {
         $testFile = 'var/testStore.txt';
@@ -311,7 +309,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests storage of a new file given a filename and binary content
-     **/
+     */
     public function testFileStoreContents()
     {
         $testFile = "var/testStoreContents.txt";
@@ -328,8 +326,8 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     }
 
     /**
-    * Tests the non cluster-static method that stores a file's content
-    **/
+     * Tests the non cluster-static method that stores a file's content
+     */
     public function testStoreContentsWithoutLocalStore()
     {
         $testFile = "var/testStoreContents.txt";
@@ -348,7 +346,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests the non cluster-static method that stores a file's content
-     **/
+     */
     public function testStoreContentsWithLocalStore()
     {
         $testFile = "var/testStoreContents.txt";
@@ -366,10 +364,10 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     }
 
     /**
-    * Tests the fileFetch method.
-    *
-    * Should locally fetch a file located on DB+DFS
-    **/
+     * Tests the fileFetch method.
+     *
+     * Should locally fetch a file located on DB+DFS
+     */
     public function _testFileFetchExistingFile()
     {
         $testFile = 'var/testFileForTestFileFetch.txt';
@@ -392,7 +390,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      * Should locally fetch a file located on DB+DFS
      *
      * @deprecated See {@link eZCluserFileHandlerAbstractTest}
-     **/
+     */
     public function _testFileFetchNonExistingFile()
     {
         $testFile = 'var/testFileForTestFileFetchNonExistingFile.txt';
@@ -410,7 +408,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     /**
      * Tests eZDFSFileHandler->fetch() on an existing file
      * @deprecated See {@link eZCluserFileHandlerAbstractTest}
-     **/
+     */
     public function _testFetchExistingFile()
     {
         $testFile = 'var/testFileForTestFetchExistingFile.txt';
@@ -427,7 +425,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     /**
      * Tests eZDFSFileHandler->fetch() on a non-existing file
      * @deprecated See {@link eZCluserFileHandlerAbstractTest}
-     **/
+     */
     public function _testFetchNonExistingFile()
     {
         $testFile = 'var/testFileForTestFetchExistingFile.txt';
@@ -443,7 +441,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests fileExists on an existing file
-     **/
+     */
     public function testFileExistsExistingFile()
     {
         $testFile = 'var/testFileForTestExistsExistingFile.txt';
@@ -458,7 +456,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests eZDFSFileHandler::fileExists() on a non-existing file
-     **/
+     */
     public function testFileExistsNonExistingFile()
     {
         $testFile = 'var/testFileForTestExistsExistingFile.txt';
@@ -473,7 +471,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests fileExists on an existing file
-     **/
+     */
     public function testExistsExistingFile()
     {
         $testFile = 'var/testFileForTestExistsExistingFile.txt';
@@ -489,7 +487,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Tests eZDFSFileHandler::fileExists() on a non-existing file
-     **/
+     */
     public function testExistsNonExistingFile()
     {
         $testFile = 'var/testFileForTestExistsExistingFile.txt';
@@ -798,8 +796,8 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     }
 
     /**
-    * Expects the file we copy to to exists
-    **/
+     * Expects the file we copy to to exists
+     */
     public function testFileCopy()
     {
         $testFile = 'var/testFileCopy.txt';
@@ -818,7 +816,7 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 
     /**
      * Expects the old name to no longer exist and the new one to exist
-     **/
+     */
     public function testFileMove()
     {
         $testFile = 'var/testFileMove.txt';
@@ -920,6 +918,39 @@ class eZDFSFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
     {
         $handler = eZClusterFileHandler::instance();
         $this->assertTrue( $handler->requiresClusterizing() );
+    }
+
+    public function testDisconnect()
+    {
+        $handler = eZClusterFileHandler::instance();
+
+        $refHandler = new ReflectionObject( $handler );
+        $refBackendProperty = $refHandler->getProperty( 'dbbackend' );
+        $refBackendProperty->setAccessible( true );
+
+        self::assertNotNull( $refBackendProperty->getValue( $handler ) );
+
+        $handler->disconnect();
+
+        self::assertNull( $refBackendProperty->getValue( $handler ) );
+    }
+
+    /**
+     * Test for the global {@see eZClusterFilehandler::preFork()} method
+     */
+    public function testPreFork()
+    {
+        $handler = eZClusterFileHandler::instance();
+
+        $refHandler = new ReflectionObject( $handler );
+        $refBackendProperty = $refHandler->getProperty( 'dbbackend' );
+        $refBackendProperty->setAccessible( true );
+
+        self::assertNotNull( $refBackendProperty->getValue( $handler ) );
+
+        eZClusterFileHandler::preFork();
+
+        self::assertNull( $refBackendProperty->getValue( $handler ) );
     }
 }
 ?>

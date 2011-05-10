@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -116,7 +116,6 @@
   Example of how to crete an option, adding multioptions and options
   and finally retrieving the xml structure.
   \code
-   //include_once( "kernel/classes/datatypes/ezoption/ezmultioption.php" );
    $option = new eZOption( "Car" );
    $newID = $option->addMultiOption("Model",$priority,false);
       $option->addOption( $newID, "", "Model - A", "100", false );
@@ -303,7 +302,7 @@ class eZMultiOption
             } break;
             default:
             {
-                eZDebug::writeError( "Attribute '$name' does not exist", 'eZMultiOption::attribute' );
+                eZDebug::writeError( "Attribute '$name' does not exist", __METHOD__ );
                 return null;
             }break;
         }

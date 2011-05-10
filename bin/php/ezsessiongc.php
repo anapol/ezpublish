@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@
 //
 
 set_time_limit( 0 );
-$isQuiet = false;
 
 require 'autoload.php';
 
@@ -39,7 +38,7 @@ $script = eZScript::instance( array( 'description' => ( "eZ Publish Session Garb
                                                         "./bin/php/ezsessiongc.php" ),
                                      'use-session' => false,
                                      'use-modules' => false,
-                                     'use-extensions' => false ) );
+                                     'use-extensions' => true ) );
 
 $script->startup();
 
@@ -48,8 +47,7 @@ $options = $script->getOptions( "",
                                 array() );
 $script->initialize();
 
-if ( !$isQuiet )
-    $cli->notice( "Cleaning up expired sessions." );
+$cli->output( "Cleaning up expired sessions." );
 
 // Functions for session to make sure baskets are cleaned up
 function eZSessionBasketGarbageCollector( $db, $time )

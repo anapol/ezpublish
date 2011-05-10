@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -129,7 +129,7 @@ class eZWorkflowEvent extends eZPersistentObject
      * @param string $typeString
      *
      * @return eZWorkflowEvent
-     **/
+     */
     static function create( $workflowID, $typeString )
     {
         $row = array(
@@ -268,7 +268,14 @@ class eZWorkflowEvent extends eZPersistentObject
         $stored = eZPersistentObject::store( $fieldFilters );
 
         $eventType = $this->eventType();
-        $eventType->storeEventData( $this, $this->attribute( 'version' ) );
+        if ( $eventType instanceof eZWorkflowEventType )
+        {
+            $eventType->storeEventData( $this, $this->attribute( 'version' ) );
+        }
+        else // Can't find eventype. Most likely deactivated while workflow has not been cleaneds up
+        {
+            eZDebug::writeError( "Couldn't load eventype '{$this->attribute( 'workflow_type_string' )}' for workflow. Is it activated ?", __METHOD__ );
+        }
         $db->commit();
 
         return $stored;
@@ -285,7 +292,15 @@ class eZWorkflowEvent extends eZPersistentObject
         $stored = eZPersistentObject::store( $fieldFilters );
 
         $eventType = $this->eventType();
-        $eventType->storeDefinedEventData( $this );
+        if ( $eventType instanceof eZWorkflowEventType )
+        {
+            $eventType->storeDefinedEventData( $this );
+        }
+        else // Can't find eventype. Most likely deactivated while workflow has not been cleaned up
+        {
+            eZDebug::writeError( "Couldn't load eventype '{$this->attribute( 'workflow_type_string' )}' for workflow. Is it activated ?", __METHOD__ );
+        }
+
         $db->commit();
 
         return $stored;

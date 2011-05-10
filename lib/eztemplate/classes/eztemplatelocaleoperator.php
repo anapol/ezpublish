@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -151,7 +151,6 @@ class eZTemplateLocaleOperator
         $newElements = array();
 
         $newElements[] = eZTemplateNodeTool::createCodePieceElement( '// l10nTransformation begin' . "\n" );
-        $newElements[] = eZTemplateNodeTool::createCodePieceElement( '//include_once("lib/ezlocale/classes/ezlocale.php");' . "\n" );
         $values[] = $parameters[0];
 
         if ( count( $parameters ) > 2 )
@@ -165,7 +164,7 @@ class eZTemplateLocaleOperator
             $newElements[] = eZTemplateNodeTool::createCodePieceElement( "\$locale = eZLocale::instance();\n" );
         }
 
-        if ( !eZTemplateNodeTool::isStaticElement( $parameters[1] ) )
+        if ( !eZTemplateNodeTool::isConstantElement( $parameters[1] ) )
         {
             $newElements[] = eZTemplateNodeTool::createCodePieceElement( '// l10nTransformation: not static' . "\n" );
             $values[] = $parameters[1];
@@ -203,7 +202,7 @@ class eZTemplateLocaleOperator
         {
             $values[] = false;
             $newElements[] = eZTemplateNodeTool::createCodePieceElement( '// l10nTransformation: static' . "\n" );
-            if ( ( $function = eZTemplateNodeTool::elementStaticValue( $parameters[1] ) ) !== false )
+            if ( ( $function = eZTemplateNodeTool::elementConstantValue( $parameters[1] ) ) !== false )
             {
                 $locale = eZLocale::instance();
                 $method = $locale->getFormattingFunction( $function );
@@ -246,20 +245,19 @@ class eZTemplateLocaleOperator
         {
             return false;
         }
-        if ( !eZTemplateNodeTool::isStaticElement( $parameters[1] ) )
+        if ( !eZTemplateNodeTool::isConstantElement( $parameters[1] ) )
         {
             return false;
         }
         else
         {
-            $class = eZTemplateNodeTool::elementStaticValue( $parameters[1] );
+            $class = eZTemplateNodeTool::elementConstantValue( $parameters[1] );
         }
         if ( ( $class == 'custom' ) && ( $paramCount != 3 ) )
         {
             return false;
         }
 
-        $newElements[] = eZTemplateNodeTool::createCodePieceElement( '//include_once("lib/ezlocale/classes/ezlocale.php");' . "\n" );
         $newElements[] = eZTemplateNodeTool::createCodePieceElement( '$locale = eZLocale::instance();' . "\n" );
 
         if ( $class == 'custom' )

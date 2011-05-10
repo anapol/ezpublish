@@ -2,7 +2,7 @@
 /**
  * File containing the eZClusterFileHandlerAbstractTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -25,7 +25,7 @@ abstract class eZClusterFileHandlerAbstractTest extends ezpDatabaseTestCase
 
     /**
      * @var eZINI
-     **/
+     */
     protected $fileINI;
 
     public function setUp()
@@ -34,7 +34,7 @@ abstract class eZClusterFileHandlerAbstractTest extends ezpDatabaseTestCase
         if ( $this->clusterClass === false )
             $this->markTestSkipped( "Test class " . get_class( $this ) . " does not provide the clusterClass property" );
 
-        return parent::setup();
+        return parent::setUp();
     }
 
     /**
@@ -324,8 +324,8 @@ abstract class eZClusterFileHandlerAbstractTest extends ezpDatabaseTestCase
     public function processCacheGenerateCallback( $path, $extraData )
     {
         /** Add random content ?
-        * Idea: use extra data to carry options around from {@link testProcessCache}
-        */
+         * Idea: use extra data to carry options around from {@link testProcessCache}
+         */
         return array( 'content' => $extraData['content'], 'scope' => 'test', 'datatype' => 'text/plain' );
     }
 
@@ -738,5 +738,10 @@ abstract class eZClusterFileHandlerAbstractTest extends ezpDatabaseTestCase
 
         self::deleteLocalFiles( $sourcePath, $destinationPath );
     }
+
+    /**
+     * Test for the eZClusterFileHandler::preFork() global method
+     */
+    public function testPreFork(){}
 }
 ?>

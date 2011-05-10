@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -133,7 +133,7 @@ if ( $enable === 'true' )
     eZWebDAVContentBackend::appendLogEntry( "Requested URI is: " . $_SERVER['REQUEST_URI'], 'webdav.php' );
 
     // Initialize/set the index file.
-    eZSys::init( 'webdav.php' );
+    eZSys::init( 'webdav.php', $ini->variable( 'SiteAccessSettings', 'ForceVirtualHost' ) === 'true' );
 
     // @as 2009-03-04 - added cleaning up of the REQUEST_URI and HTTP_DESTINATION
     $_SERVER['REQUEST_URI'] = urldecode( $_SERVER['REQUEST_URI'] );

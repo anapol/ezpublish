@@ -47,13 +47,14 @@ var confObj = {ldelim}
     dataSourceURL: "{concat('ezjscore/call/ezjscnode::subtree::', $node.node_id)|ezurl('no')}",
     rowsPrPage: {$number_of_items},
     sortOrder: {$node.sort_order},
+    nameFilter: '{$view_parameters.namefilter}',
     defaultShownColumns: vcols,
     navigationPart: "{$section.navigation_part_identifier}",
     cookieName: "eZSubitemColumns",
     cookieSecure: false,
     cookieDomain: "{ezsys(hostname)}",
     languages: availableLanguages,
-    classesString: "{$node.classes_js_array}",
+    classesString: {$node.classes_js_array},
     flagIcons: icons
 
 {rdelim}
@@ -97,6 +98,7 @@ var labelsObj = {ldelim}
                         select: "{'Select'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         select_sav: "{'Select all visible'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         select_sn: "{'Select none'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
+                        select_inv: "{'Invert selection'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         create_new: "{'Create new'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         more_actions: "{'More actions'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
                         more_actions_rs: "{'Remove selected'|i18n( 'design/admin/node/view/full' )|wash('javascript')}",
@@ -130,18 +132,18 @@ var labelsObj = {ldelim}
                                                                                      'group_by_class_group', true() ) )}
 
     var createGroups = [
-    
+
     {foreach $can_create_classes as $group}
         "{$group.group_name}"
         {delimiter}
         ,
         {/delimiter}
     {/foreach}
-    
+
     ];
-    
+
     var createOptions = [
-    
+
     {foreach $can_create_classes as $group}
         [
         {foreach $group.items as $can_create_class}
@@ -157,14 +159,14 @@ var labelsObj = {ldelim}
         {/delimiter}
     {/foreach}
     ];
-    
+
 {else}
     var createGroups = [];
     var createOptions = [];
 {/if}
 
 {literal}
-YUILoader.require(['datatable', 'button', 'container', 'cookie']);
+YUILoader.require(['datatable', 'button', 'container', 'cookie', 'element']);
 YUILoader.onSuccess = function() {
     sortableSubitems.init(confObj, labelsObj, createGroups, createOptions);
 };

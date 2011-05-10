@@ -4,7 +4,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@ $scriptSettings = array();
 $scriptSettings['description'] = 'Update all attributes with datatype ezimage to use the new image system introduced in eZ Publish 3.3';
 $scriptSettings['use-session'] = true;
 $scriptSettings['use-modules'] = false;
-$scriptSettings['use-extensions'] = false;
+$scriptSettings['use-extensions'] = true;
 
 $script = eZScript::instance( $scriptSettings );
 $script->startup();

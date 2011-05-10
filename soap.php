@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -63,7 +63,7 @@ function eZUpdateDebugSettings()
 $ini = eZINI::instance();
 
 // Initialize/set the index file.
-eZSys::init( 'soap.php', $ini->variable( 'SiteAccessSettings', 'ForceVirtualHost' ) == 'true' );
+eZSys::init( 'soap.php', $ini->variable( 'SiteAccessSettings', 'ForceVirtualHost' ) === 'true' );
 $uri = eZURI::instance( eZSys::requestURI() );
 $GLOBALS['eZRequestedURI'] = $uri;
 
@@ -73,7 +73,6 @@ eZExtension::activateExtensions( 'default' );
 // Extension check end
 
 // Activate correct siteaccess
-include_once( 'access.php' );
 $soapINI = eZINI::instance( 'soap.ini' );
 if ( $soapINI->variable( 'GeneralSettings', 'UseDefaultAccess' ) === 'enabled' )
 {
@@ -125,8 +124,6 @@ $enableSOAP = $soapINI->variable( 'GeneralSettings', 'EnableSOAP' );
 
 if ( $enableSOAP == 'true' )
 {
-    eZSys::init( 'soap.php' );
-
     // Login if we have username and password.
     if ( eZHTTPTool::username() and eZHTTPTool::password() )
         eZUser::loginUser( eZHTTPTool::username(), eZHTTPTool::password() );

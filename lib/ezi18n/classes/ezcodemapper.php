@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -91,7 +91,7 @@ class eZCodeMapper
         }
         else
         {
-            eZDebug::writeError( $str, 'eZCodeMapper::error' );
+            eZDebug::writeError( $str, __METHOD__ );
         }
     }
 
@@ -115,7 +115,7 @@ class eZCodeMapper
         }
         else
         {
-            eZDebug::writeWarning( $str, 'eZCodeMapper::warning' );
+            eZDebug::writeWarning( $str, __METHOD__ );
         }
     }
 
@@ -1529,8 +1529,7 @@ class eZCodeMapper
                 {
                     break;
                 }
-                eZDebug::writeError( "Unknown command '$name'",
-                                     'eZCharTransform::decodeCommand' );
+                eZDebug::writeError( "Unknown command '$name'", __METHOD__ );
             } break;
         }
         return $rules;
@@ -1583,7 +1582,6 @@ class eZCodeMapper
             if ( !in_array( $charsetName, $nonCJKCharsets ) )
             {
                 $code .= ( '// add N-Gram(N=2)  chinese / japanese / korean multibyte characters' . "\n" .
-                           '//include_once( \'lib/ezi18n/classes/eztextcodec.php\' );' . "\n" .
                            '$codec = eZTextCodec::instance( false, \'unicode\' );' . "\n" .
                            "\n" .
                            '$unicodeValueArray = $codec->convertString( $text );' . "\n" .

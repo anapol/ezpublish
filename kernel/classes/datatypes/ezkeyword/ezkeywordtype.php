@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -255,10 +255,13 @@ class eZKeywordType extends eZDataType
         return true;
     }
 
-    /*!
-     \return string representation of an contentobjectattribute data for simplified export
-
-    */
+    /**
+     *
+     * Returns string representation of an contentobjectattribute data for simplified export
+     *
+     * @param eZContentObjectAttribute $contentObjectAttribute
+     * @return string
+     */
     function toString( $contentObjectAttribute )
     {
         $keyword = new eZKeyword();
@@ -268,12 +271,9 @@ class eZKeywordType extends eZDataType
 
     function fromString( $contentObjectAttribute, $string )
     {
-        if ( $string != '' )
-        {
-            $keyword = new eZKeyword();
-            $keyword->initializeKeyword( $string );
-            $contentObjectAttribute ->setContent( $keyword );
-        }
+        $keyword = new eZKeyword();
+        $keyword->initializeKeyword( $string );
+        $contentObjectAttribute->setContent( $keyword );
         return true;
     }
 

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -135,7 +135,7 @@ class eZImageShellHandler extends eZImageHandler
         }
         else
         {
-            eZDebug::writeWarning( "Failed executing: $systemString, Error code: $returnCode", 'eZImageShellHandler::convert' );
+            eZDebug::writeWarning( "Failed executing: $systemString, Error code: $returnCode", __METHOD__ );
             return false;
         }
 
@@ -155,8 +155,7 @@ class eZImageShellHandler extends eZImageHandler
         $ini = eZINI::instance( $iniFilename );
         if ( !$ini )
         {
-            eZDebug::writeError( "Failed loading ini file $iniFilename",
-                                 'eZImageShellHandler::createFromINI' );
+            eZDebug::writeError( "Failed loading ini file $iniFilename", __METHOD__ );
             return $handler;
         }
 
@@ -216,8 +215,7 @@ class eZImageShellHandler extends eZImageHandler
                 $path = $ini->variable( $iniGroup, 'ExecutablePath' );
             if ( !$ini->hasVariable( $iniGroup, 'Executable' ) )
             {
-                eZDebug::writeError( "No Executable setting for group $iniGroup in ini file $iniFilename",
-                                     'eZImageShellHandler::createFromINI' );
+                eZDebug::writeError( "No Executable setting for group $iniGroup in ini file $iniFilename", __METHOD__ );
                 return $handler;
             }
             $executable = $ini->variable( $iniGroup, 'Executable' );

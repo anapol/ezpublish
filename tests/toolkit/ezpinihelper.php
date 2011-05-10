@@ -2,7 +2,7 @@
 /**
  * File containing the ezpINIHelper class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -20,7 +20,7 @@ class ezpINIHelper
      * @param mixed $value The new value
      *
      * @see restoreINISettings() to restore all the modified INI settings
-     **/
+     */
     public static function setINISetting( $file, $block, $variable, $value )
     {
         if ( is_array( $file ) )
@@ -75,7 +75,7 @@ class ezpINIHelper
      * Modified INI settings, as an array of 4 keys array:
      * file, block, variable, value
      * @var array
-     **/
+     */
     protected static $modifiedINISettings = array();
 }
 

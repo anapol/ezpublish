@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -50,30 +50,45 @@ class eZUserAccountKey extends eZPersistentObject
 
     static function definition()
     {
-        return array( "fields" => array( "id" => "ID",
-                                         "user_id" => "UserID",
-                                         "hash_key" => "HashKey",
-                                         "time" => "Time"
+        return array( 'fields' => array( 'id' => array( 'name' => 'ID',
+                                                        'datatype' => 'integer',
+                                                        'default' => 0,
+                                                        'required' => true ),
+                                         'user_id' => array( 'name' => 'UserID',
+                                                             'datatype' => 'integer',
+                                                             'default' => 0,
+                                                             'required' => true,
+                                                             'foreign_class' => 'eZUser',
+                                                             'foreign_attribute' => 'contentobject_id',
+                                                             'multiplicity' => '0..1' ),
+                                         'hash_key' => array( 'name' => 'HashKey',
+                                                              'datatype' => 'string',
+                                                              'default' => '',
+                                                              'required' => true ),
+                                         'time' => array( 'name' => 'Time',
+                                                          'datatype' => 'integer',
+                                                          'default' => 0,
+                                                          'required' => true )
                                          ),
-                      "keys" => array( "id" ),
-                      "increment_key" => "id",
-                      "sort" => array( "id" => "asc" ),
-                      "class_name" => "eZUserAccountKey",
-                      "name" => "ezuser_accountkey" );
+                      'keys' => array( 'id' ),
+                      'increment_key' => 'id',
+                      'sort' => array( 'id' => 'asc' ),
+                      'class_name' => 'eZUserAccountKey',
+                      'name' => 'ezuser_accountkey' );
     }
 
     static function createNew( $userID, $hashKey, $time)
     {
-        return new eZUserAccountKey( array( "user_id" => $userID,
-                                            "hash_key" => $hashKey,
-                                            "time" => $time ) );
+        return new eZUserAccountKey( array( 'user_id' => $userID,
+                                            'hash_key' => $hashKey,
+                                            'time' => $time ) );
     }
 
     static function fetchByKey( $hashKey )
     {
         return eZPersistentObject::fetchObject( eZUserAccountKey::definition(),
                                                 null,
-                                                array( "hash_key" => $hashKey ),
+                                                array( 'hash_key' => $hashKey ),
                                                 true );
     }
 

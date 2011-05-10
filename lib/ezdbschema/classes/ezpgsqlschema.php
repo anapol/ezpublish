@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -344,6 +344,7 @@ class eZPgsqlSchema extends eZDBSchemaInterface
             case 'integer':
             case 'double precision':
             case 'real':
+            case 'bigint':
             {
                 return false;
             } break;
@@ -369,6 +370,10 @@ class eZPgsqlSchema extends eZDBSchemaInterface
             case 'int':
             {
                 return 'integer';
+            } break;
+            case 'bigint':
+            {
+                return 'bigint';
             } break;
             case 'varchar':
             {
@@ -419,7 +424,8 @@ class eZPgsqlSchema extends eZDBSchemaInterface
         {
             case 'bigint':
             {
-                return 'int';
+                $length = 20;
+                return 'bigint';
             } break;
             case 'integer':
             {
@@ -440,7 +446,7 @@ class eZPgsqlSchema extends eZDBSchemaInterface
             } break;
             case 'character':
             {
-                $lenght = 1;
+                $length = 1;
                 return 'char';
             } break;
             case 'numeric':
@@ -504,7 +510,7 @@ class eZPgsqlSchema extends eZDBSchemaInterface
      \param $params An associative array with optional parameters which controls the output of SQLs
      \param $withClosure If \c true then the SQLs will contain semi-colons to close them.
     */
-    function generateAddIndexSql( $table_name, $index_name, $def, $params, $withClosure )
+    function generateAddIndexSql( $table_name, $index_name, $def, $params, $withClosure = true )
     {
         $diffFriendly = isset( $params['diff_friendly'] ) ? $params['diff_friendly'] : false;
         $postgresqlCompatible = isset( $params['compatible_sql'] ) ? $params['compatible_sql'] : false;
@@ -568,7 +574,7 @@ class eZPgsqlSchema extends eZDBSchemaInterface
     /*!
      * \private
      */
-    function generateDropIndexSql( $table_name, $index_name, $def, $withClosure )
+    function generateDropIndexSql( $table_name, $index_name, $def, $withClosure = true )
     {
         if ($def['type'] == 'primary' )
         {
@@ -772,7 +778,7 @@ class eZPgsqlSchema extends eZDBSchemaInterface
      \param $params An associative array with optional parameters which controls the output of SQLs
      \param $withClosure If \c true then the SQLs will contain semi-colons to close them.
     */
-    function generateTableArrays( $table, $table_def, $params, $withClosure )
+    function generateTableArrays( $table, $table_def, $params, $withClosure = true )
     {
         $diffFriendly = isset( $params['diff_friendly'] ) ? $params['diff_friendly'] : false;
         $postgresqlCompatible = isset( $params['compatible_sql'] ) ? $params['compatible_sql'] : false;

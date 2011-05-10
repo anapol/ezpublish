@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -124,7 +124,7 @@ class eZSimplePrice
 
             default:
             {
-                eZDebug::writeError( "Unspecified attribute: " . $attr, 'eZSimplePrice::setAttribute' );
+                eZDebug::writeError( "Unspecified attribute: " . $attr, __METHOD__ );
             } break;
         }
     }
@@ -200,7 +200,7 @@ class eZSimplePrice
 
             default :
             {
-                eZDebug::writeError( "Attribute '$attr' does not exist", 'eZSimplePrice::attribute' );
+                eZDebug::writeError( "Attribute '$attr' does not exist", __METHOD__ );
                 return null;
             } break;
         }
@@ -221,7 +221,7 @@ class eZSimplePrice
         $this->VATType = eZVatType::fetch( $VATID );
         if ( !$this->VATType )
         {
-            eZDebug::writeDebug( "VAT type with id '$VATID' is unavailable", 'eZSimplePrice::setVATType');
+            eZDebug::writeDebug( "VAT type with id '$VATID' is unavailable", __METHOD__ );
             $this->VATType = eZVatType::create();
         }
     }

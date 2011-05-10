@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -42,7 +42,7 @@ class eZi18nOperator
         $this->Name = $name;
         $this->ExtensionName = $extensionName;
         // d18n is a i18n alias for use with dynamic variables as input
-        // where you don't want ezlupdate to pick up the string 
+        // where you don't want ezlupdate to pick up the string
         $this->DynamicName = $dynamicName;
     }
 
@@ -119,11 +119,11 @@ class eZi18nOperator
             }
         }
 
-        $value = eZTemplateNodeTool::elementStaticValue( $parameters[0] );
+        $value = eZTemplateNodeTool::elementConstantValue( $parameters[0] );
 
         $numParameters = count ( $parameters );
-        $context = ( $numParameters > 1 ) ? eZTemplateNodeTool::elementStaticValue( $parameters[1] ) : null;
-        $comment = ( $numParameters > 2 ) ? eZTemplateNodeTool::elementStaticValue( $parameters[2] ) : null;
+        $context = ( $numParameters > 1 ) ? eZTemplateNodeTool::elementConstantValue( $parameters[1] ) : null;
+        $comment = ( $numParameters > 2 ) ? eZTemplateNodeTool::elementConstantValue( $parameters[2] ) : null;
 
         if ( $numParameters < 4 )
         {
@@ -195,6 +195,6 @@ class eZi18nOperator
     public $Operators;
     public $Name;
     public $ExtensionName;
-};
+}
 
 ?>

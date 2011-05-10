@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -91,11 +91,11 @@ class eZObjectForwarder
         if ( isset( $parameters['render-mode'] ) )
         {
             $renderData = $parameters['render-mode'];
-            if ( !eZTemplateNodeTool::isStaticElement( $renderData ) )
+            if ( !eZTemplateNodeTool::isConstantElement( $renderData ) )
             {
                 return false;
             }
-            $renderMode = eZTemplateNodeTool::elementStaticValue( $renderData );
+            $renderMode = eZTemplateNodeTool::elementConstantValue( $renderData );
         }
         if ( $renderMode )
             $view_dir .= "/render-$renderMode";
@@ -109,11 +109,11 @@ class eZObjectForwarder
             if ( isset( $parameters[$viewName] ) )
             {
                 $viewData = $parameters[$viewName];
-                if ( !eZTemplateNodeTool::isStaticElement( $viewData ) )
+                if ( !eZTemplateNodeTool::isConstantElement( $viewData ) )
                 {
                     return false;
                 }
-                $viewValue = eZTemplateNodeTool::elementStaticValue( $viewData );
+                $viewValue = eZTemplateNodeTool::elementConstantValue( $viewData );
                 $viewDir .= '/' . $viewValue;
             }
             else
@@ -835,6 +835,6 @@ class eZObjectForwarder
     }
 
     public $Rules;
-};
+}
 
 ?>

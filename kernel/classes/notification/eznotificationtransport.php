@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -49,8 +49,8 @@ class eZNotificationTransport
      * Returns a shared instance of the eZNotificationTransport class.
      *
      *
-     * @param $transport string|false Uses notification.ini[TransportSettings]DefaultTransport if false
-     * @param $forceNewInstance bool
+     * @param string|false $transport Uses notification.ini[TransportSettings]DefaultTransport if false
+     * @param bool $forceNewInstance
      * @return eZNotificationTransport
      */
     static function instance( $transport = false, $forceNewInstance = false )
@@ -92,7 +92,7 @@ class eZNotificationTransport
         if ( !isset( $impl ) )
         {
             $impl = new eZNotificationTransport();
-            eZDebug::writeError( 'Transport implementation not supported: ' . $transport, 'eZNotificationTransport::instance' );
+            eZDebug::writeError( 'Transport implementation not supported: ' . $transport, __METHOD__ );
         }
         return $impl;
     }

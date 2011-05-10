@@ -2,7 +2,7 @@
 /**
  * File containing the eZDBFileHandlerTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -11,7 +11,7 @@ class eZDBFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
 {
     /**
      * @var array
-     **/
+     */
     protected $sqlFiles = array( 'kernel/sql/mysql/cluster_schema.sql' );
 
     protected $clusterClass = 'eZDBFileHandler';
@@ -28,15 +28,13 @@ class eZDBFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
      *
      * Load an instance of file.ini
      * Assigns DB parameters for cluster
-     **/
+     */
     public function setUp()
     {
-        parent::setUp();
+        if ( ezpTestRunner::dsn()->dbsyntax !== 'mysql' && ezpTestRunner::dsn()->dbsyntax !== 'mysqli' )
+            self::markTestSkipped( "Not running MySQL, skipping" );
 
-        if ( !( $this->sharedFixture instanceof eZMySQLDB ) and !( $this->sharedFixture instanceof eZMySQLiDB ) )
-        {
-            self::markTestSkipped( "Not using mysql interface, skipping" );
-        }
+        parent::setUp();
 
         // We need to clear the existing handler if it was loaded before the INI
         // settings changes
@@ -92,6 +90,40 @@ class eZDBFileHandlerTest extends eZDBBasedClusterFileHandlerAbstractTest
         }
 
         parent::tearDown();
+    }
+
+    public function testDisconnect()
+    {
+        $handler = eZClusterFileHandler::instance();
+
+        // the property ain't private as of now, but will be at some point
+        $refHandler = new ReflectionObject( $handler );
+        $refBackendProperty = $refHandler->getProperty( 'backend' );
+        $refBackendProperty->setAccessible( true );
+
+        self::assertNotNull( $refBackendProperty->getValue( $handler ) );
+
+        $handler->disconnect();
+
+        self::assertNull( $refBackendProperty->getValue( $handler ) );
+    }
+
+    /**
+     * Test for the global {@see eZClusterFilehandler::preFork()} method
+     */
+    public function testPreFork()
+    {
+        $handler = eZClusterFileHandler::instance();
+
+        $refHandler = new ReflectionObject( $handler );
+        $refBackendProperty = $refHandler->getProperty( 'backend' );
+        $refBackendProperty->setAccessible( true );
+
+        self::assertNotNull( $refBackendProperty->getValue( $handler ) );
+
+        eZClusterFileHandler::preFork();
+
+        self::assertNull( $refBackendProperty->getValue( $handler ) );
     }
 }
 ?>

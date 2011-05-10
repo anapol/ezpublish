@@ -2,7 +2,7 @@
 /**
  * File containing the eZContentClassTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -16,16 +16,6 @@ class eZContentClassTest extends ezpDatabaseTestCase
         parent::__construct();
         $this->setName( "eZContentClass Unit Tests" );
     }*/
-
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
 
     /**
      * Unit test for eZContentClass::classIDByIdentifier()
@@ -108,7 +98,7 @@ class eZContentClassTest extends ezpDatabaseTestCase
 
     /**
      * Unit test for eZContentClass::versionHistoryLimit() with object parameters
-     * 
+     *
      * Replica of testVersionHistoryLimit() but you cannot make calls
      * to the eZ API which relies on a database, as this is not present
      * in the provider methods.

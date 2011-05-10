@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -453,12 +453,12 @@ class eZXHTMLXMLOutput extends eZXMLOutputHandler
 
     function renderParagraph( $element, $childrenOutput, $vars )
     {
-        // don't render if inside 'li' or inside 'td' (by option)
+        // don't render if inside 'li' or inside 'td'/'th' (by option)
         $parent = $element->parentNode;
 
 
         if ( ( $parent->nodeName == 'li' && self::childTagCount( $parent ) == 1 ) ||
-             ( $parent->nodeName == 'td' && !$this->RenderParagraphInTableCells && self::childTagCount( $parent ) == 1 ) )
+             ( in_array( $parent->nodeName, array( 'td', 'th' ) ) && !$this->RenderParagraphInTableCells && self::childTagCount( $parent ) == 1 ) )
 
         {
             return $childrenOutput;

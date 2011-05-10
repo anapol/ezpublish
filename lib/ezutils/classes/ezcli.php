@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -382,8 +382,6 @@ class eZCLI
     */
     function notice( $string = false, $addEOL = true )
     {
-        if ( $this->isQuiet() )
-            return;
         fputs( STDERR, $string );
         if ( $addEOL )
             fputs( STDERR, $this->endlineString() );
@@ -395,8 +393,6 @@ class eZCLI
     */
     function warning( $string = false, $addEOL = true )
     {
-        if ( $this->isQuiet() )
-            return;
         $string = $this->stylize( 'warning', $string );
         fputs( STDERR, $string );
         if ( $addEOL )
@@ -409,18 +405,19 @@ class eZCLI
     */
     function error( $string = false, $addEOL = true )
     {
-        if ( $this->isQuiet() )
-            return;
         $string = $this->stylize( 'error', $string );
         fputs( STDERR, $string );
         if ( $addEOL )
             fputs( STDERR, $this->endlineString() );
     }
 
-    /*!
-     Sets whether the output(), notice(), warning() and error() methods should print out anything.
-     \sa isQuiet, isLoud
-    */
+    /**
+     * Sets whether the output() method should print out anything.
+     *
+     * @param bool $isQuiet
+     *
+     * @see isQuiet, isLoud
+     */
     function setIsQuiet( $isQuiet )
     {
         $this->IsQuiet = $isQuiet;
@@ -480,8 +477,7 @@ class eZCLI
                 $end = strpos( $configString, ']', $i + 1 );
                 if ( $end === false )
                 {
-                    eZDebug::writeError( "Missing end marker ] in option string at position $i",
-                                         'eZCLI::parseOptionString' );
+                    eZDebug::writeError( "Missing end marker ] in option string at position $i", __METHOD__ );
                     return $optionConfig;
                 }
                 $optionList = substr( $configString, $i + 1, $end - $i - 1 );

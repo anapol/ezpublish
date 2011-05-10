@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@
   Note: Not all code is using this class for cluster access, see index_image_mysql.php and index_image_pgsql.php for more custom code.
 */
 
-class eZDBFileHandler
+class eZDBFileHandler implements ezpDatabaseBasedClusterFileHandler
 {
     /*!
      Controls whether file data from database is cached on the local filesystem.
@@ -80,6 +80,15 @@ class eZDBFileHandler
             unset( $fileINI );
         }
         $this->nonExistantStaleCacheHandling = $GLOBALS['eZDBFileHandler_Settings']['NonExistantStaleCacheHandling'];
+    }
+
+    /**
+     * Disconnects the cluster handler from the database
+     */
+    public function disconnect()
+    {
+        $this->backend->_disconnect();
+        $this->backend = null;
     }
 
     /**
@@ -614,7 +623,7 @@ class eZDBFileHandler
      * @param int    $curtime The current time to check against.
      * @param int    $ttl Number of seconds the data can live, set to null to disable TTL.
      * @return bool
-     **/
+     */
     public function isExpired( $expiry, $curtime, $ttl )
     {
         if ( $this->metaData === null )
@@ -629,7 +638,7 @@ class eZDBFileHandler
      * @param int    $curtime The current time to check against.
      * @param int    $ttl Number of seconds the data can live, set to null to disable TTL.
      * @return bool
-     **/
+     */
     public function isLocalFileExpired( $expiry, $curtime, $ttl )
     {
         return self::isFileExpired( $this->filePath, @filemtime( $this->filePath ), $expiry, $curtime, $ttl );
@@ -641,7 +650,7 @@ class eZDBFileHandler
      * @param int    $curtime The current time to check against.
      * @param int    $ttl Number of seconds the data can live, set to null to disable TTL.
      * @return bool
-     **/
+     */
     public function isDBFileExpired( $expiry, $curtime, $ttl )
     {
         $mtime = isset( $this->metaData['mtime'] ) ? $this->metaData['mtime'] : 0;
@@ -1213,13 +1222,13 @@ class eZDBFileHandler
     }
 
     /**
-    * Starts cache generation for the current file.
-    *
-    * This is done by creating a file named by the original file name, prefixed
-    * with '.generating'.
-    *
-    * @return bool false if the file is being generated, true if it is not
-    **/
+     * Starts cache generation for the current file.
+     *
+     * This is done by creating a file named by the original file name, prefixed
+     * with '.generating'.
+     *
+     * @return bool false if the file is being generated, true if it is not
+     */
     public function startCacheGeneration()
     {
         $generatingFilePath = $this->filePath . '.generating';
@@ -1248,8 +1257,8 @@ class eZDBFileHandler
     }
 
     /**
-    * Ends the cache generation started by startCacheGeneration().
-    **/
+     * Ends the cache generation started by startCacheGeneration().
+     */
     public function endCacheGeneration( $rename = true )
     {
         if ( $this->backend->_endCacheGeneration( $this->realFilePath, $this->filePath, $rename ) )
@@ -1266,11 +1275,11 @@ class eZDBFileHandler
     }
 
     /**
-    * Aborts the current cache generation process.
-    *
-    * Does so by rolling back the current transaction, which should be the
-    * .generating file lock
-    **/
+     * Aborts the current cache generation process.
+     *
+     * Does so by rolling back the current transaction, which should be the
+     * .generating file lock
+     */
     public function abortCacheGeneration()
     {
         $this->backend->_abortCacheGeneration( $this->filePath );
@@ -1283,7 +1292,7 @@ class eZDBFileHandler
      * Checks if the .generating file was changed, which would mean that generation
      * timed out. If not timed out, refreshes the timestamp so that storage won't
      * be stolen
-     **/
+     */
     public function checkCacheGenerationTimeout()
     {
         return $this->backend->_checkCacheGenerationTimeout( $this->filePath, $this->generationStartTimestamp );
@@ -1292,8 +1301,8 @@ class eZDBFileHandler
     /**
      * Determines the cache type based on the path
      * @return string viewcache, cacheblock or misc
-     **/
-    private function _cacheType()
+     */
+    protected function _cacheType()
     {
         if ( strstr( $this->filePath, 'cache/content' ) !== false )
             return 'viewcache';
@@ -1305,7 +1314,7 @@ class eZDBFileHandler
 
     /**
      * Magic getter
-     **/
+     */
     function __get( $propertyName )
     {
         switch ( $propertyName )
@@ -1332,7 +1341,7 @@ class eZDBFileHandler
     /**
      * Since eZDB uses the database, running clusterize.php is required
      * @return bool
-     **/
+     */
     public function requiresClusterizing()
     {
         return true;
@@ -1343,7 +1352,7 @@ class eZDBFileHandler
      * It does store files in DB and therefore doesn't remove files in real time
      *
      * @since 4.3.0
-     * @deprecated Deprecated as of 4.4.1, use {@link eZDBFileHandler::requiresPurge()} instead.
+     * @deprecated Deprecated as of 4.5, use {@link eZDBFileHandler::requiresPurge()} instead.
      * @return bool
      */
     public function requiresBinaryPurge()
@@ -1355,9 +1364,9 @@ class eZDBFileHandler
      * eZDB does require binary purge.
      * It does store files in DB and therefore doesn't remove files in real time
      *
-     * @since 4.4.1
+     * @since 4.5.0
      * @return bool
-     **/
+     */
     public function requiresPurge()
     {
         return true;
@@ -1370,7 +1379,7 @@ class eZDBFileHandler
      *
      * @return array(eZClusterFileHandlerInterace)
      * @since 4.3.0
-     * @deprecated Deprecated as of 4.4.1, use {@link eZDBFileHandler::fetchExpiredItems()} instead.
+     * @deprecated Deprecated as of 4.5, use {@link eZDBFileHandler::fetchExpiredItems()} instead.
      *
      * @todo handle output using $cli or something
      */
@@ -1387,7 +1396,7 @@ class eZDBFileHandler
      * @param int $expiry Number of seconds, only items older than this will be returned
      *
      * @return array(filepath)
-     * @since 4.4.1
+     * @since 4.5.0
      */
     public function fetchExpiredItems( $scopes, $limit = array( 0 , 100 ), $expiry = false )
     {
@@ -1395,73 +1404,73 @@ class eZDBFileHandler
     }
 
     /**
-    * Database backend class
-    * @var eZDBFileHandlerMysqlBackend
-    **/
+     * Database backend class
+     * @var eZDBFileHandlerMysqlBackend
+     */
     public $backend;
 
     /**
      * Secondary database backend class, used to check for modifications outside
      * of the main transaction scope
      * @var eZDBFileHandlerMysqlBackend
-     **/
+     */
     public $backendVerify;
 
     /**
-    * Path to the current file
-    * @var string
-    **/
+     * Path to the current file
+     * @var string
+     */
     public $filePath;
 
     /**
-    * holds the real file path. This is only used when we are generating a cache
-    * file, in which case $filePath holds the generating cache file name,
-    * and $realFilePath holds the real name
-    **/
+     * holds the real file path. This is only used when we are generating a cache
+     * file, in which case $filePath holds the generating cache file name,
+     * and $realFilePath holds the real name
+     */
     public $realFilePath = null;
 
     /**
-    * holds the file's metaData loaded from database
-    * The variable's type indicates the exact status:
-    *   - null: means that metaData have not been loaded yet
-    *   - false: means that metaData were loaded but the file was not found in DB
-    *   - array: metaData have been loaded and file exists
-    * @todo refactor to a magic property:
-    *   - when the property is requested, we check if it's null.
-    *   - if it is, we load the metadata from the database and cache them
-    *   - if it is not, we return the metaData
-    *   - then we add a reinitMetaData() method that resets the property to null
-    *     by erasing the cache
-    **/
+     * holds the file's metaData loaded from database
+     * The variable's type indicates the exact status:
+     *   - null: means that metaData have not been loaded yet
+     *   - false: means that metaData were loaded but the file was not found in DB
+     *   - array: metaData have been loaded and file exists
+     * @todo refactor to a magic property:
+     *   - when the property is requested, we check if it's null.
+     *   - if it is, we load the metadata from the database and cache them
+     *   - if it is not, we return the metaData
+     *   - then we add a reinitMetaData() method that resets the property to null
+     *     by erasing the cache
+     */
     public $_metaData = null;
 
     /**
      * Indicates that the current cache item is being generated and an old version
      * should be used
      * @var bool
-     **/
-    private $useStaleCache = false;
+     */
+    protected $useStaleCache = false;
 
     /**
- * Holds the preferences used when stale cache is activated and no expired
- * file is available.
- * This is loaded from file.ini, ClusteringSettings.NonExistantStaleCacheHandling
- **/
-    private $nonExistantStaleCacheHandling;
+     * Holds the preferences used when stale cache is activated and no expired
+     * file is available.
+     * This is loaded from file.ini, ClusteringSettings.NonExistantStaleCacheHandling
+     */
+    protected $nonExistantStaleCacheHandling;
 
     /**
- * Holds the number of seconds remaining before the generating cache times out
- * @var int
- **/
-    private $remainingCacheGenerationTime = false;
+     * Holds the number of seconds remaining before the generating cache times out
+     * @var int
+     */
+    protected $remainingCacheGenerationTime = false;
 
     /**
- * When the instance generates the cached version for a file, this property
- * holds the timestamp at which generation was started. This is used to control
- * a possible generation timeout
- * @var int
- **/
-    private $generationStartTimestamp = false;
+     * When the instance generates the cached version for a file, this property
+     * holds the timestamp at which generation was started. This is used to control
+     * a possible generation timeout
+     * @var int
+     */
+    protected $generationStartTimestamp = false;
 
 }
 ?>

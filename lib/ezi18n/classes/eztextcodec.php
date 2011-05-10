@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -445,9 +445,9 @@ class eZTextCodec
      * Returns a shared instance of the eZTextCodec pr the
      * $inputCharsetCode and $outputCharsetCode params.
      *
-     * @param $inputCharsetCode string|false uses {@link eZTextCodec::internalCharset()} if false
-     * @param $outputCharsetCode string|false uses {@link eZTextCodec::internalCharset()} if false
-     * @param $alwaysReturn bool
+     * @param string|false $inputCharsetCode Uses {@link eZTextCodec::internalCharset()} if false
+     * @param string|false $outputCharsetCode Uses {@link eZTextCodec::internalCharset()} if false
+     * @param bool $alwaysReturn
      * @return eZTextCodec|null Returns null if $alwaysReturn is false and text codec is not needed for
      *         current $inputCharsetCode and $outputCharsetCode.
      */

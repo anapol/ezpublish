@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -86,7 +86,7 @@ class eZContentLanguage extends eZPersistentObject
         $localeObject = eZLocale::instance( $locale );
         if ( !$localeObject )
         {
-            eZDebug::writeError( "No such locale $locale!", 'eZContentLanguage::addLanguage' );
+            eZDebug::writeError( "No such locale $locale!", __METHOD__ );
             return false;
         }
 
@@ -101,13 +101,13 @@ class eZContentLanguage extends eZPersistentObject
 
         if ( ( $existingLanguage = eZContentLanguage::fetchByLocale( $locale ) ) )
         {
-            eZDebug::writeWarning( "Language '$locale' already exists!", 'eZContentLanguage::addLanguage' );
+            eZDebug::writeWarning( "Language '$locale' already exists!", __METHOD__ );
             return $existingLanguage;
         }
 
         if ( count( $languages ) >= eZContentLanguage::MAX_COUNT )
         {
-            eZDebug::writeError( 'Too many languages, cannot add more!', 'eZContentLanguage::addLanguage' );
+            eZDebug::writeError( 'Too many languages, cannot add more!', __METHOD__ );
             return false;
         }
 
@@ -350,7 +350,7 @@ class eZContentLanguage extends eZPersistentObject
                 }
                 else
                 {
-                    eZDebug::writeWarning( "Language '$localeCode' does not exist or is not used!", 'eZContentLanguage::prioritizedLanguages' );
+                    eZDebug::writeWarning( "Language '$localeCode' does not exist or is not used!", __METHOD__ );
                 }
             }
 
@@ -898,17 +898,17 @@ class eZContentLanguage extends eZPersistentObject
      */
     static function jsArrayByMask( $mask )
     {
-        $jsArray = array();
+        $localList = array();
         $languages = eZContentLanguage::prioritizedLanguagesByMask( $mask );
         foreach ( $languages as $key => $language )
         {
-            $jsArray[] = "{ locale: '".$language->attribute( 'locale' ).
-                "', name: '".$language->attribute( 'name' )."' }";
+            $localList[] = array( 'locale' => $language->attribute( 'locale' ),
+                                  'name'   => $language->attribute( 'name' ) );
         }
 
-        if ( $jsArray )
+        if ( $localList )
         {
-            return '[ '.implode( ', ', $jsArray ).' ]';
+            return json_encode( $localList );
         }
         else
         {

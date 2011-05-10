@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -688,12 +688,19 @@ if ( !function_exists( 'checkContentActions' ) )
 
             eZDebug::accumulatorStart( 'publish', '', 'publish' );
             $oldObjectName = $object->name();
+
+            $behaviour = new ezpContentPublishingBehaviour();
+            $behaviour->isTemporary = true;
+            $behaviour->disableAsynchronousPublishing = false;
+            ezpContentPublishingBehaviour::setBehaviour( $behaviour );
+
             $operationResult = eZOperationHandler::execute( 'content', 'publish', array( 'object_id' => $object->attribute( 'id' ),
                                                                                          'version' => $version->attribute( 'version' ) ) );
             eZDebug::accumulatorStop( 'publish' );
 
             if ( ( array_key_exists( 'status', $operationResult ) && $operationResult['status'] != eZModuleOperationInfo::STATUS_CONTINUE ) )
             {
+                eZDebug::writeDebug( $operationResult, __FILE__ );
                 switch( $operationResult['status'] )
                 {
                     case eZModuleOperationInfo::STATUS_REPEAT:

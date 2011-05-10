@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -48,12 +48,13 @@ class eZModuleOperationInfo
     const STATUS_CANCELLED = 2;
     const STATUS_HALTED = 3;
     const STATUS_REPEAT = 4;
+    const STATUS_QUEUED = 5;
 
     /**
      * Constructor
      * @param string $moduleName
      * @param bool $useTriggers
-    **/
+     */
     function eZModuleOperationInfo( $moduleName, $useTriggers = true )
     {
         $this->ModuleName = $moduleName;
@@ -74,9 +75,9 @@ class eZModuleOperationInfo
     }
 
     /**
-    * Loads the operations definition for the current module
-    * @return bool true if the operations were loaded, false if an error occured
-    **/
+     * Loads the operations definition for the current module
+     * @return bool true if the operations were loaded, false if an error occured
+     */
     function loadDefinition()
     {
         $pathList = eZModule::globalPathList();
@@ -89,16 +90,14 @@ class eZModuleOperationInfo
         }
         if ( $definitionFile === null )
         {
-            eZDebug::writeError( 'Missing operation definition file for module: ' . $this->ModuleName,
-                                 'eZModuleOperationInfo::loadDefinition' );
+            eZDebug::writeError( 'Missing operation definition file for module: ' . $this->ModuleName, __METHOD__ );
             return false;
         }
         unset( $OperationList );
         include( $definitionFile );
         if ( !isset( $OperationList ) )
         {
-            eZDebug::writeError( 'Missing operation definition list for module: ' . $this->ModuleName,
-                                 'eZModuleOperationInfo::loadDefinition' );
+            eZDebug::writeError( 'Missing operation definition list for module: ' . $this->ModuleName, __METHOD__ );
             return false;
         }
         $this->OperationList = $OperationList;
@@ -150,27 +149,23 @@ class eZModuleOperationInfo
         $moduleName = $this->ModuleName;
         if ( !isset( $this->OperationList[$operationName] ) )
         {
-            eZDebug::writeError( "No such operation '$operationName' in module '$moduleName'",
-                                 'eZModuleOperationInfo::execute' );
+            eZDebug::writeError( "No such operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
         $operationDefinition = $this->OperationList[$operationName];
         if ( !isset( $operationName['default_call_method'] ) )
         {
-            eZDebug::writeError( "No call method defined for operation '$operationName' in module '$moduleName'",
-                                 'eZModuleOperationInfo::execute' );
+            eZDebug::writeError( "No call method defined for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
         if ( !isset( $operationName['body'] ) )
         {
-            eZDebug::writeError( "No body for operation '$operationName' in module '$moduleName'",
-                                 'eZModuleOperationInfo::execute' );
+            eZDebug::writeError( "No body for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
         if ( !isset( $operationName['parameters'] ) )
         {
-            eZDebug::writeError( "No parameters defined for operation '$operationName' in module '$moduleName'",
-                                 'eZModuleOperationInfo::execute' );
+            eZDebug::writeError( "No parameters defined for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
         $callMethod = $operationDefinition['default_call_method'];
@@ -207,8 +202,6 @@ class eZModuleOperationInfo
                     if ( isset( $mementoOperationData['loop_run'] ) )
                         $bodyCallCount['loop_run'] = $mementoOperationData['loop_run'];
                 }
-//                 else
-//                     eZDebug::writeWarning( 'Missing main operation memento for key: ' . $this->Memento->attribute( 'memento_key' ), 'eZModuleOperationInfo::execute' );
 
                 $mementoList = null;
                 if ( $this->UseTriggers )
@@ -245,8 +238,6 @@ class eZModuleOperationInfo
                 $resultArray = $this->executeBody( $callMethod['include_file'], $callMethod['class'], $operationDefinition['body'],
                                                     $operationKeys, $operationParameterDefinitions, $operationParameters,
                                                     $mementoData, $bodyCallCount, $operationDefinition['name'] );
-
-//                 eZDebug::writeDebug( $resultArray, 'ezmodule operation result array' );
             }
 
             if ( is_array( $resultArray ) and
@@ -254,9 +245,15 @@ class eZModuleOperationInfo
                  ( $resultArray['status'] == eZModuleOperationInfo::STATUS_HALTED
                    or $resultArray['status'] == eZModuleOperationInfo::STATUS_REPEAT ) )
             {
-//                 eZDebug::writeDebug( $this->Memento, 'ezmodule operation result halted' );
                 if ( $this->Memento !== null )
                 {
+                    // $bodyCallCount stores an indexed array of each operation method that was executed
+                    // it must be store in the memento on HALT/REPEAT so that the operation can be resumed
+                    // where it was stopped (same behaviour as triggers)
+                    $this->storeOperationMemento( $operationKeys, $operationParameterDefinitions, $operationParameters, $bodyCallCount, $operationName );
+                    $data = $this->Memento->data();
+                    $data['loop_run'] = $bodyCallCount['loop_run'];
+                    $this->Memento->setData( $data );
                     $this->Memento->store();
                 }
             }
@@ -287,14 +284,12 @@ class eZModuleOperationInfo
         }
         else
         {
-            eZDebug::writeError( "No valid call methods found for operation '$operationName' in module '$moduleName'",
-                                 'eZModuleOperationInfo::execute' );
+            eZDebug::writeError( "No valid call methods found for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
         if ( !is_array( $resultArray ) )
         {
-            eZDebug::writeError( "Operation '$operationName' in module '$moduleName' did not return a result array",
-                                 'eZOperationHandler::execute' );
+            eZDebug::writeError( "Operation '$operationName' in module '$moduleName' did not return a result array", __METHOD__ );
             return null;
         }
         if ( isset( $resultArray['internal_error'] ) )
@@ -304,37 +299,32 @@ class eZModuleOperationInfo
                 case eZModuleOperationInfo::ERROR_NO_CLASS:
                 {
                     $className = $resultArray['internal_error_class_name'];
-                    eZDebug::writeError( "No class '$className' available for operation '$operationName' in module '$moduleName'",
-                                         'eZModuleOperationInfo::execute' );
+                    eZDebug::writeError( "No class '$className' available for operation '$operationName' in module '$moduleName'", __METHOD__ );
                     return null;
                 } break;
                 case eZModuleOperationInfo::ERROR_NO_CLASS_METHOD:
                 {
                     $className = $resultArray['internal_error_class_name'];
                     $classMethodName = $resultArray['internal_error_class_method_name'];
-                    eZDebug::writeError( "No method '$classMethodName' in class '$className' available for operation '$operationName' in module '$moduleName'",
-                                         'eZModuleOperationInfo::execute' );
+                    eZDebug::writeError( "No method '$classMethodName' in class '$className' available for operation '$operationName' in module '$moduleName'", __METHOD__ );
                     return null;
                 } break;
                 case eZModuleOperationInfo::ERROR_CLASS_INSTANTIATE_FAILED:
                 {
                     $className = $resultArray['internal_error_class_name'];
-                    eZDebug::writeError( "Failed instantiating class '$className' which is needed for operation '$operationName' in module '$moduleName'",
-                                         'eZModuleOperationInfo::execute' );
+                    eZDebug::writeError( "Failed instantiating class '$className' which is needed for operation '$operationName' in module '$moduleName'", __METHOD__ );
                     return null;
                 } break;
                 case eZModuleOperationInfo::ERROR_MISSING_PARAMETER:
                 {
                     $parameterName = $resultArray['internal_error_parameter_name'];
-                    eZDebug::writeError( "Missing parameter '$parameterName' for operation '$operationName' in module '$moduleName'",
-                                         'eZModuleOperationInfo::execute' );
+                    eZDebug::writeError( "Missing parameter '$parameterName' for operation '$operationName' in module '$moduleName'", __METHOD__ );
                     return null;
                 } break;
                 default:
                 {
                     $internalError = $resultArray['internal_error'];
-                    eZDebug::writeError( "Unknown internal error '$internalError' for operation '$operationName' in module '$moduleName'",
-                                         'eZModuleOperationInfo::execute' );
+                    eZDebug::writeError( "Unknown internal error '$internalError' for operation '$operationName' in module '$moduleName'", __METHOD__ );
                     return null;
                 } break;
             }
@@ -349,8 +339,7 @@ class eZModuleOperationInfo
         }
         else
         {
-            eZDebug::writeError( "Operation '$operationName' in module '$moduleName' did not return a result value",
-                                 'eZOperationHandler::execute' );
+            eZDebug::writeError( "Operation '$operationName' in module '$moduleName' did not return a result value", __METHOD__ );
         }
         return null;
     }
@@ -379,12 +368,12 @@ class eZModuleOperationInfo
         {
             if ( !isset( $body['type'] ) )
             {
-                eZDebug::writeError( 'No type for body element, skipping', 'eZModuleOperationInfo::executeBody' );
+                eZDebug::writeError( 'No type for body element, skipping', __METHOD__ );
                 continue;
             }
             if ( !isset( $body['name'] ) )
             {
-                eZDebug::writeError( 'No name for body element, skipping', 'eZModuleOperationInfo::executeBody' );
+                eZDebug::writeError( 'No name for body element, skipping', __METHOD__ );
                 continue;
             }
             $bodyName = $body['name'];
@@ -560,7 +549,6 @@ class eZModuleOperationInfo
                             $tmpOperationParameterDefinitions = $body['parameters'];
                         if ( $executeMethod )
                         {
-                            ++$bodyCallCount['loop_run'][$bodyName];
                             $result = $this->executeClassMethod( $includeFile, $className, $method,
                                                                  $tmpOperationParameterDefinitions, $operationParameters );
                             if ( $result && array_key_exists( 'status', $result ) )
@@ -570,6 +558,10 @@ class eZModuleOperationInfo
                                     case eZModuleOperationInfo::STATUS_CONTINUE:
                                     default:
                                     {
+                                        // moved from outside the case:
+                                        // we don't want to count the method as executed if it doesn't return a CONTINUE status,
+                                        // or it won't be executed next run
+                                        ++$bodyCallCount['loop_run'][$bodyName];
                                         $result['status'] = eZModuleOperationInfo::STATUS_CONTINUE;
                                         $bodyReturnValue = $result;
                                     } break;
@@ -586,7 +578,7 @@ class eZModuleOperationInfo
                 } break;
                 default:
                 {
-                    eZDebug::writeError( "Unknown operation type $type", 'eZModuleOperationInfo::executeBody' );
+                    eZDebug::writeError( "Unknown operation type $type", __METHOD__ );
                 }
             }
         }
@@ -847,7 +839,7 @@ class eZModuleOperationInfo
      * @return $className
      * @private
      * @todo Use a static variable instead of globals
-     **/
+     */
     function objectForClass( $className )
     {
         if ( !isset( $GLOBALS['eZModuleOperationClassObjectList'] ) )
@@ -864,7 +856,7 @@ class eZModuleOperationInfo
 
     /**
      * @deprecated use call_user_func_array() instead
-    **/
+     */
     function callClassMethod( $methodName, $classObject, $parameterArray )
     {
         return call_user_func_array( array( $classObject, $methodName ), $parameterArray );
@@ -876,6 +868,11 @@ class eZModuleOperationInfo
     public $FunctionList;
     public $IsValid;
     public $UseTriggers = false;
+
+    /**
+     * @var eZOperationMemento
+     */
+    public $Memento;
 }
 
 ?>

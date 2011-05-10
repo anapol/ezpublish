@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -305,6 +305,11 @@ class eZBinaryFileType extends eZDataType
     function fetchObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
         eZBinaryFileType::checkFileUploads();
+        if ( $this->isDeletingFile( $http, $contentObjectAttribute ) )
+        {
+            return false;
+        }
+
         if ( !eZHTTPFile::canFetch( $base . "_data_binaryfilename_" . $contentObjectAttribute->attribute( "id" ) ) )
             return false;
 
@@ -700,8 +705,7 @@ class eZBinaryFileType extends eZDataType
 
         if ( !file_exists( $sourcePath ) )
         {
-            eZDebug::writeError( "The file '$sourcePath' does not exist, cannot initialize file attribute with it",
-                                 'eZBinaryFileType::unserializeContentObjectAttribute' );
+            eZDebug::writeError( "The file '$sourcePath' does not exist, cannot initialize file attribute with it", __METHOD__ );
             return false;
         }
 
@@ -727,8 +731,7 @@ class eZBinaryFileType extends eZDataType
         }
 
         eZFileHandler::copy( $sourcePath, $destinationPath . $basename );
-        eZDebug::writeNotice( 'Copied: ' . $sourcePath . ' to: ' . $destinationPath . $basename,
-                              'eZBinaryFileType::unserializeContentObjectAttribute()' );
+        eZDebug::writeNotice( 'Copied: ' . $sourcePath . ' to: ' . $destinationPath . $basename, __METHOD__ );
 
         $binaryFile->setAttribute( 'contentobject_attribute_id', $objectAttribute->attribute( 'id' ) );
         $binaryFile->setAttribute( 'filename', $basename );
@@ -744,6 +747,28 @@ class eZBinaryFileType extends eZDataType
     function supportsBatchInitializeObjectAttribute()
     {
         return true;
+    }
+
+    /**
+     * Checks if current HTTP request is asking for current binary file deletion
+     * @param eZHTTPTool $http
+     * @param eZContentObjectAttribute $contentObjectAttribute
+     * @return bool
+     */
+    private function isDeletingFile( eZHTTPTool $http, eZContentObjectAttribute $contentObjectAttribute )
+    {
+        $isDeletingFile = false;
+        if ( $http->hasPostVariable( 'CustomActionButton' ) )
+        {
+            $customActionArray = $http->postVariable( 'CustomActionButton' );
+            $attributeID = $contentObjectAttribute->attribute( 'id' );
+            if ( isset( $customActionArray[$attributeID . '_delete_binary'] ) )
+            {
+                $isDeletingFile = true;
+            }
+        }
+
+        return $isDeletingFile;
     }
 }
 

@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -28,7 +28,8 @@
 
 
 /**
- * @deprecated Temporary compatibility layer for extensions
+ * @deprecated Since 4.3, superseded by {@link ezpI18n::tr()}
+ *             Will be kept for compatability in 4.x.
  */
 function ezi18n( $context, $source, $comment = null, $arguments = null )
 {
@@ -36,7 +37,8 @@ function ezi18n( $context, $source, $comment = null, $arguments = null )
 }
 
 /**
- * @deprecated Temporary compatibility layer for extensions
+ * @deprecated Since 4.3, superseded by {@link ezpI18n::tr()} instead
+ *             Will be kept for compatability in 4.x.
  */
 function ezx18n( $extension, $context, $source, $comment = null, $arguments = null )
 {

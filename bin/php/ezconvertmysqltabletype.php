@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -35,7 +35,7 @@ $script = eZScript::instance( array( 'description' => ( "eZ Publish Database Con
                                                         "ezconvertmysqltabletype.php [--host=VALUE --user=VALUE --database=VALUE [--password=VALUE]] [--list] [--newtype=TYPE] [--usecopy]" ),
                                      'use-session' => false,
                                      'use-modules' => false,
-                                     'use-extensions' => false ) );
+                                     'use-extensions' => true ) );
 
 $script->startup();
 
@@ -78,7 +78,7 @@ else
 
 /**
  *  Check whether the parameters are correctly set.
-**/
+ */
 function checkParameters( $cli, $script, $options, $host, $user, $password, $database, $listMode, $newType )
 {
     // Extra parameters are not tolerated.
@@ -137,7 +137,7 @@ function eZTriedDatabaseString( $database, $host, $user, $password )
 
 /**
  * Connect to the database
-**/
+ */
 function connectToDatabase( $cli, $script, $host, $user, $password, $database )
 {
     if ( $user )
@@ -196,8 +196,8 @@ function listTypes( $cli, $db )
     $tables = $db->arrayQuery( "show tables" );
 
     $spaces = str_pad ( ' ', 35 );
-    $cli->notice( "Table $spaces Type" );
-    $cli->notice( "----- $spaces ----" );
+    $cli->output( "Table $spaces Type" );
+    $cli->output( "----- $spaces ----" );
     foreach ( $tables as $table )
     {
         $tableName = current( $table );
@@ -205,7 +205,7 @@ function listTypes( $cli, $db )
 
         $spaces = str_pad(' ', 40 - strlen( $tableName ) );
         $eZpublishTable = strncmp( $tableName, "ez", 2 ) == 0 ? "" : "(non eZ Publish)";
-        $cli->notice( "$tableName $spaces $tableType $eZpublishTable" );
+        $cli->output( "$tableName $spaces $tableType $eZpublishTable" );
     }
 }
 
@@ -260,7 +260,7 @@ function setNewType( $cli, $db, $newType, $usecopy )
         else
         {
             // Yes, convert.
-            $cli->notice( "Converting table $tableName ... " );
+            $cli->output( "Converting table $tableName ... " );
 
             if ( !$usecopy )
             {

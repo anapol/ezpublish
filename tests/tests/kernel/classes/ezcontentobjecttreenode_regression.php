@@ -2,7 +2,7 @@
 /**
  * File containing the eZContentObjectTreeNodeRegression class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -17,34 +17,26 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
         $this->setName( "eZContentObjectTreeNode Regression Tests" );
     }
 
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
-
     /**
-    * Test for regression #13497:
-    * attribute operator throws a PHP fatal error on a node without parent in a displayable language
-    *
-    * Situation:
-    *  - siteaccess with one language (fre-FR) and ShowUntranslatedObjects disabled
-    *  - parent content node in another language (eng-GB) with always available disabled
-    *  - content node in the siteaccess' language (fre-FR)
-    *  - fetch this fre-FR node from anywhere, and call attribute() on it
-    *
-    * Result:
-    *  - Fatal error: Call to a member function attribute() on a non-object in
-    *    kernel/classes/ezcontentobjecttreenode.php on line 4225
-    *
-    * Explanation: the error actually comes from the can_remove_location attribute
-    **/
+     * Test for regression #13497:
+     * attribute operator throws a PHP fatal error on a node without parent in a displayable language
+     *
+     * Situation:
+     *  - siteaccess with one language (fre-FR) and ShowUntranslatedObjects disabled
+     *  - parent content node in another language (eng-GB) with always available disabled
+     *  - content node in the siteaccess' language (fre-FR)
+     *  - fetch this fre-FR node from anywhere, and call attribute() on it
+     *
+     * Result:
+     *  - Fatal error: Call to a member function attribute() on a non-object in
+     *    kernel/classes/ezcontentobjecttreenode.php on line 4225
+     *
+     * Explanation: the error actually comes from the can_remove_location attribute
+     */
     public function testIssue13497()
     {
+        $bkpLanguages = eZContentLanguage::prioritizedLanguageCodes();
+
         // Create a folder in english only
         $folder = new ezpObject( "folder", 2, 14, 1, 'eng-GB' );
         $folder->setAlwaysAvailableLanguageID( false );
@@ -64,7 +56,8 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
 
         // INi changes: set language to french only, untranslatedobjects disabled
         ezpINIHelper::setINISetting( 'site.ini', 'RegionalSettings', 'ContentObjectLocale', 'fre-FR' );
-        ezpINIHelper::setINISetting( 'site.ini', 'RegionalSettings', 'SiteLanguageList', array( 'fre-FR' ) );
+        // ezpINIHelper::setINISetting( 'site.ini', 'RegionalSettings', 'SiteLanguageList', array( 'fre-FR' ) );
+        eZContentLanguage::setPrioritizedLanguages( array( 'fre-FR' ) );
         ezpINIHelper::setINISetting( 'site.ini', 'RegionalSettings', 'ShowUntranslatedObjects', 'disabled' );
         eZContentLanguage::expireCache();
 
@@ -74,21 +67,24 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
         ezpINIHelper::restoreINISettings();
 
         // re-expire cache for further tests
+        eZContentLanguage::setPrioritizedLanguages( $bkpLanguages );
         eZContentLanguage::expireCache();
+
+        ezpINIHelper::restoreINISettings();
     }
 
     /**
-    * Test for regression #15211
-    *
-    * The issue was reported as happening when a fetch_alias was called without
-    * a second parameter. It turns out that this was just wrong, but led to the
-    * following: if eZContentObjectTreeNode::createAttributeFilterSQLStrings
-    * is called with the first parameter ($attributeFilter) is a string, a fatal
-    * error "Cannot unset string offsets" is thrown.
-    *
-    * Test: Call this function with a string as the first parameter. Without the
-    * fix, a fatal error occurs, while an empty filter is returned once fixed.
-    **/
+     * Test for regression #15211
+     *
+     * The issue was reported as happening when a fetch_alias was called without
+     * a second parameter. It turns out that this was just wrong, but led to the
+     * following: if eZContentObjectTreeNode::createAttributeFilterSQLStrings
+     * is called with the first parameter ($attributeFilter) is a string, a fatal
+     * error "Cannot unset string offsets" is thrown.
+     *
+     * Test: Call this function with a string as the first parameter. Without the
+     * fix, a fatal error occurs, while an empty filter is returned once fixed.
+     */
     public function testIssue15211()
     {
         $attributeFilter = "somestring";
@@ -103,10 +99,10 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
     }
 
     /**
-    * Test for issue #15062:
-    * StateGroup Policy limitation SQL can break the 30 characters oracle
-    * limitation for identifiers
-    **/
+     * Test for issue #15062:
+     * StateGroup Policy limitation SQL can break the 30 characters oracle
+     * limitation for identifiers
+     */
     public function testIssue15062()
     {
         $policyLimitationArray = array(
@@ -135,9 +131,9 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
             $this->assertTrue( strlen( $alias ) <= 30 , "Identifier {$alias} exceeds the 30 characters limit" );
         }
     }
-    
+
     /**
-     * Regression test for issue #15561: 
+     * Regression test for issue #15561:
      * eZContentObjectTreeNode::fetch() SQL error when conditions argument is given
      */
     public function testIssue15561()
@@ -147,22 +143,24 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
         $object->title = __FUNCTION__;
         $object->publish();
         $nodeID = $object->attribute( 'main_node_id' );
-        
+
         $node = eZContentObjectTreeNode::fetch( $nodeID, false, true,
             array( 'contentobject_version' => 1 ) );
-        
+
         $this->assertType( 'eZContentObjectTreeNode', $node);
     }
 
 
     /**
-     * Regesssion test for issue #16737
+     * Regression test for issue #16737
      * 1) Test executing the sql and verify that it doesn't have database error.
      * 2) Test the sorting in class_name, class_name with contentobject_id
      * The test should pass in mysql, postgresql and oracle
      */
     public function testIssue16737()
     {
+
+
         //test generated result of createSortingSQLStrings
         $sortList = array( array( 'class_name', true ) );
         $result = eZContentObjectTreeNode::createSortingSQLStrings( $sortList );
@@ -217,7 +215,7 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
     }
 
     /**
-     * Regesssion test for issue #16949
+     * Regression test for issue #16949
      * 1) Test there is no pending object in sub objects
      * 2) Test there is one pending object in sub objects
      */
@@ -249,6 +247,49 @@ class eZContentObjectTreeNodeRegression extends ezpDatabaseTestCase
         $this->assertTrue( $result['has_pending_object'] );
 
         eZUser::setCurrentlyLoggedInUser( $currentUser, $currentUserID );
+    }
+
+    /**
+     * Regression test for issue {@see #17632 http://issues.ez.no/17632}
+     *
+     * In a multi language environment, a node fetched with a language other than the prioritized one(s) will return the
+     * URL alias in the prioritized language
+     */
+    public function testIssue17632()
+    {
+        $bkpLanguages = eZContentLanguage::prioritizedLanguageCodes();
+
+        $strNameEngGB = __FUNCTION__ . " eng-GB";
+        $strNameFreFR = __FUNCTION__ . " fre-FR";
+
+        // add a secondary language
+        $locale = eZLocale::instance( 'fre-FR' );
+        $translation = eZContentLanguage::addLanguage( $locale->localeCode(), $locale->internationalLanguageName() );
+
+        // set the prioritize language list to contain english
+        // ezpINIHelper::setINISetting( 'site.ini', 'RegionalSettings', 'SiteLanguageList', array( 'fre-FR' ) );
+        eZContentLanguage::setPrioritizedLanguages( array( 'fre-FR' ) );
+
+        // Create an object with data in fre-FR and eng-GB
+        $folder = new ezpObject( 'folder', 2, 14, 1, 'eng-GB' );
+        $folder->publish();
+
+        // Workaround as setting folder->name directly doesn't produce the expected result
+        $folder->addTranslation( 'eng-GB', array( 'name' => $strNameEngGB ) );
+        $folder->addTranslation( 'fre-FR', array( 'name' => $strNameFreFR ) );
+
+        $nodeId = $folder->main_node_id;
+
+        // fetch the node with no default parameters. Should return the french URL Alias
+        $node = eZContentObjectTreeNode::fetch( $nodeId );
+        self::assertEquals( 'testIssue17632-fre-FR' , $node->attribute( 'url_alias' ) );
+
+        // fetch the node in english. Should return the english URL Alias
+        $node = eZContentObjectTreeNode::fetch( $nodeId, 'eng-GB' );
+        self::assertEquals( 'testIssue17632-eng-GB' , $node->attribute( 'url_alias' ) );
+
+        ezpINIHelper::restoreINISettings();
+        eZContentLanguage::setPrioritizedLanguages( $bkpLanguages );
     }
 }
 ?>

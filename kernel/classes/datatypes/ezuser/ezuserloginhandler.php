@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -102,7 +102,7 @@ class eZUserLoginHandler
     /**
      * Returns a new instance of the eZUser class pr $protocol.
      *
-     * @param $protocol string If not set to 'standard' (default), then the code will look
+     * @param string $protocol If not set to 'standard' (default), then the code will look
      *        for handler first in kernel/classes/datatypes/ezuser/, then according to
      *        site.ini[UserSettings]ExtensionDirectory settings
      * @return eZUser
@@ -148,7 +148,7 @@ class eZUserLoginHandler
             }
         }
         // if no one appropriate instance was found
-        eZDebug::writeWarning( "Unable to find user login handler '$protocol', searched for these files: " . implode( ', ', $triedFiles ), 'eZUserLoginHandler::instance()' );
+        eZDebug::writeWarning( "Unable to find user login handler '$protocol', searched for these files: " . implode( ', ', $triedFiles ), __METHOD__ );
         $impl = null;
         return $impl;
     }

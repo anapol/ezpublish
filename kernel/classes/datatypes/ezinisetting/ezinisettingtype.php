@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -191,9 +191,7 @@ class eZIniSettingType extends eZDataType
                 else
                 {
                     $objectAttribute->setAttribute( 'data_text', $configValue );
-                    eZDebug::writeNotice( 'Loaded following values from ' . $path . '/' . $filename . ":\n" .
-                                          '    ' . $configValue,
-                                          'eZIniSettingType::initializeObjectAttribute');
+                    eZDebug::writeNotice( "Loaded following values from $path/$filename:\n    $configValue", __METHOD__ );
                 }
             }
 
@@ -302,7 +300,7 @@ class eZIniSettingType extends eZDataType
             else
                 $path = 'settings/siteaccess/' . $siteAccessArray[$iniInstance];
 
-            $config = eZINI::instance( $filename . '.append', $path, null, false, null, true, true );
+            $config = new eZINI( $filename . '.append', $path, null, false, null, true, true );
 
             if ( $config == null )
             {
@@ -328,7 +326,7 @@ class eZIniSettingType extends eZDataType
                 eZDebug::writeNotice( 'Saved ini settings to file: ' . $path . '/' . $filename . "\n" .
                                       '                            ['. $section . ']' . "\n" .
                                       '                            ' . $parameter . '=' . $contentObjectAttribute->attribute( 'data_text' ),
-                                      'eZIniSettingType::onPublish' );
+                                      __METHOD__ );
             }
             $config->save();
         }

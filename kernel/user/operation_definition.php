@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -96,6 +96,40 @@ $OperationList['activation'] = array( 'name' => 'activation',
                                                                 'keys' => array( 'user_id',
                                                                                  'user_hash',
                                                                                  'is_enabled'
+                                                                                 ) ) )
+                                        );
+
+$OperationList['register'] = array( 'name' => 'register',
+                                        'default_call_method' => array( 'include_file' => 'kernel/user/ezuseroperationcollection.php',
+                                                                        'class' => 'eZUserOperationCollection' ),
+                                        'parameter_type' => 'standard',
+                                        'parameters' => array( array( 'name' => 'user_id',
+                                                                      'type' => 'integer',
+                                                                      'required' => true ) ),
+                                        'keys' => array( 'user_id' ),
+                                        'body' => array( array( 'type' => 'trigger',
+                                                                'name' => 'pre_register',
+                                                                'keys' => array( 'user_id' )
+                                                                ),
+                                                         array( 'type' => 'method',
+                                                                'name' => 'send-activation-email',
+                                                                'frequency' => 'once',
+                                                                'method' => 'sendActivationEmail' ),
+                                                         array( 'type' => 'method',
+                                                                'name' => 'check-activation',
+                                                                'frequency' => 'once',
+                                                                'method' => 'checkActivation' ),
+                                                         array( 'type' => 'method',
+                                                                'name' => 'publish-user-content-object',
+                                                                'frequency' => 'once',
+                                                                'method' => 'publishUserContentObject' ),
+//                                                         array( 'type' => 'method',
+//                                                                'name' => 'send-user-notification',
+//                                                                'frequency' => 'once',
+//                                                                'method' => 'sendUserNotification' ),
+                                                         array( 'type' => 'trigger',
+                                                                'name' => 'post_register',
+                                                                'keys' => array( 'user_id'
                                                                                  ) ) )
                                         );
 

@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ class eZDbSchema
     /**
      * Returns a shared instance of the eZDBSchemaInterface class.
      *
-     * @param $params array|eZDBInterface|false if array, following key is needed:
+     * @param array|eZDBInterface|false $params If array, following key is needed:
      *        - instance: the eZDB instance (optional), if none provided, eZDB::instance() will be used.
      * @return eZDBSchemaInterface|false
      */
@@ -73,7 +73,7 @@ class eZDbSchema
         /* Check if we have a handler */
         if ( !isset( $schemaPaths[$dbname] ) or !isset( $schemaHandlerClasses[$dbname] ) )
         {
-            eZDebug::writeError( "No schema handler for database type: $dbname", 'eZDbSchema::instance()' );
+            eZDebug::writeError( "No schema handler for database type: $dbname", __METHOD__ );
             return false;
         }
 
@@ -160,9 +160,9 @@ class eZDbSchema
     }
 
     /**
-    * Merges 2 db schemas, basically appending 2nd on top of 1st
-    * @return array the merged schema
-    */
+     * Merges 2 db schemas, basically appending 2nd on top of 1st
+     * @return array the merged schema
+     */
     static function merge( $schema1, $schema2 )
     {
         $merged = $schema1;

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -186,8 +186,7 @@ class eZImageObject extends eZImageInterface
     {
         if ( !$imageLayer instanceof eZImageLayer )
         {
-            eZDebug::writeWarning( 'Only eZImageLayer objects may be added as layer items',
-                                   'eZImageObject::appendLayer' );
+            eZDebug::writeWarning( 'Only eZImageLayer objects may be added as layer items', __METHOD__ );
             return false;
         }
         ++$this->ImageLayerCounter;
@@ -207,8 +206,7 @@ class eZImageObject extends eZImageInterface
     {
         if ( !$imageLayer instanceof eZImageLayer )
         {
-            eZDebug::writeWarning( 'Only eZImageLayer objects may be added as layer items',
-                                   'eZImageObject::prependLayer' );
+            eZDebug::writeWarning( 'Only eZImageLayer objects may be added as layer items', __METHOD__ );
             return false;
         }
         ++$this->ImageLayerCounter;
@@ -301,7 +299,7 @@ class eZImageObject extends eZImageInterface
                 $hasFirst = true;
             }
             else
-                eZDebug::writeWarning( 'Wrong image type ' . gettype( $layer ), 'eZImageObject::flatten' );
+                eZDebug::writeWarning( 'Wrong image type ' . gettype( $layer ), __METHOD__ );
             ++$i;
         }
         if ( $hasFirst )
@@ -335,7 +333,7 @@ class eZImageObject extends eZImageInterface
                 }
                 else
                 {
-                    eZDebug::writeWarning( 'Wrong image type ' . gettype( $layer ), 'eZImageObject::flatten' );
+                    eZDebug::writeWarning( 'Wrong image type ' . gettype( $layer ), __METHOD__ );
                 }
                 ++$i;
             }

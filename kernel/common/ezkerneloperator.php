@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -89,9 +89,9 @@ class eZKernelOperator
         if ( count( $parameters[0] ) == 0 )
             return false;
         $values = array();
-        if ( eZTemplateNodeTool::isStaticElement( $parameters[0] ) )
+        if ( eZTemplateNodeTool::isConstantElement( $parameters[0] ) )
         {
-            $name = eZTemplateNodeTool::elementStaticValue( $parameters[0] );
+            $name = eZTemplateNodeTool::elementConstantValue( $parameters[0] );
             $nameText = eZPHPCreator::variableText( $name, 0, 0, false );
         }
         else
@@ -99,8 +99,7 @@ class eZKernelOperator
             $nameText = '%1%';
             $values[] = $parameters[0];
         }
-        return array( eZTemplateNodeTool::createCodePieceElement( "//include_once( 'kernel/classes/ezpreferences.php' );\n" .
-                                                                  "%output% = eZPreferences::value( $nameText );\n",
+        return array( eZTemplateNodeTool::createCodePieceElement( "%output% = eZPreferences::value( $nameText );\n",
                                                                   $values ) );
     }
 

@@ -2,7 +2,7 @@
 /**
  * File containing the eZFSFileHandlerTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -11,7 +11,7 @@ class eZFSFileHandlerTest extends eZClusterFileHandlerAbstractTest
 {
     /**
      * @var eZINI
-     **/
+     */
     protected $fileINI;
 
     protected $backupGlobals = false;
@@ -24,7 +24,7 @@ class eZFSFileHandlerTest extends eZClusterFileHandlerAbstractTest
      * Test setup
      *
      * Load an instance of file.ini
-     **/
+     */
     public function setUp()
     {
         parent::setUp();
@@ -94,6 +94,11 @@ class eZFSFileHandlerTest extends eZClusterFileHandlerAbstractTest
     public function testCheckCacheGenerationTimeout()
     {
         self::assertTrue( eZClusterFileHandler::instance()->abortCacheGeneration() );
+    }
+
+    public function testPrefork()
+    {
+        self::markTestSkipped( "preFork does nothing on non DB based handlers" );
     }
 }
 ?>

@@ -2,7 +2,7 @@
 /**
  * File containing the eZContentObjectTreeNodeTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -71,7 +71,7 @@ class eZContentObjectTreeNodeTest extends ezpDatabaseTestCase
      *    the parameter list
      *
      * @todo Also test with $asObject = false
-     **/
+     */
     public function testFindMainNodeArray()
     {
         // 1) Check that the method returns null on an empty array
@@ -110,7 +110,7 @@ class eZContentObjectTreeNodeTest extends ezpDatabaseTestCase
      *
      * @todo test with $onlyMainNode=true
      * @todo test with $groupByObjectID=true
-     **/
+     */
     public function testGetParentNodeIdListByContentObjectID()
     {
         // Create a few containers with a few children below each

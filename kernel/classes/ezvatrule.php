@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -55,7 +55,10 @@ class eZVatRule extends eZPersistentObject
                                          "vat_type" => array( 'name' => "VatType",
                                                               'datatype' => 'integer',
                                                               'default' => null,
-                                                              'required' => true ) ),
+                                                              'required' => true,
+                                                              'foreign_class' => 'eZVatType',
+                                                              'foreign_attribute' => 'id',
+                                                              'multiplicity' => '1..*') ),
                       "function_attributes" => array( 'product_categories' => 'productCategories',
                                                       'product_categories_string' => 'productCategoriesString',
                                                       'product_categories_ids' => 'productCategoriesIDs',
@@ -313,9 +316,9 @@ class eZVatRule extends eZPersistentObject
         return eZVatType::fetch( $this->attribute( 'vat_type' ) );
     }
 
-    /*
-    * Returns country name
-    */
+    /**
+     * Returns country name
+     */
     function country()
     {
         if ( $this->attribute( 'country_code' ) != '*' )

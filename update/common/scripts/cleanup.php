@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -126,18 +126,15 @@ else
 
 function changeSiteAccessSetting( &$siteaccess, $optionData )
 {
-    global $isQuiet;
     $cli = eZCLI::instance();
     if ( file_exists( 'settings/siteaccess/' . $optionData ) )
     {
         $siteaccess = $optionData;
-        if ( !$isQuiet )
-            $cli->notice( "Using siteaccess $siteaccess for database cleanup" );
+        $cli->output( "Using siteaccess $siteaccess for database cleanup" );
     }
     else
     {
-        if ( !$isQuiet )
-            $cli->notice( "Siteaccess $optionData does not exist, using default siteaccess" );
+        $cli->notice( "Siteaccess $optionData does not exist, using default siteaccess" );
     }
 }
 
@@ -164,7 +161,7 @@ $db->setIsSQLOutputEnabled( $showSQL );
 
 if ( $clean['session'] )
 {
-    if ( !eZSession::getHandlerInstance()->usesDatabaseTable() )
+    if ( !eZSession::getHandlerInstance()->hasBackendAccess() )
     {
         $cli->output( "Could not remove sessions, current session handler does not support session cleanup (not backend based)." );
     }
@@ -177,7 +174,7 @@ if ( $clean['session'] )
 
 if ( $clean['expired_session'] )
 {
-    if ( !eZSession::getHandlerInstance()->usesDatabaseTable() )
+    if ( !eZSession::getHandlerInstance()->hasBackendAccess() )
     {
         $cli->output( "Could not remove expired sessions, current session handler does not support session garbage collection (not backend based)." );
     }

@@ -2,7 +2,7 @@
 /**
  * File containing the eZContentOperationCollectionRegression class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -15,16 +15,6 @@ class eZContentOperationCollectionRegression extends ezpDatabaseTestCase
     {
         parent::__construct();
         $this->setName( "eZContentOperationCollection Regression Tests" );
-    }
-
-    public function setup()
-    {
-        parent::setup();
-    }
-
-    public function teardown()
-    {
-        parent::teardown();
     }
 
     /**
@@ -90,7 +80,7 @@ class eZContentOperationCollectionRegression extends ezpDatabaseTestCase
 
     /**
      * Helper method to aid the development and test and verification of results.
-     * 
+     *
      * The method will output information about the inputted objects and nodes
      *
      * @param mixed $testObjects (array=>ezpObject)

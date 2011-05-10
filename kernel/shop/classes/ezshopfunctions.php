@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -253,13 +253,13 @@ class eZShopFunctions
             if ( !$currency->isActive() )
             {
                 $error = eZError::SHOP_PREFERRED_CURRENCY_INACTIVE;
-                eZDebug::writeWarning( "Currency '$currencyCode' is inactive.", 'eZShopFunctions::isPreferredCurrencyValid' );
+                eZDebug::writeWarning( "Currency '$currencyCode' is inactive.", __METHOD__ );
             }
         }
         else
         {
             $error = eZError::SHOP_PREFERRED_CURRENCY_DOESNOT_EXIST;
-            eZDebug::writeWarning( "Currency '$currencyCode' doesn't exist", 'eZShopFunctions::isPreferredCurrencyValid' );
+            eZDebug::writeWarning( "Currency '$currencyCode' doesn't exist", __METHOD__ );
         }
 
         return $error;
@@ -442,8 +442,7 @@ class eZShopFunctions
 
         if ( $error['code'] !== eZExchangeRatesUpdateHandler::OK )
         {
-            eZDebug::writeError( $error['description'],
-                                 'eZShopFunctions::updateAutoRates' );
+            eZDebug::writeError( $error['description'], __METHOD__ );
         }
 
         return $error;

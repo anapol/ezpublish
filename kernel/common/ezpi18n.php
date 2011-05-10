@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -34,7 +34,7 @@ class ezpI18n
      * If \a $arguments is an associative array it will use the argument
      * keys as replacement keys. If not it will convert the index to
      * a key looking like %n, where n is a number between 1 and 9.
-     * 
+     *
      * @param string $string
      * @param array $arguments
      * @return string
@@ -58,7 +58,7 @@ class ezpI18n
 
     /**
      * Enabled if the site.ini settings RegionalSettings/TextTranslation is set to disabled
-     * 
+     *
      * @return bool
     */
     protected static function isEnabled()
@@ -76,11 +76,11 @@ class ezpI18n
     /**
      * Translates the source \a $source with context \a $context and optional comment \a $comment
      * and returns the translation if translations are enabled.
-     * Uses {@see ezpI18n::translateText()}
-     * 
+     * Uses {@link ezpI18n::translateText()}
+     *
      * Example:
      * translate( 'content/view', 'There are %count nodes in this list out of %total total nodes.', 'Children view of nodes for whole site', array( '%count' => $c, '%total' => $t ) );
-     *   
+     *
      * @param string $context
      * @param string $source
      * @param string|null $comment
@@ -99,11 +99,11 @@ class ezpI18n
     /**
      * Translates the source \a $source with context \a $context and optional comment \a $comment
      * and returns the translation if locale code is not eng-GB.
-     * Uses {@see eZTranslatorMananger::translate()} to do the actual translation
-     * 
+     * Uses {@link eZTranslatorMananger::translate()} to do the actual translation
+     *
      * Example:
      * translateText( 'content/view', 'There are %count nodes in this list out of %total total nodes.', 'Children view of nodes for whole site', array( '%count' => $c, '%total' => $t ) );
-     *   
+     *
      * @param string $context
      * @param string $source
      * @param string|null $comment

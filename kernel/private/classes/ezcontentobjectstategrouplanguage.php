@@ -2,7 +2,7 @@
 /**
  * File containing the eZContentObjectStateGroupLanguage class.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPL v2
  * @version //autogentag//
  * @package kernel
@@ -27,8 +27,11 @@ class eZContentObjectStateGroupLanguage extends eZPersistentObject
     static function definition()
     {
         static $definition = array( "fields" => array( "contentobject_state_group_id" => array( "name" => "ContentObjectStateGroupID",
-                                                                                  "datatype" => "integer",
-                                                                                  "required" => false ),
+                                                                                                "datatype" => "integer",
+                                                                                                "required" => false,
+                                                                                                "foreign_class" => "eZContentObjectStateGroup",
+                                                                                                "foreign_attribute" => "id",
+                                                                                                "multiplicity" => "1..*" ),
                                          "name" => array( "name" => "Name",
                                                           "datatype" => "string",
                                                           "required" => false ),

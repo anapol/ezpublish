@@ -8,7 +8,7 @@
  * items, and ended up with an almost constant usage. No particular setting
  * should therefore be required to run it.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  *
  * @property bool optDryRun
@@ -51,7 +51,7 @@ class eZScriptClusterPurge
      * Executes the purge operation
      *
      * @todo Endless loop on fetch list. The expired items are returned over and over again
-     **/
+     */
     public function run()
     {
         $cli = eZCLI::instance();
@@ -59,7 +59,7 @@ class eZScriptClusterPurge
         if ( $this->optMemoryMonitoring == true )
         {
             eZLog::rotateLog( self::LOG_FILE );
-            $cli->notice( "Logging memory usage to " . self::LOG_FILE );
+            $cli->output( "Logging memory usage to " . self::LOG_FILE );
         }
 
         if ( $this->optIterationSleep > 0 )

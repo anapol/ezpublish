@@ -10,7 +10,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -39,10 +39,6 @@
   eZSOAPClient handles communication with a SOAP server.
 
   \code
-
-// include client classes
-//include_once( "lib/ezsoap/classes/ezsoapclient.php" );
-//include_once( "lib/ezsoap/classes/ezsoaprequest.php" );
 
 // create a new client
 $client = new eZSOAPClient( "nextgen.bf.dvh1.ez.no", "/sdk/ezsoap/view/server" );

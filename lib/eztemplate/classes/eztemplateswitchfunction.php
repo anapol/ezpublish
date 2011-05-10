@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -106,9 +106,9 @@ class eZTemplateSwitchFunction
                     $match = eZTemplateCompiler::processElementTransformationList( $tpl, $node, $match, $privateData );
 
                     $dynamicCase = false;
-                    if ( eZTemplateNodeTool::isStaticElement( $match ) )
+                    if ( eZTemplateNodeTool::isConstantElement( $match ) )
                     {
-                        $matchValue = eZTemplateNodeTool::elementStaticValue( $match );
+                        $matchValue = eZTemplateNodeTool::elementConstantValue( $match );
                         $caseText = eZPHPCreator::variableText( $matchValue, 0, 0, false );
                     }
                     else
@@ -168,17 +168,17 @@ class eZTemplateSwitchFunction
         if ( isset( $parameters['name'] ) )
         {
             $nameData = $parameters['name'];
-            if ( !eZTemplateNodeTool::isStaticElement( $nameData ) )
+            if ( !eZTemplateNodeTool::isConstantElement( $nameData ) )
                 return false;
-            $namespaceValue = eZTemplateNodeTool::elementStaticValue( $nameData );
+            $namespaceValue = eZTemplateNodeTool::elementConstantValue( $nameData );
         }
 
         if ( isset( $parameters['var'] ) )
         {
             $varData = $parameters['var'];
-            if ( !eZTemplateNodeTool::isStaticElement( $varData ) )
+            if ( !eZTemplateNodeTool::isConstantElement( $varData ) )
                 return false;
-            $varName = eZTemplateNodeTool::elementStaticValue( $varData );
+            $varName = eZTemplateNodeTool::elementConstantValue( $varData );
         }
 
         $newNodes[] = eZTemplateNodeTool::createVariableNode( false, $parameters['match'], false, array(),

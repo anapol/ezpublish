@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -83,7 +83,7 @@ class eZTemplateToolbarFunction
         if ( isset( $parameters["view"] ) )
         {
             $viewData = $parameters["view"];
-            $viewMode = eZTemplateNodeTool::elementStaticValue( $viewData );
+            $viewMode = eZTemplateNodeTool::elementConstantValue( $viewData );
         }
         else
         {
@@ -95,10 +95,10 @@ class eZTemplateToolbarFunction
         if ( isset( $parameters["name"] ) )
         {
             $nameData = $parameters["name"];
-            if ( !eZTemplateNodeTool::isStaticElement( $nameData ) )
+            if ( !eZTemplateNodeTool::isConstantElement( $nameData ) )
                 return false;
 
-            $nameValue = eZTemplateNodeTool::elementStaticValue( $nameData );
+            $nameValue = eZTemplateNodeTool::elementConstantValue( $nameData );
 
             $toolbarPosition = $nameValue;
             $toolbarName = "Toolbar_" . $toolbarPosition;

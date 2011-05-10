@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -817,7 +817,7 @@ class eZContentOperationCollection
     /**
      * Removes a nodeAssignment or a list of nodeAssigments
      *
-     * @deprecated
+     * @deprecated since 4.3
      *
      * @param int $nodeID
      * @param int $objectID
@@ -859,15 +859,6 @@ class eZContentOperationCollection
             $nodeIDList[] = $node->attribute( 'node_id' );
         }
 
-        // Give other search engines that the default one a chance to reindex
-        // when removing locations.
-        // include_once( 'kernel/classes/ezsearch.php' );
-        if ( !eZSearch::getEngine() instanceof eZSearchEngine )
-        {
-            // include_once( 'kernel/content/ezcontentoperationcollection.php' );
-            eZContentOperationCollection::registerSearchObject( $objectID, $object->attribute( 'current_version' ) );
-        }
-
         eZNodeAssignment::purgeByID( array_unique( $nodeAssignmentIDList ) );
 
         if ( $mainNodeChanged )
@@ -876,6 +867,13 @@ class eZContentOperationCollection
             $mainNode   = $allNodes[0];
             $mainNodeID = $mainNode->attribute( 'node_id' );
             eZContentObjectTreeNode::updateMainNodeID( $mainNodeID, $objectID, false, $mainNode->attribute( 'parent_node_id' ) );
+        }
+
+        // Give other search engines that the default one a chance to reindex
+        // when removing locations.
+        if ( !eZSearch::getEngine() instanceof eZSearchEngine )
+        {
+            eZContentOperationCollection::registerSearchObject( $objectID, $object->attribute( 'current_version' ) );
         }
 
         $db->commit();
@@ -937,14 +935,6 @@ class eZContentOperationCollection
                 $objectIdList[$objectId] = eZContentObject::fetch( $objectId );
         }
 
-        // Give other search engines that the default one a chance to reindex
-        // when removing locations.
-        if ( !eZSearch::getEngine() instanceof eZSearchEngine )
-        {
-            foreach ( $objectIdList as $objectId => $object )
-                eZContentOperationCollection::registerSearchObject( $objectId, $object->attribute( 'current_version' ) );
-        }
-
         eZNodeAssignment::purgeByID( array_keys( $nodeAssignmentIdList ) );
 
         foreach ( array_keys( $mainNodeChanged ) as $objectId )
@@ -953,6 +943,14 @@ class eZContentOperationCollection
             // Registering node that will be promoted as 'main'
             $mainNodeChanged[$objectId] = $allNodes[0];
             eZContentObjectTreeNode::updateMainNodeID( $allNodes[0]->attribute( 'node_id' ), $objectId, false, $allNodes[0]->attribute( 'parent_node_id' ) );
+        }
+
+        // Give other search engines that the default one a chance to reindex
+        // when removing locations.
+        if ( !eZSearch::getEngine() instanceof eZSearchEngine )
+        {
+            foreach ( $objectIdList as $objectId => $object )
+                eZContentOperationCollection::registerSearchObject( $objectId, $object->attribute( 'current_version' ) );
         }
 
         $db->commit();
@@ -987,8 +985,66 @@ class eZContentOperationCollection
      */
     static public function deleteObject( $deleteIDArray, $moveToTrash = false )
     {
-       eZContentObjectTreeNode::removeSubtrees( $deleteIDArray, $moveToTrash );
-       return array( 'status' => true );
+        $ini = eZINI::instance();
+        $delayedIndexingValue = $ini->variable( 'SearchSettings', 'DelayedIndexing' );
+        if ( $delayedIndexingValue === 'enabled' || $delayedIndexingValue === 'classbased' )
+        {
+            $pendingActionsToDelete = array();
+            $classList = $ini->variable( 'SearchSettings', 'DelayedIndexingClassList' ); // Will be used below if DelayedIndexing is classbased
+            $assignedNodesByObject = array();
+            $nodesToDeleteByObject = array();
+            $aNodes = eZContentObjectTreeNode::fetch( $deleteIDArray );
+            if( !is_array( $aNodes ) )
+                $aNodes = array( $aNodes );
+
+            foreach ( $aNodes as $node )
+            {
+                $object = $node->object();
+                $objectID = $object->attribute( 'id' );
+                $assignedNodes = $object->attribute( 'assigned_nodes' );
+                // Only delete pending action if this is the last object's node that is requested for deletion
+                // But $deleteIDArray can also contain all the object's node (mainly if this method is called programmatically)
+                // So if this is not the last node, then store its id in a temp array
+                // This temp array will then be compared to the whole object's assigned nodes array
+                if ( count( $assignedNodes ) > 1 )
+                {
+                    // $assignedNodesByObject will be used as a referent to check if we want to delete all lasting nodes
+                    if ( !isset( $assignedNodesByObject[$objectID] ) )
+                    {
+                        $assignedNodesByObject[$objectID] = array();
+
+                        foreach ( $assignedNodes as $assignedNode )
+                        {
+                            $assignedNodesByObject[$objectID][] = $assignedNode->attribute( 'node_id' );
+                        }
+                    }
+
+                    // Store the node assignment we want to delete
+                    // Then compare the array to the referent node assignment array
+                    $nodesToDeleteByObject[$objectID][] = $node->attribute( 'node_id' );
+                    $diff = array_diff( $assignedNodesByObject[$objectID], $nodesToDeleteByObject[$objectID] );
+                    if ( !empty( $diff ) ) // We still have more node assignments for object, pending action is not to be deleted considering this iteration
+                    {
+                        continue;
+                    }
+                }
+
+                if ( $delayedIndexingValue !== 'classbased' ||
+                     ( is_array( $classList ) && in_array( $object->attribute( 'class_identifier' ), $classList ) ) )
+                {
+                    $pendingActionsToDelete[] = $objectID;
+                }
+            }
+
+            if ( !empty( $pendingActionsToDelete ) )
+            {
+                $filterConds = array( 'param' => array ( $pendingActionsToDelete ) );
+                eZPendingActions::removeByAction( 'index_object', $filterConds );
+            }
+        }
+
+        eZContentObjectTreeNode::removeSubtrees( $deleteIDArray, $moveToTrash );
+        return array( 'status' => true );
     }
 
     /**
@@ -1227,7 +1283,7 @@ class eZContentOperationCollection
     }
 
     /**
-     * Update a node's main assignement
+     * Update a node's main assignment
      *
      * @param int $mainAssignmentID
      * @param int $objectID
@@ -1364,26 +1420,26 @@ class eZContentOperationCollection
     }
 
     /**
-    * Executes the pre-publish trigger for this object, and handles
-    * specific return statuses from the workflow
-    *
-    * @param int $objectID Object ID
-    * @param int $version Version number
-    *
-    * @since 4.2
-    **/
+     * Executes the pre-publish trigger for this object, and handles
+     * specific return statuses from the workflow
+     *
+     * @param int $objectID Object ID
+     * @param int $version Version number
+     *
+     * @since 4.2
+     */
     static public function executePrePublishTrigger( $objectID, $version )
     {
 
     }
 
     /**
-    * Creates a RSS/ATOM Feed export for a node
-    *
-    * @param int $nodeID Node ID
-    *
-    * @since 4.3
-    **/
+     * Creates a RSS/ATOM Feed export for a node
+     *
+     * @param int $nodeID Node ID
+     *
+     * @since 4.3
+     */
     static public function createFeedForNode( $nodeID )
     {
         $hasExport = eZRSSFunctionCollection::hasExportByNode( $nodeID );
@@ -1464,12 +1520,12 @@ class eZContentOperationCollection
     }
 
     /**
-    * Removes a RSS/ATOM Feed export for a node
-    *
-    * @param int $nodeID Node ID
-    *
-    * @since 4.3
-    **/
+     * Removes a RSS/ATOM Feed export for a node
+     *
+     * @param int $nodeID Node ID
+     *
+     * @since 4.3
+     */
     static public function removeFeedForNode( $nodeID )
     {
         $rssExport = eZPersistentObject::fetchObject( eZRSSExport::definition(),
@@ -1496,6 +1552,83 @@ class eZContentOperationCollection
         eZContentCacheManager::clearContentCacheIfNeeded( $objectID );
 
         return array( 'status' => true );
+    }
+
+    /**
+     * Sends the published object/version for publishing to the queue
+     * Used by the content/publish operation
+     * @param int $objectId
+     * @param int $version
+     *
+     * @return array( status => int )
+     * @since 4.5
+     */
+    public static function sendToPublishingQueue( $objectId, $version )
+    {
+        $behaviour = ezpContentPublishingBehaviour::getBehaviour();
+        if ( $behaviour->disableAsynchronousPublishing )
+            $asyncEnabled = false;
+        else
+            $asyncEnabled = ( eZINI::instance( 'content.ini' )->variable( 'PublishingSettings', 'AsynchronousPublishing' ) == 'enabled' );
+
+        $accepted = true;
+
+        if ( $asyncEnabled === true )
+        {
+            // Filter handlers
+            $ini = eZINI::instance( 'content.ini' );
+            $filterHandlerClasses = $ini->variable( 'PublishingSettings', 'AsynchronousPublishingFilters' );
+
+            if ( count( $filterHandlerClasses ) )
+            {
+                $versionObject = eZContentObjectVersion::fetchVersion( $version, $objectId );
+                foreach( $filterHandlerClasses as $filterHandlerClass )
+                {
+                    if ( !class_exists( $filterHandlerClass ) )
+                    {
+                        eZDebug::writeError( "Unknown asynchronous publishing filter handler class '$filterHandlerClass'", __METHOD__  );
+                        continue;
+                    }
+
+                    $handler = new $filterHandlerClass( $versionObject );
+                    if ( !( $handler instanceof ezpAsynchronousPublishingFilterInterface ) )
+                    {
+                        eZDebug::writeError( "Asynchronous publishing filter handler class '$filterHandlerClass' does not implement ezpAsynchronousPublishingFilterInterface", __METHOD__  );
+                        continue;
+                    }
+
+                    $accepted = $handler->accept();
+
+                    if ( !$accepted )
+                    {
+                        eZDebugSetting::writeDebug( "Object #{$objectId}/{$version} was excluded from asynchronous publishing by $filterHandlerClass", __METHOD__ );
+                        break;
+                    }
+                }
+            }
+            unset( $filterHandlerClasses, $handler );
+        }
+
+        if ( $asyncEnabled && $accepted )
+        {
+            // if the object is already in the process queue, we move ahead
+            // this test should NOT be necessary since http://issues.ez.no/17840 was fixed
+            if ( ezpContentPublishingQueue::isQueued( $objectId, $version ) )
+            {
+                return array( 'status' => eZModuleOperationInfo::STATUS_CONTINUE );
+            }
+            // the object isn't in the process queue, this means this is the first time we execute this method
+            // the object must be queued
+            else
+            {
+                ezpContentPublishingQueue::add( $objectId, $version );
+                return array( 'status' => eZModuleOperationInfo::STATUS_HALTED, 'redirect_url' => "content/queued/{$objectId}/{$version}" );
+            }
+        }
+        else
+        {
+            return array( 'status' => eZModuleOperationInfo::STATUS_CONTINUE );
+        }
     }
 }
 ?>

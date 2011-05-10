@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -34,9 +34,9 @@
 class eZFSFileHandler
 {
     /**
-    * This should be defined in eZFS2FileHandler, but due to static members
-    * limitations in PHP < 5.3, it is declared here
-    **/
+     * This should be defined in eZFS2FileHandler, but due to static members
+     * limitations in PHP < 5.3, it is declared here
+     */
     const EXPIRY_TIMESTAMP = 233366400;
 
     /**
@@ -324,12 +324,10 @@ class eZFSFileHandler
      */
     function processCache( $retrieveCallback, $generateCallback = null, $ttl = null, $expiry = null, $extraData = null )
     {
-        $forceDB = false;
         $fname = $this->filePath;
         $args = array( $fname );
         if ( $extraData !== null )
             $args[] = $extraData;
-        $timestamp = null;
         $curtime   = time();
         $tries     = 0;
         $noCache   = false;
@@ -477,7 +475,7 @@ class eZFSFileHandler
      * @param int    $curtime The current time to check against.
      * @param int    $ttl Number of seconds the data can live, set to null to disable TTL.
      * @return bool
-     **/
+     */
     public function isExpired( $expiry, $curtime, $ttl )
     {
         return self::isFileExpired( $this->filePath, @filemtime( $this->filePath ), $expiry, $curtime, $ttl );
@@ -746,7 +744,7 @@ class eZFSFileHandler
                 $handler = eZFileHandler::instance( false );
                 $handler->unlink( $path );
                 if ( file_exists( $path ) )
-                    eZDebug::writeError( "File still exists after removal: '$path'", 'fs::fileDelete' );
+                    eZDebug::writeError( "File still exists after removal: '$path'", __METHOD__ );
             }
             else
             {
@@ -798,7 +796,7 @@ class eZFSFileHandler
      * @see fetchUnique
      *
      * In case of fetching from filesystem does nothing.
-     **/
+     */
     function fileDeleteLocal( $path )
     {
         eZDebugSetting::writeDebug( 'kernel-clustering', "fs::fileDeleteLocal( '$path' )", __METHOD__ );
@@ -1006,7 +1004,7 @@ class eZFSFileHandler
      *
      * @return mixed true if generation lock was granted, an integer matching the
      *               time before the current generation times out
-     **/
+     */
     public function startCacheGeneration()
     {
         return true;
@@ -1014,7 +1012,7 @@ class eZFSFileHandler
 
     /**
      * Ends the cache generation started by startCacheGeneration().
-     **/
+     */
     public function endCacheGeneration()
     {
         return true;
@@ -1025,7 +1023,7 @@ class eZFSFileHandler
      *
      * Does so by rolling back the current transaction, which should be the
      * .generating file lock
-     **/
+     */
     public function abortCacheGeneration()
     {
         return true;
@@ -1035,7 +1033,7 @@ class eZFSFileHandler
      * Checks if the .generating file was changed, which would mean that generation
      * timed out. If not timed out, refreshes the timestamp so that storage won't
      * be stolen
-     **/
+     */
     public function checkCacheGenerationTimeout()
     {
         return true;
@@ -1045,7 +1043,7 @@ class eZFSFileHandler
      * eZFS only stores data to FS and doesn't require/support clusterizing
      *
      * @return bool false
-     **/
+     */
     public function requiresClusterizing()
     {
         return false;
@@ -1056,7 +1054,7 @@ class eZFSFileHandler
      * Files are stored on plain FS and removed using FS functions
      *
      * @since 4.3
-     * @deprecated Deprecated as of 4.4.1, use {@link eZFSFileHandler::requiresPurge()} instead.
+     * @deprecated Deprecated as of 4.5, use {@link eZFSFileHandler::requiresPurge()} instead.
      * @return bool
      */
     public function requiresBinaryPurge()
@@ -1068,9 +1066,9 @@ class eZFSFileHandler
      * eZFS does not require binary purge.
      * Files are stored on plain FS and removed using FS functions
      *
-     * @since 4.4.1
+     * @since 4.5.0
      * @return bool
-     **/
+     */
     public function requiresPurge()
     {
         return false;

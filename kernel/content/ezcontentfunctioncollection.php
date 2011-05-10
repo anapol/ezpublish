@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -977,7 +977,12 @@ class eZContentFunctionCollection
                         $sqlTarget = 'DISTINCT ezcontentobject_tree.node_id, '.$sqlKeyword;
                     }
                     else // for unique declaration
+                    {
+                        $sortByArray = explode( ' ', $sortingInfo['sortingFields'] );
+                        $sortingInfo['attributeTargetSQL'] .= ', ' . $sortByArray[0];
+
                         $sortingInfo['attributeFromSQL']  .= ', ezcontentobject_attribute a1';
+                    }
 
                 } break;
             }
@@ -1151,7 +1156,7 @@ class eZContentFunctionCollection
                 }
                 else
                 {
-                    eZDebug::writeWarning( "Unknown relation type: '$relationType'.", "eZContentFunctionCollection::contentobjectRelationTypeMask()" );
+                    eZDebug::writeWarning( "Unknown relation type: '$relationType'.", __METHOD__ );
                 }
             }
         }

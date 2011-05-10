@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -116,8 +116,7 @@ class eZImageAnalyzer
             }
             else
             {
-                eZDebug::writeWarning( "Could not locate Image Analyzer for $analyzerName",
-                                       'eZImageAnalyzer::instance' );
+                eZDebug::writeWarning( "Could not locate Image Analyzer for $analyzerName", __METHOD__ );
             }
         }
         if ( isset( $analyzerData['handlers'][$analyzerName] ) )
@@ -130,8 +129,7 @@ class eZImageAnalyzer
             }
             else
             {
-                eZDebug::writeWarning( "The Image Analyzer class $className was not found, cannot create analyzer",
-                                       'eZImageAnalyzer::instance' );
+                eZDebug::writeWarning( "The Image Analyzer class $className was not found, cannot create analyzer", __METHOD__ );
             }
         }
         return false;
@@ -177,8 +175,7 @@ class eZImageAnalyzer
                 }
             }
             else
-                eZDebug::writeWarning( "INI group $iniGroup does not exist in image.ini",
-                                       'eZImageAnalyzer::readAnalyzerSettingsFromINI' );
+                eZDebug::writeWarning( "INI group $iniGroup does not exist in image.ini", __METHOD__ );
         }
 
         $GLOBALS['eZImageAnalyzer'] = $analyzerData;

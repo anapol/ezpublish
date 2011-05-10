@@ -2,7 +2,7 @@
 /**
  * File containing the eZImageFileRegression class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -21,7 +21,7 @@ class eZImageFileRegression extends ezpDatabaseTestCase
      * Regression test for issue #16078
      *
      * @link http://issues.ez.no/16078
-     **/
+     */
     public function testIssue16078()
     {
         $classID = 5; // image class, can remain hardcoded, I guess
@@ -67,7 +67,7 @@ class eZImageFileRegression extends ezpDatabaseTestCase
      * @param object $object
      * @param string $newLanguageCode
      * @return version in new language
-     **/
+     */
     public function addTranslationDontPublish( $object, $newLanguageCode )
     {
         // Make sure to refresh the objects data.

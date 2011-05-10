@@ -2,7 +2,7 @@
 /**
  * File containing the ezpDatabaseTestCase class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -29,10 +29,18 @@ class ezpDatabaseTestCase extends ezpTestCase
     protected $insertDefaultData = true;
 
     /**
+     * Hold shared fixtures
+     * 
+     * @var mixed
+     */
+    protected $sharedFixture;
+
+    /**
      * Sets up the database enviroment
      */
     protected function setUp()
     {
+        parent::setUp();
         if ( ezpTestRunner::dbPerTest() )
         {
             $dsn = ezpTestRunner::dsn();
@@ -46,15 +54,15 @@ class ezpDatabaseTestCase extends ezpTestCase
         }
         eZDB::setInstance( $this->sharedFixture );
     }
-    
+
     protected function tearDown()
     {
-        parent::tearDown();
         if ( ezpTestRunner::dbPerTest() )
         {
             $db = eZDB::instance();
             $db->close();
         }
+        parent::tearDown();
     }
 }
 

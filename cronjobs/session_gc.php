@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@
  * (the expiry time is calculated when session is created / updated)
  * These are normally automatically removed by the session gc in php, but on some linux distroes
  * based on debian this does not work because the custom way session gc is handled.
- * 
+ *
  * Also make sure you run basket_cleanup if you use the shop!
  *
  * @package eZCronjob

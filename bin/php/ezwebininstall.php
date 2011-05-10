@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -52,7 +52,7 @@ $script = eZScript::instance( array( 'description' => ( "\n" .
                                                         "Install eZWebin package\n" ),
                                      'use-session' => false,
                                      'use-modules' => true,
-                                     'use-extensions' => false,
+                                     'use-extensions' => true,
                                      'user' => true ) );
 $script->startup();
 
@@ -379,7 +379,7 @@ if( downloadPackages( $packageList, $packageURL, $packageDir, $packageRepository
     }
     else
     {
-        showWarning( "Unable to find installtion script dir." );
+        showWarning( "Unable to find installation script dir." );
     }
 }
 

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -229,7 +229,7 @@ class eZTemplateCacheBlock
                     $nodeID = eZURLAliasML::fetchNodeIDByPath( $subtree );
                     if ( !$nodeID )
                     {
-                        eZDebug::writeError( "Could not find path_string '$subtree' for 'subtree_expiry' node.", 'eZTemplateCacheBlock::subtreeExpiryCacheDir()' );
+                        eZDebug::writeError( "Could not find path_string '$subtree' for 'subtree_expiry' node.", __METHOD__ );
                     }
                     else
                     {
@@ -294,7 +294,7 @@ class eZTemplateCacheBlock
         }
         else
         {
-            eZDebug::writeWarning( "Unable to determine cacheDir for nodeID = $nodeID", 'eZtemplateCacheFunction::subtreeCacheSubDirForNode' );
+            eZDebug::writeWarning( "Unable to determine cacheDir for nodeID = $nodeID", __METHOD__ );
         }
 
         $cacheDir .= '/cache';

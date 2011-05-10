@@ -2,7 +2,7 @@
 /**
  * File containing the eZContentClassAttributeTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -14,16 +14,6 @@ class eZContentClassAttributeTest extends ezpDatabaseTestCase
         parent::__construct();
         $this->setName( "eZContentClass Unit Tests" );
     }*/
-
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
 
     /**
      * #15898: Cannot translate a user content object

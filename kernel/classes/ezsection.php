@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -171,7 +171,7 @@ class eZSection extends eZPersistentObject
 
      /*!
      \return the number of active orders
-    */
+     */
     static function sectionCount()
     {
         $db = eZDB::instance();
@@ -180,38 +180,38 @@ class eZSection extends eZPersistentObject
         return $countArray[0]['count'];
     }
 
-   /**
-    * Makes sure the global section ID is propagated to the template override key.
-    * @deprecated since 4.4, global section support has been removed
-    *
-    * @return false
-    */
+    /**
+     * Makes sure the global section ID is propagated to the template override key.
+     * @deprecated since 4.4, global section support has been removed
+     *
+     * @return false
+     */
     static function initGlobalID()
     {
         return false;
     }
 
-   /**
-    * Sets the current global section ID to \a $sectionID in the session and
-    * the template override key
-    * @deprecated since 4.4, global section support has been removed this
-    *             function only sets value to override values for bc.
-    *
-    *  @param int $sectionID
-    */
+    /**
+     * Sets the current global section ID to \a $sectionID in the session and
+     * the template override key
+     * @deprecated since 4.4, global section support has been removed this
+     *             function only sets value to override values for bc.
+     *
+     *  @param int $sectionID
+     */
     static function setGlobalID( $sectionID )
     {
         // eZTemplateDesignResource will read this global variable
         $GLOBALS['eZDesignKeys']['section'] = $sectionID;
     }
 
-   /**
-    * Return the global section ID or \c null if it is not set yet.
-    * @deprecated since 4.4, global section support has been removed and
-    *             null is always returned.
-    *
-    * @return null
-    */
+    /**
+     * Return the global section ID or \c null if it is not set yet.
+     * @deprecated since 4.4, global section support has been removed and
+     *             null is always returned.
+     *
+     * @return null
+     */
     static function globalID()
     {
         return null;

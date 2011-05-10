@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -465,6 +465,25 @@ class eZStepSiteTypes extends eZStepInstaller
                     }
                 }
             }
+            else if ( isset( $sitePackagesInfoChoosen ) and !isset( $sitePackagesInfoChoosen['url'] ) )
+            {
+                // Site package found locally. Checking if all requiremens are downloaded.
+                // This would be the case for offline installations with manually downloaded packages.
+                $chosenRequirements = $sitePackagesInfoChoosen['requires'];
+                $reqsDownloaded = true;
+                foreach( $chosenRequirements as $creq )
+                {
+                    if( !$creq['status'] )
+                    {
+                        // Required packages missing. Stalling on this step.
+                        $reqsDownloaded = false;
+                        break;
+                    }
+                }
+                $downloaded = $reqsDownloaded;
+                // Template should show Site_package set in kickstart.ini
+                $this->selectSiteType( $chosenSitePackage );
+            }
 
             if ( $downloaded and $this->selectSiteType( $chosenSitePackage ) )
             {
@@ -644,6 +663,25 @@ class eZStepSiteTypes extends eZStepInstaller
     {
         // Download index file.
         $idxFileName = $this->downloadFile( $this->XMLIndexURL, /* $outDir = */ eZStepSiteTypes::tempDir(), 'index.xml' );
+
+        if ( $idxFileName === false )
+        {
+            // Searching for a local index.xml file to use for offline installation
+            $destIndexPath = eZStepSiteTypes::tempDir() . DIRECTORY_SEPARATOR . 'index.xml';
+            $repo = eZPackage::systemRepositoryInformation();
+
+            if ( $repo )
+            {
+                $sourceIndexPath = $repo['path'] . DIRECTORY_SEPARATOR . 'index.xml';
+                if ( file_exists( $sourceIndexPath ) )
+                {
+                    eZFileHandler::copy( $sourceIndexPath, $destIndexPath );
+                    $idxFileName = $destIndexPath;
+                    // Removing error message from downloadFile
+                    $this->ErrorMsg = false;
+                }
+            }
+        }
 
         if ( $idxFileName === false )
         {

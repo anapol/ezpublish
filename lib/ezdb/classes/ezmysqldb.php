@@ -9,7 +9,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -30,13 +30,12 @@
 // ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 //
 
-/*!
-  \class eZMySQLDB ezmysqldb.php
-  \ingroup eZDB
-  \brief The eZMySQLDB class provides MySQL implementation of the database interface.
-
-  eZMySQLDB is the MySQL implementation of eZDB.
-  \sa eZDB
+/**
+ * The eZMySQLDB class provides MySQL implementation of the database interface.
+ *
+ * eZMySQLDB is the MySQL implementation of eZDB.
+ * @see eZDB
+ * @deprecated Since 4.5 in favour of {@link eZMySQLiDB}
 */
 class eZMySQLDB extends eZDBInterface
 {
@@ -117,29 +116,38 @@ class eZMySQLDB extends eZDBInterface
             ini_set( "mysql.default_socket", $socketPath );
         }
 
-        if ( $this->UsePersistentConnection == true )
-        {
-            $connection = mysql_pconnect( $server, $user, $password );
-        }
-        else
-        {
-            $connection = mysql_connect( $server, $user, $password, true );
-        }
-        $dbErrorText = mysql_error();
+        $oldHandling = eZDebug::setHandleType( eZDebug::HANDLE_EXCEPTION );
+        try {
+            if ( $this->UsePersistentConnection == true )
+            {
+                $connection = mysql_pconnect( $server, $user, $password );
+            }
+            else
+            {
+                $connection = mysql_connect( $server, $user, $password, true );
+            }
+        } catch( ErrorException $e ) {}
+        eZDebug::setHandleType( $oldHandling );
+
+        $this->setError();
         $maxAttempts = $this->connectRetryCount();
         $waitTime = $this->connectRetryWaitTime();
         $numAttempts = 1;
         while ( !$connection && $numAttempts <= $maxAttempts )
         {
             sleep( $waitTime );
-            if ( $this->UsePersistentConnection == true )
-            {
-                $connection = mysql_pconnect( $this->Server, $this->User, $this->Password );
-            }
-            else
-            {
-                $connection = mysql_connect( $this->Server, $this->User, $this->Password );
-            }
+            $oldHandling = eZDebug::setHandleType( eZDebug::HANDLE_EXCEPTION );
+            try {
+                if ( $this->UsePersistentConnection == true )
+                {
+                    $connection = mysql_pconnect( $this->Server, $this->User, $this->Password );
+                }
+                else
+                {
+                    $connection = mysql_connect( $this->Server, $this->User, $this->Password );
+                }
+            } catch( ErrorException $e ) {}
+            eZDebug::setHandleType( $oldHandling );
             $numAttempts++;
         }
         $this->setError();
@@ -148,9 +156,9 @@ class eZMySQLDB extends eZDBInterface
 
         if ( !$connection )
         {
-            eZDebug::writeError( "Connection error: Couldn't connect to database. Please try again later or inform the system administrator.\n$dbErrorText", __CLASS__ );
+            eZDebug::writeError( "Connection error: Couldn't connect to database server. Please try again later or inform the system administrator.\n{$this->ErrorMessage}", __CLASS__ );
             $this->IsConnected = false;
-            throw new eZDBNoConnectionException( $server );
+            throw new eZDBNoConnectionException( $server, $this->ErrorMessage, $this->ErrorNumber );
         }
 
         if ( $this->IsConnected && $db != null )
@@ -158,8 +166,8 @@ class eZMySQLDB extends eZDBInterface
             $ret = mysql_select_db( $db, $connection );
             if ( !$ret )
             {
-                //$this->setError();
-                eZDebug::writeError( "Connection error: " . mysql_errno( $connection ) . ": " . mysql_error( $connection ), "eZMySQLDB" );
+                $this->setError( $connection );
+                eZDebug::writeError( "Connection error: Couldn't select the database. Please try again later or inform the system administrator.\n{$this->ErrorMessage}", __CLASS__ );
                 $this->IsConnected = false;
             }
         }
@@ -432,7 +440,14 @@ class eZMySQLDB extends eZDBInterface
 
                 // This is to behave the same way as other RDBMS PHP API as PostgreSQL
                 // functions which throws an error with a failing request.
-                trigger_error( "mysql_query(): $errorMessage", E_USER_ERROR );
+                if ( $this->errorHandling == eZDB::ERROR_HANDLING_STANDARD )
+                {
+                    trigger_error( "mysql_query(): $errorMessage", E_USER_ERROR );
+                }
+                else
+                {
+                    throw new eZDBException( $this->ErrorMessage, $this->ErrorNumber );
+                }
 
                 return false;
             }
@@ -882,12 +897,22 @@ class eZMySQLDB extends eZDBInterface
         }
     }
 
-    function setError()
+    /**
+     * Sets the internal error messages & number
+     * @param resource $connection database connection handle, overrides the current one if given
+     */
+    function setError( $connection = false)
     {
         if ( $this->IsConnected )
         {
-            $this->ErrorMessage = mysql_error( $this->DBConnection );
-            $this->ErrorNumber = mysql_errno( $this->DBConnection );
+            if ( $connection === false )
+                $connection = $this->DBConnection;
+
+            if ( is_resource( $connection ) )
+            {
+                $this->ErrorMessage = mysql_error( $connection );
+                $this->ErrorNumber = mysql_errno( $connection );
+            }
         }
         else
         {

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -419,10 +419,10 @@ class eZTemplateCompiler
                 return true;
             }
             else
-                eZDebug::writeError( "Failed executing compiled template '$phpScript'", 'eZTemplateCompiler::executeCompilation' );
+                eZDebug::writeError( "Failed executing compiled template '$phpScript'", __METHOD__ );
         }
         else
-            eZDebug::writeError( "Unknown compiled template '$phpScript'", 'eZTemplateCompiler::executeCompilation' );
+            eZDebug::writeError( "Unknown compiled template '$phpScript'", __METHOD__ );
         return false;
     }
 
@@ -1971,7 +1971,7 @@ $lbracket
         if ( is_object( \$value ) )
         $lbracket
             if ( method_exists( \$value, \"attribute\" ) and
-                 method_exists( \$value, \"hasattribute\" ) )
+                 method_exists( \$value, \"hasAttribute\" ) )
             $lbracket
                 if ( \$value->hasAttribute( \$attributeValue ) )
                 $lbracket
@@ -2415,7 +2415,7 @@ $rbracket
                             $modificationCheckText = "file_exists( $phpScriptText )";
                             if  ( eZTemplateCompiler::isDevelopmentModeEnabled() )
                             {
-                                $modificationCheckText = "@filemtime( $phpScriptText ) > filemtime( $uriText )";
+                                $modificationCheckText = "file_exists( $phpScriptText ) && filemtime( $phpScriptText ) > filemtime( $uriText )";
                             }
                             $php->addCodePiece( "\$resourceFound = false;\nif " . ( $resourceData['use-comments'] ? ( "/*TC:" . __LINE__ . "*/" ) : "" ) . "( $phpScriptText !== false and $modificationCheckText )\n{\n", array( 'spacing' => $spacing ) );
                         }
@@ -2431,7 +2431,7 @@ $rbracket
                             $modificationCheckText = "file_exists( $phpScriptText )";
                             if  ( eZTemplateCompiler::isDevelopmentModeEnabled() )
                             {
-                                $modificationCheckText = "@filemtime( $phpScriptText ) > filemtime( $uriText )";
+                                $modificationCheckText = "file_exists( $phpScriptText ) && filemtime( $phpScriptText ) > filemtime( $uriText )";
                             }
                             $php->addCodePiece( "if " . ( $resourceData['use-comments'] ? ( "/*TC:" . __LINE__ . "*/" ) : "" ) . "( $modificationCheckText )\n{\n", array( 'spacing' => $spacing ) );
 
@@ -2626,16 +2626,16 @@ END;
                 $isStaticElement = false;
                 $nodeElements = $node[2];
                 $knownTypes = array();
-                if ( eZTemplateNodeTool::isStaticElement( $nodeElements ) and
+                if ( eZTemplateNodeTool::isConstantElement( $nodeElements ) and
                      !$variableParameters['text-result'] )
                 {
-                    $variableText = $php->thisVariableText( eZTemplateNodeTool::elementStaticValue( $nodeElements ), 0, 0, false );
+                    $variableText = $php->thisVariableText( eZTemplateNodeTool::elementConstantValue( $nodeElements ), 0, 0, false );
                     $isStaticElement = true;
                 }
                 else if ( eZTemplateNodeTool::isPHPVariableElement( $nodeElements ) and
                           !$variableParameters['text-result'] )
                 {
-                    $variableText = '$' . eZTemplateNodeTool::elementStaticValue( $nodeElements );
+                    $variableText = '$' . eZTemplateNodeTool::elementConstantValue( $nodeElements );
                     $isStaticElement = true;
                 }
                 else
@@ -3135,9 +3135,9 @@ END;
                 $tmpVariableAssignmentCounter = $newParameters['counter'];
                 if ( $tmpVariableAssignmentCounter > 0 )
                     $tmpVariableAssignmentName .= $tmpVariableAssignmentCounter;
-                if ( eZTemplateNodeTool::isStaticElement( $variableDataItem[1] ) )
+                if ( eZTemplateNodeTool::isConstantElement( $variableDataItem[1] ) )
                 {
-                    $attributeStaticValue = eZTemplateNodeTool::elementStaticValue( $variableDataItem[1] );
+                    $attributeStaticValue = eZTemplateNodeTool::elementConstantValue( $variableDataItem[1] );
                     $attributeText = $php->thisVariableText( $attributeStaticValue, 0, 0, false );
                 }
                 else
@@ -3224,9 +3224,9 @@ unset( \$" . $variableAssignmentName . "Data );\n",
                     }
                     ++$paramCount;
                     $code .= '\'' . $key . '\' => ';
-                    if( eZTemplateNodeTool::isStaticElement( $value ) )
+                    if( eZTemplateNodeTool::isConstantElement( $value ) )
                     {
-                        $code .= eZPHPCreator::variableText( eZTemplateNodeTool::elementStaticValue( $value ), 0, 0, false );
+                        $code .= eZPHPCreator::variableText( eZTemplateNodeTool::elementConstantValue( $value ), 0, 0, false );
                         continue;
                     }
                     $code .= '%' . $counter . '%';
@@ -3268,9 +3268,9 @@ unset( \$" . $variableAssignmentName . "Data );\n",
                         $newVariableAssignmentCounter = $newParameters['counter'];
                         if ( $newVariableAssignmentCounter > 0 )
                             $newVariableAssignmentName .= $newVariableAssignmentCounter;
-                        if ( eZTemplateNodeTool::isStaticElement( $value ) )
+                        if ( eZTemplateNodeTool::isConstantElement( $value ) )
                         {
-                            $staticValue = eZTemplateNodeTool::elementStaticValue( $value );
+                            $staticValue = eZTemplateNodeTool::elementConstantValue( $value );
                             $staticValueText = $php->thisVariableText( $staticValue, 0, 0, false );
                             if ( preg_match( "/%code$counter%/", $code ) )
                             {

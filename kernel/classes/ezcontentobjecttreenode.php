@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -230,7 +230,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                       'sort_field' => $sortField,
                       'sort_order' => $sortOrder,
                       'modified_subnode' => 0,
-                      'remote_id' => md5( (string)mt_rand() . (string)time() ),
+                      'remote_id' => eZRemoteIdUtility::generate( 'node' ),
                       'priority' => 0 );
         $node = new eZContentObjectTreeNode( $row );
         return $node;
@@ -255,7 +255,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
         $remoteID = eZPersistentObject::attribute( 'remote_id', true );
         if ( !$remoteID )
         {
-            $this->setAttribute( 'remote_id', md5( (string)mt_rand() . (string)time() ) );
+            $this->setAttribute( 'remote_id', eZRemoteIdUtility::generate( 'node' ) );
             $this->sync( array( 'remote_id' ) );
             $remoteID = eZPersistentObject::attribute( 'remote_id', true );
         }
@@ -716,10 +716,10 @@ class eZContentObjectTreeNode extends eZPersistentObject
                             }
                             else
                             {
-                                eZDebug::writeWarning( 'Unknown sort field: ' . $sortField, 'eZContentObjectTreeNode::createSortingSQLStrings' );
+                                eZDebug::writeWarning( 'Unknown sort field: ' . $sortField, __METHOD__ );
                                 continue;
                             }
-                        };
+                        }
                     }
                     $sortOrder = true; // true is ascending
                     if ( isset( $sortBy[1] ) )
@@ -1018,7 +1018,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                                 default :
                                 {
                                     $hasFilterOperator = false;
-                                    eZDebug::writeError( "Unknown attribute filter type for state: $filterType", "eZContentObjectTreeNode::subTree()" );
+                                    eZDebug::writeError( "Unknown attribute filter type for state: $filterType", __METHOD__ );
                                 } break;
                             }
 
@@ -1245,7 +1245,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                             default :
                             {
                                 $hasFilterOperator = false;
-                                eZDebug::writeError( "Unknown attribute filter type: $filterType", "eZContentObjectTreeNode::subTree()" );
+                                eZDebug::writeError( "Unknown attribute filter type: $filterType", __METHOD__ );
                             }break;
 
                         }
@@ -1982,16 +1982,9 @@ class eZContentObjectTreeNode extends eZPersistentObject
 
         $server = count( $sqlPermissionChecking['temp_tables'] ) > 0 ? eZDBInterface::SERVER_SLAVE : false;
 
-        if ( !$offset && !$limit )
-        {
-            $nodeListArray = $db->arrayQuery( $query, array(), $server );
-        }
-        else
-        {
-            $nodeListArray = $db->arrayQuery( $query, array( 'offset' => $offset,
-                                                             'limit'  => $limit ),
-                                                      $server );
-        }
+        $nodeListArray = $db->arrayQuery( $query, array( 'offset' => $offset,
+                                                         'limit'  => $limit ),
+                                                  $server );
 
         if ( $asObject )
         {
@@ -2275,8 +2268,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
             } break;
             default:
             {
-                eZDebug::writeError( "Unknown field type $type",
-                                     'eZContentObjectTreeNode::subTreeGroupByDateField' );
+                eZDebug::writeError( "Unknown field type $type", __METHOD__ );
             }
         }
         if ( $divisor > 0 )
@@ -2842,7 +2834,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
 
     function fetchByCRC( $pathStr )
     {
-        eZDebug::writeWarning( "Obsolete: use eZURLAlias instead", 'eZContentObjectTreeNode::fetchByCRC' );
+        eZDebug::writeWarning( "Obsolete: use eZURLAlias instead", __METHOD__ );
         return null;
     }
 
@@ -2875,7 +2867,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
     {
         if ( $pathString == "" )
         {
-            eZDebug::writeWarning( 'Can not fetch, given URLPath is empty', 'eZContentObjectTreeNode::fetchByURLPath' );
+            eZDebug::writeWarning( 'Can not fetch, given URLPath is empty', __METHOD__ );
             return null;
         }
 
@@ -2888,7 +2880,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
      * @param array(int) $nodeList
      *
      * @return array Associative array
-     **/
+     */
     static function fetchAliasesFromNodeList( $nodeList )
     {
         if ( !is_array( $nodeList ) || count( $nodeList ) < 1 )
@@ -2937,7 +2929,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
      *        Wether to return the result as an array of eZContentObjectTreeNode
      *        (true) or as an array of associative arrays (false)
      * @return array(array|eZContentObjectTreeNode)
-     **/
+     */
     static function findMainNodeArray( $objectIDArray, $asObject = true )
     {
         if ( count( $objectIDArray ) )
@@ -3049,7 +3041,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
 
             if ( $sqlCondition == '' )
             {
-                eZDebug::writeWarning( 'Cannot fetch node, emtpy ID or no conditions given', 'eZContentObjectTreeNode::fetch' );
+                eZDebug::writeWarning( 'Cannot fetch node, emtpy ID or no conditions given', __METHOD__ );
                 return $returnValue;
             }
 
@@ -4948,6 +4940,30 @@ class eZContentObjectTreeNode extends eZPersistentObject
     // This code is automatically generated from templates/classcreatelist.ctpl
     // DO NOT EDIT THIS CODE DIRECTLY, CHANGE THE TEMPLATE FILE INSTEAD
 
+    /**
+     * Checks if provided policy array has a limitation on current subtree
+     * @param array $policy
+     * @return bool
+     */
+    protected function hasCurrentSubtreeLimitation( array $policy )
+    {
+        if ( !isset( $policy['Subtree'] ) )
+        {
+            return false;
+        }
+
+        $pathString = $this->attribute( 'path_string' );
+        foreach ( $policy['Subtree'] as $subtreeString )
+        {
+            if ( strpos( $pathString, $subtreeString ) !== false )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /*!
      Finds all classes that the current user can create objects from and returns.
      It is also possible to filter the list event more with \a $includeFilter and \a $groupList.
@@ -4982,7 +4998,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
         }
         else if ( $accessWord == 'no' )
         {
-            // Cannnot create any objects, return empty list.
+            // Cannot create any objects, return empty list.
             return $classList;
         }
         else
@@ -4991,19 +5007,21 @@ class eZContentObjectTreeNode extends eZPersistentObject
             foreach ( $policies as $policyKey => $policy )
             {
                 $policyArray = $this->classListFromPolicy( $policy, $languageCodeList );
-                if ( count( $policyArray ) == 0 )
+                if ( empty( $policyArray ) )
                 {
                     continue;
                 }
                 $classIDArrayPart = $policyArray['classes'];
                 $languageCodeArrayPart = $policyArray['language_codes'];
-                if ( $classIDArrayPart == '*' )
+                // No class limitation for this policy AND no previous limitation(s)
+                if ( $classIDArrayPart == '*' && empty( $classIDArray ) )
                 {
                     $fetchAll = true;
                     $allowedLanguages['*'] = array_unique( array_merge( $allowedLanguages['*'], $languageCodeArrayPart ) );
                 }
-                else
+                else if ( is_array( $classIDArrayPart ) && $this->hasCurrentSubtreeLimitation( $policy ) )
                 {
+                    $fetchAll = false;
                     foreach( $classIDArrayPart as $class )
                     {
                         if ( isset( $allowedLanguages[$class] ) )
@@ -5381,7 +5399,6 @@ class eZContentObjectTreeNode extends eZPersistentObject
         {
             $description = "Node with remote ID $remoteID already exists.";
 
-            // include_once( 'kernel/classes/ezpackagehandler.php' );
             $choosenAction = eZPackageHandler::errorChoosenAction( eZContentObject::PACKAGE_ERROR_EXISTS,
                                                                    $options, $description, $handlerType, false );
 
@@ -5390,7 +5407,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                 // In case user have choosen "Keep existing object and create new"
                 case eZContentObject::PACKAGE_NEW:
                 {
-                    $newRemoteID = md5( (string)mt_rand() . (string)time() );
+                    $newRemoteID = eZRemoteIdUtility::generate( 'node' );
                     $node->setAttribute( 'remote_id', $newRemoteID );
                     $node->store();
                     $nodeInfo = array( 'contentobject_id' =>  $node->attribute( 'contentobject_id' ),
@@ -5452,8 +5469,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
             }
             else
             {
-                eZDebug::writeError( 'New parent node not set ' . $contentNodeDOMNode->getAttribute( 'name' ),
-                                     'eZContentObjectTreeNode::unserialize()' );
+                eZDebug::writeError( 'New parent node not set ' . $contentNodeDOMNode->getAttribute( 'name' ), __METHOD__ );
             }
         }
 
@@ -5540,7 +5556,12 @@ class eZContentObjectTreeNode extends eZPersistentObject
     */
     function updateAndStoreModified()
     {
-        $pathArray = explode( '/', trim( $this->attribute( 'path_string' ), '/' ) );
+        $pathString = trim( $this->attribute( 'path_string' ), '/' );
+
+        // during publishing, a temporary path is generated. The update query shouldn't be executed as it doesn't affect anything
+        if ( $pathString == 'TEMPPATH' )
+            return;
+        $pathArray = explode( '/', $pathString );
 
         if ( count( $pathArray ) > 0 )
         {
@@ -5767,6 +5788,18 @@ class eZContentObjectTreeNode extends eZPersistentObject
         $time = time();
         $db = eZDB::instance();
 
+        if ( eZAudit::isAuditEnabled() )
+        {
+            // Set audit params.
+            $objectID = $node->attribute( 'contentobject_id' );
+            $objectName = $node->attribute( 'name' );
+            eZAudit::writeAudit( 'content-hide', array( 'Node ID' => $nodeID, 
+                                                        'Object ID' => $objectID, 
+                                                        'Content Name' => $objectName, 
+                                                        'Time' => $time,
+                                                        'Comment' => 'Hided the current node: eZContentObjectTreeNode::hideSubTree()' ) );
+        }
+
         $db->begin();
 
         if ( !$node->attribute( 'is_invisible' ) ) // if root node is visible
@@ -5820,6 +5853,20 @@ class eZContentObjectTreeNode extends eZPersistentObject
         $nodeInvisible = $node->attribute( 'is_invisible' );
         $parentNode = $node->attribute( 'parent' );
         $time = time();
+
+        if ( eZAudit::isAuditEnabled() )
+        {
+            // Set audit params.
+            $objectID = $node->attribute( 'contentobject_id' );
+            $objectName = $node->attribute( 'name' );
+
+            eZAudit::writeAudit( 'content-hide', array( 'Node ID' => $nodeID, 
+                                                        'Object ID' => $objectID, 
+                                                        'Content Name' => $objectName, 
+                                                        'Time' => $time,
+                                                        'Comment' => 'Unhided the current node: eZContentObjectTreeNode::unhideSubTree()' ) );
+        }
+
         $db = eZDB::instance();
 
         $db->begin();
@@ -6090,7 +6137,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
         if ( $classes === false )
         {
             // If $node is object we should fetch available classes from node, from ezcontentclass otherwise
-            $classes = ( is_object( $node ) and strtolower( get_class( $node ) ) == 'ezcontentobjecttreenode' )
+            $classes = ( $node instanceOf eZContentObjectTreeNode )
                         ? $node->canCreateClassList( false, $includeFilter, $groupList, $fetchID )
                         : eZContentClass::canInstantiateClassList( false, $includeFilter, $groupList, $fetchID );
         }
@@ -6098,11 +6145,10 @@ class eZContentObjectTreeNode extends eZPersistentObject
             return $falseValue;
 
         // Create javascript array
-        $jsArray = array();
-        $db = eZDB::instance();
+        $classList = array();
         foreach ( $classes as $class )
         {
-            if ( is_object( $class ) )
+            if ( $class instanceOf eZContentClass )
             {
                 $classID = $class->attribute( 'id' );
                 $className = $class->attribute( 'name' );
@@ -6112,12 +6158,14 @@ class eZContentObjectTreeNode extends eZPersistentObject
                 $classID = $class['id'];
                 $className = $class['name'];
             }
-            $jsArray[] = "{ classID: '" . $db->escapeString( $classID ) .
-                          "', name: '" . $db->escapeString( $className ) . "' }";
+            $classList[] = array(
+                'classID' => (int) $classID,
+                'name'    => $className
+            );
         }
 
-        if ( $jsArray )
-            return '[ '.implode( ', ', $jsArray ).' ]';
+        if ( $classList )
+            return json_encode( $classList );
 
         return $falseValue;
     }

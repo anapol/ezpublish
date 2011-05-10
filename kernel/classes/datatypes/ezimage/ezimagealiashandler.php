@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -68,7 +68,7 @@ class eZImageAliasHandler
         }
         else
         {
-            eZDebug::writeWarning( 'Invalid eZContentObjectAttribute', 'eZImageAliasHandler::eZImageAliasHandler' );
+            eZDebug::writeWarning( 'Invalid eZContentObjectAttribute', __METHOD__ );
         }
     }
 
@@ -426,37 +426,33 @@ class eZImageAliasHandler
         }
         else
         {
-            $imageManager = eZImageManager::factory();
-            if ( $imageManager->hasAlias( $aliasName ) )
+            $original = $aliasList['original'];
+            $basename = $original['basename'];
+            if ( $imageManager->createImageAlias( $aliasName, $aliasList,
+                                                  array( 'basename' => $basename ) ) )
             {
-                $original = $aliasList['original'];
-                $basename = $original['basename'];
-                if ( $imageManager->createImageAlias( $aliasName, $aliasList,
-                                                      array( 'basename' => $basename ) ) )
+                $text = $this->displayText( $original['alternative_text'] );
+                $originalFilename = $original['original_filename'];
+                foreach ( $aliasList as $aliasKey => $alias )
                 {
-                    $text = $this->displayText( $original['alternative_text'] );
-                    $originalFilename = $original['original_filename'];
-                    foreach ( $aliasList as $aliasKey => $alias )
+                    $alias['original_filename'] = $originalFilename;
+                    $alias['text'] = $text;
+                    if ( $alias['url'] )
                     {
-                        $alias['original_filename'] = $originalFilename;
-                        $alias['text'] = $text;
-                        if ( $alias['url'] )
-                        {
-                            $aliasFile = eZClusterFileHandler::instance( $alias['url'] );
-                            if( $aliasFile->exists() )
-                                $alias['filesize'] = $aliasFile->size();
-                        }
-                        if ( $alias['is_new'] )
-                        {
-                            eZImageFile::appendFilepath( $this->ContentObjectAttributeData['id'], $alias['url'] );
-                        }
-                        $aliasList[$aliasKey] = $alias;
+                        $aliasFile = eZClusterFileHandler::instance( $alias['url'] );
+                        if( $aliasFile->exists() )
+                            $alias['filesize'] = $aliasFile->size();
                     }
-                    $this->setAliasList( $aliasList );
-                    $this->addImageAliases( $aliasList );
-                    $aliasList = $this->aliasList();
-                    return $aliasList[$aliasName];
+                    if ( $alias['is_new'] )
+                    {
+                        eZImageFile::appendFilepath( $this->ContentObjectAttributeData['id'], $alias['url'] );
+                    }
+                    $aliasList[$aliasKey] = $alias;
                 }
+                $this->setAliasList( $aliasList );
+                $this->addImageAliases( $aliasList );
+                $aliasList = $this->aliasList();
+                return $aliasList[$aliasName];
             }
         }
 
@@ -620,6 +616,7 @@ class eZImageAliasHandler
 
         if ( $imageVariationNodeArray->length > 0 )
         {
+            $imageManager = eZImageManager::factory();
             foreach ( $imageVariationNodeArray as $imageVariation )
             {
                 $aliasEntry = array();
@@ -650,7 +647,6 @@ class eZImageAliasHandler
                         $aliasEntry['filesize'] = $aliasFile->size();
                 }
 
-                $imageManager = eZImageManager::factory();
                 if ( $imageManager->isImageAliasValid( $aliasEntry ) )
                 {
                     $aliasList[$aliasEntry['name']] = $aliasEntry;
@@ -662,12 +658,12 @@ class eZImageAliasHandler
         return $aliasList;
     }
 
-   /**
-    * Removes all image alias files which the attribute refers to.
-    *
-    * @param eZContentObjectAttribute
-    * @note If you want to remove the alias information use removeAliases().
-    **/
+    /**
+     * Removes all image alias files which the attribute refers to.
+     *
+     * @param eZContentObjectAttribute
+     * @note If you want to remove the alias information use removeAliases().
+     */
     static function removeAllAliases( $contentObjectAttribute )
     {
         $handler = $contentObjectAttribute->attribute( 'content' );
@@ -684,8 +680,7 @@ class eZImageAliasHandler
             $file = eZClusterFileHandler::instance( $filepath );
             if ( $file->exists() )
             {
-                // FIXME: optimize not to use recursive delete
-                $file->delete();
+                $file->fileDelete( $filepath );
                 $dirs[] = eZDir::dirpath( $filepath );
             }
         }
@@ -709,7 +704,7 @@ class eZImageAliasHandler
      *        Content object attribute to remove aliases for
      *
      * @return void
-     **/
+     */
     function removeAliases( $contentObjectAttribute )
     {
         $aliasList = $this->aliasList();
@@ -777,8 +772,7 @@ class eZImageAliasHandler
                     }
                     else
                     {
-                        eZDebug::writeError( "Image file $filepath for alias $aliasName does not exist, could not remove from disk",
-                                             'eZImageAliasHandler::removeAliases' );
+                        eZDebug::writeError( "Image file $filepath for alias $aliasName does not exist, could not remove from disk", __METHOD__ );
                     }
                 }
             }
@@ -1059,7 +1053,7 @@ class eZImageAliasHandler
      * @param mixed $httpFile
      *
      * @see httpFile
-    */
+     */
     function setHTTPFile( $httpFile )
     {
         $this->ContentObjectAttributeData['DataTypeCustom']['http_file'] = $httpFile;
@@ -1071,7 +1065,7 @@ class eZImageAliasHandler
      * @param bool $release Erase the content of the stored HTTP file
      *
      * @see setHTTPFile
-    */
+     */
     function httpFile( $release = false )
     {
         if ( isset( $this->ContentObjectAttributeData['DataTypeCustom']['http_file'] ) )
@@ -1094,7 +1088,7 @@ class eZImageAliasHandler
      * @param string $imageAltText Optional image ALT text
      *
      * @return TODO: FIXME
-     **/
+     */
     function initializeFromHTTPFile( $httpFile, $imageAltText = false )
     {
         $this->increaseImageSerialNumber();
@@ -1143,13 +1137,13 @@ class eZImageAliasHandler
             $contentObjectAttribute = eZContentObjectAttribute::fetch( $contentObjectAttributeID, $version );
             $contentObjectAttributeName = '';
             $contentObjectName = '';
-            
+
             if ( $contentObject instanceof eZContentObject )
                 $contentObjectName = $contentObject->attribute('name');
-            
+
             if ( $contentObjectAttribute instanceof eZContentObjectAttribute )
                 $contentObjectAttributeName = $contentObjectAttribute->attribute( 'contentclass_attribute_name' );
-            
+
             eZDebug::writeError( "The image '$filename' does not exist, cannot initialize image attribute: '$contentObjectAttributeName' (id: $contentObjectAttributeID) for content object: '$contentObjectName' (id: $contentObjectID)", __METHOD__ );
             return false;
         }
@@ -1475,7 +1469,7 @@ class eZImageAliasHandler
             {
                 eZDebug::writeError( "Invalid objectAttribute: id = " . $this->ContentObjectAttributeData['id'] .
                                     " version = " . $this->ContentObjectAttributeData['version'] ,
-                                    "eZImageAliasHandler::storeDOMTree" );
+                                    __METHOD__ );
             }
         }
 

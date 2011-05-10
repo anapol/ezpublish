@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -521,17 +521,17 @@ class eZDir
         {
             while ( ( $element = readdir( $handle ) ) !== false )
             {
-                if ( $element == '.' or $element == '..' )
+                if ( $element === '.' || $element === '..' )
                     continue;
-                if ( !$includeHidden and $element[0] == "." )
+                if ( !$includeHidden && $element[0] === '.' )
                     continue;
-                if ( $excludeItems and preg_match( $excludeItems, $element ) )
+                if ( $excludeItems && preg_match( $excludeItems, $element ) )
                     continue;
-                if ( @is_dir( $dir . '/' . $element ) and strpos( $types, 'd' ) === false )
+                if ( strpos( $types, 'd' ) === false && is_dir( $dir . '/' . $element ) )
                     continue;
-                if ( @is_link( $dir . '/' . $element ) and strpos( $types, 'l' ) === false )
+                if ( strpos( $types, 'l' ) === false && is_link( $dir . '/' . $element ) )
                     continue;
-                if ( @is_file( $dir . '/' . $element ) and strpos( $types, 'f' ) === false )
+                if ( strpos( $types, 'f' ) === false && is_file( $dir . '/' . $element ))
                     continue;
                 if ( $fullPath )
                 {
@@ -566,14 +566,12 @@ class eZDir
     {
         if ( !is_dir( $sourceDirectory ) )
         {
-            eZDebug::writeError( "Source $sourceDirectory is not a directory, cannot copy from it",
-                                 'eZDir::copy' );
+            eZDebug::writeError( "Source $sourceDirectory is not a directory, cannot copy from it", __METHOD__ );
             return false;
         }
         if ( !is_dir( $destinationDirectory ) )
         {
-            eZDebug::writeError( "Destination $destinationDirectory is not a directory, cannot copy to it",
-                                 'eZDir::copy' );
+            eZDebug::writeError( "Destination $destinationDirectory is not a directory, cannot copy to it", __METHOD__ );
             return false;
         }
         if ( $asChild )

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -104,16 +104,21 @@ class eZImageFile extends eZPersistentObject
      *               image files where the url is referenced
      *
      * @todo Rewrite ! A where data_text LIKE '%xxx%' is a resource hog !
-     **/
+     */
     static function fetchImageAttributesByFilepath( $filepath, $contentObjectAttributeID )
     {
         $db = eZDB::instance();
         $contentObjectAttributeID = (int) $contentObjectAttributeID;
-        $query = "SELECT contentobject_id, contentclassattribute_id
-                  FROM   ezcontentobject_attribute
-                  WHERE  id = $contentObjectAttributeID
-                  LIMIT 1";
-        $rows = $db->arrayQuery( $query );
+
+        $cond = array( 'id' => $contentObjectAttributeID );
+        $fields = array( 'contentobject_id', 'contentclassattribute_id' );
+        $limit = array( 'offset' => 0, 'length' => 1 );
+        $rows = eZPersistentObject::fetchObjectList( eZContentObjectAttribute::definition(),
+                                                     $fields,
+                                                     $cond,
+                                                     null,
+                                                     $limit,
+                                                     false );
         if ( count( $rows ) != 1 )
             return array();
 

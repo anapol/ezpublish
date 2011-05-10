@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -486,7 +486,7 @@ class eZRole extends eZPersistentObject
      *        If true, roles will be looked up for all nodes of the id's and it's parents
      *
      * @return array(eZRole)
-     **/
+     */
     static function fetchByUser( $idArray, $recursive = false )
     {
         if ( count( $idArray ) < 1 )
@@ -634,11 +634,12 @@ class eZRole extends eZPersistentObject
     {
         if ( !isset( $this->Policies ) )
         {
+            $sorting = array( 'module_name' => 'asc', 'function_name' => 'asc' );
             $policies = eZPersistentObject::fetchObjectList(
                 eZPolicy::definition(),
                 null,
                 array( 'role_id' => $this->attribute( 'id' ), 'original_id' => 0 ),
-                null, null, true );
+                $sorting, null, true );
 
             if ( $this->LimitIdentifier )
             {
@@ -662,7 +663,7 @@ class eZRole extends eZPersistentObject
      * @param array(eZContentObjectID) $idArray
      *
      * @return array(eZRoleID)
-     **/
+     */
     static function fetchIDListByUser( $idArray )
     {
         $db = eZDB::instance();

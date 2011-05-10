@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -68,10 +68,6 @@ $script->shutdown(); // Finish execution
 \endcode
 
 */
-
-require_once( 'access.php' );
-require_once( 'kernel/common/i18n.php' );
-
 class eZScript
 {
     /*!
@@ -86,7 +82,7 @@ class eZScript
                                         'debug-accumulator' => false,
                                         'debug-timing' => false,
                                         'use-session' => false,
-                                        'use-extensions' => false,
+                                        'use-extensions' => true,
                                         'use-modules' => false,
                                         'user' => false,
                                         'description' => 'eZ Publish script',
@@ -235,12 +231,15 @@ class eZScript
         if ( $this->UseExtensions )
         {
             // Check for extension
-            require_once( 'kernel/common/ezincludefunctions.php' );
             eZExtension::activateExtensions( 'default' );
             // Extension check end
         }
+        else if ( !$this->isQuiet() )
+        {
+            $cli = eZCLI::instance();
+            $cli->output( "Notice: This script uses 'use-extensions' => false, meaning extension settings are not loaded!" );
+        }
 
-        require_once( "access.php" );
         $siteaccess = $this->SiteAccess;
         if ( $siteaccess )
         {
@@ -1033,6 +1032,10 @@ class eZScript
             {
                 $this->setShowVerboseOutput( count( $options['verbose'] ) );
             }
+
+            if ( isset( $options['siteaccess'] ) and $options['siteaccess'] )
+                $this->setUseSiteAccess( $options['siteaccess'] );
+
             if ( $options['help'] )
             {
                 if ( !$this->IsInitialized )
@@ -1040,8 +1043,6 @@ class eZScript
                 $this->showHelp();
                 $this->shutdown( 0 );
             }
-            if ( isset( $options['siteaccess'] ) and $options['siteaccess'] )
-                $this->setUseSiteAccess( $options['siteaccess'] );
 
             if ( isset( $options['login'] ) and $options['login'] )
                 $this->setUser( $options['login'], isset( $options['password'] ) ? $options['password'] : false );
@@ -1052,7 +1053,7 @@ class eZScript
     /**
      * Returns a shared instance of the eZScript class.
      *
-     * @param $settings array Used by the first generated instance, but ignored for subsequent calls.
+     * @param array $settings Used by the first generated instance, but ignored for subsequent calls.
      * @return eZScript
      */
     static function instance( $settings = array() )

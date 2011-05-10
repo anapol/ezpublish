@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -305,9 +305,9 @@ class eZTemplateStringOperator
             return false;
         }
 
-        if ( eZTemplateNodeTool::isStaticElement( $parameters[0] ) )
+        if ( eZTemplateNodeTool::isConstantElement( $parameters[0] ) )
         {
-            $text = eZTemplateNodeTool::elementStaticValue( $parameters[0] );
+            $text = eZTemplateNodeTool::elementConstantValue( $parameters[0] );
             $text = $phpFunction( $text );
             $text = str_replace( array( "'" ), array( "\\'" ), $text );
             $code = "%output% = '" . $text . "' ;\n";
@@ -350,9 +350,9 @@ class eZTemplateStringOperator
         $replacementMap = array('%output%');
         for ($i = 0; $i < $paramCount; $i++)
         {
-            if ( eZTemplateNodeTool::isStaticElement( $parameters[$i] ) )
+            if ( eZTemplateNodeTool::isConstantElement( $parameters[$i] ) )
             {
-                $staticValues[$i] = eZTemplateNodeTool::elementStaticValue( $parameters[$i] );
+                $staticValues[$i] = eZTemplateNodeTool::elementConstantValue( $parameters[$i] );
             }
             else
             {
@@ -371,7 +371,7 @@ class eZTemplateStringOperator
             {
                 eval( $mapEntry['code'] );
             }
-            return array( eZTemplateNodeTool::createStaticElement( $result ) );
+            return array( eZTemplateNodeTool::createConstantElement( $result ) );
         }
         else
         {
@@ -459,9 +459,9 @@ class eZTemplateStringOperator
         $staticValues = array();
         for ($i = 0; $i < $paramCount; $i++)
         {
-            if ( eZTemplateNodeTool::isStaticElement( $parameters[$i] ) )
+            if ( eZTemplateNodeTool::isConstantElement( $parameters[$i] ) )
             {
-                $staticValues[$i] = eZTemplateNodeTool::elementStaticValue( $parameters[$i] );
+                $staticValues[$i] = eZTemplateNodeTool::elementConstantValue( $parameters[$i] );
             }
             else
             {

@@ -2,7 +2,7 @@
 /**
  * File containing the {@link eZCache} class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package kernel
  *
@@ -45,7 +45,8 @@ class eZCache
                                        'tag' => array( 'ini' ),
                                        'enabled' => true,
                                        'path' => 'var/cache/ini',
-                                       'function' => array( 'eZCache', 'clearGlobalINICache' ) ),
+                                       'function' => array( 'eZCache', 'clearGlobalINICache' ),
+                                       'purge-function' => array( 'eZCache', 'clearGlobalINICache' ) ),
                                 array( 'name' => ezpI18n::tr( 'kernel/cache', 'INI cache' ),
                                        'id' => 'ini',
                                        'tag' => array( 'ini' ),

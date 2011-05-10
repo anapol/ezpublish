@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -521,8 +521,7 @@ class eZDateTimeType extends eZDataType
             } break;
             default:
             {
-                eZDebug::writeError( 'Unknown type of DateTime default value. Empty type used instead.',
-                                    'eZDateTimeType::serializeContentClassAttribute()' );
+                eZDebug::writeError( 'Unknown type of DateTime default value. Empty type used instead.', __METHOD__ );
                 $defaultValueNode->setAttribute( 'type', 'empty' );
             } break;
         }
@@ -569,8 +568,7 @@ class eZDateTimeType extends eZDataType
             } break;
             default:
             {
-                eZDebug::writeError( 'Type of DateTime default value is not set. Empty type used as default.',
-                                    'eZDateTimeType::unserializeContentClassAttribute()' );
+                eZDebug::writeError( 'Type of DateTime default value is not set. Empty type used as default.', __METHOD__ );
                 $classAttribute->setAttribute( self::DEFAULT_FIELD, self::DEFAULT_EMTPY );
             } break;
         }

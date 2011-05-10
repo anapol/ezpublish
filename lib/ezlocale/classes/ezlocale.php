@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -46,7 +46,6 @@
   Example:
 
 \code
-//include_once( 'lib/ezlocale/classes/ezlocale.php' );
 
 // Fetch the default values supplied by site.ini
 $locale = eZLocale::instance();
@@ -123,6 +122,8 @@ The following characters are recognized in the format string:
 - y - year, 2 digits; e.g. "99"
 - z - day of the year; i.e. "0" to "365"
 - Z - timezone offset in seconds (i.e. "-43200" to "43200"). The offset for timezones west of UTC is always negative, and for those east of UTC is always positive.
+- c - ISO 8601 date; i.e. 2004-02-12T15:19:21+00:00
+- r - RFC 2822 formated date; i.e. Thu, 21 Dec 2000 16:01:07 +0200
 
 \sa eZLanguage
 */
@@ -141,7 +142,7 @@ class eZLocale
         $this->TimePHPArray = array( 'g', 'G', 'h', 'H', 'i', 's', 'U', 'I', 'L', 't' );
         $this->DatePHPArray = array( 'd', 'j', 'm', 'n', 'O', 'T', 'U', 'w', 'W', 'Y', 'y', 'z', 'Z', 'I', 'L', 't' );
         $this->DateTimePHPArray = array( 'd', 'j', 'm', 'n', 'O', 'T', 'U', 'w', 'W', 'Y', 'y', 'z', 'Z',
-                                         'g', 'G', 'h', 'H', 'i', 's', 'U', 'I', 'L', 't', 'a' );
+                                         'g', 'G', 'h', 'H', 'i', 's', 'U', 'I', 'L', 't', 'a', 'c', 'r' );
         $this->TimeArray = preg_replace( '/.+/', '%$0', $this->TimePHPArray );
         $this->DateArray = preg_replace( '/.+/', '%$0', $this->DatePHPArray );
         $this->DateTimeArray = preg_replace( '/.+/', '%$0', $this->DateTimePHPArray );
@@ -565,12 +566,12 @@ class eZLocale
             }
             else
             {
-                eZDebug::writeError( "Unknown method '$method' specified for attribute '$attribute'", 'eZLocale::attribute' );
+                eZDebug::writeError( "Unknown method '$method' specified for attribute '$attribute'", __METHOD__ );
                 return null;
             }
         }
 
-        eZDebug::writeError( "Attribute '$attribute' does not exist", 'eZLocale::attribute' );
+        eZDebug::writeError( "Attribute '$attribute' does not exist", __METHOD__ );
         return null;
     }
 
@@ -1490,7 +1491,7 @@ class eZLocale
             $localeFile = $locale . '.ini';
             if ( eZLocale::isDebugEnabled() )
             {
-                eZDebug::writeNotice( "Requesting $localeFile", 'eZLocale::localeFile' );
+                eZDebug::writeNotice( "Requesting $localeFile", __METHOD__ );
             }
             if ( eZINI::exists( $localeFile, 'share/locale' ) )
                 $this->LocaleINI[$type] = eZINI::instance( $localeFile, 'share/locale' );
@@ -1518,7 +1519,7 @@ class eZLocale
             $countryFile = 'country/' . $locale . '.ini';
             if ( eZLocale::isDebugEnabled() )
             {
-                eZDebug::writeNotice( "Requesting $countryFile", 'eZLocale::countryFile' );
+                eZDebug::writeNotice( "Requesting $countryFile", __METHOD__ );
             }
             if ( eZINI::exists( $countryFile, 'share/locale' ) )
                 $this->CountryINI[$type] = eZINI::instance( $countryFile, 'share/locale' );
@@ -1546,7 +1547,7 @@ class eZLocale
             $languageFile = 'language/' . $locale . '.ini';
             if ( eZLocale::isDebugEnabled() )
             {
-                eZDebug::writeNotice( "Requesting $languageFile", 'eZLocale::languageFile' );
+                eZDebug::writeNotice( "Requesting $languageFile", __METHOD__ );
             }
             if ( eZINI::exists( $languageFile, 'share/locale' ) )
                 $this->LanguageINI[$type] = eZINI::instance( $languageFile, 'share/locale' );
@@ -1560,7 +1561,7 @@ class eZLocale
      * Use this instead of newing eZLocale to benefit from speed and unified access.
      * note: Use create() if you need to get a new unique copy you can alter.
      *
-     * @param $localeString string|false
+     * @param string|false $localeString
      * @return eZLocale
      */
     static function instance( $localeString = false )
@@ -1720,6 +1721,6 @@ class eZLocale
     public $IntlLanguageName;
     public $CountryNames;
     //@}
-};
+}
 
 ?>

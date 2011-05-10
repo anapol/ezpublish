@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -77,7 +77,7 @@ class eZBinaryFileHandler
             return $this->Info[$attribute];
         }
 
-        eZDebug::writeError( "Attribute '$attribute' does not exist", 'eZBinaryFileHandler::attribute' );
+        eZDebug::writeError( "Attribute '$attribute' does not exist", __METHOD__ );
         return null;
     }
 
@@ -213,7 +213,7 @@ class eZBinaryFileHandler
             } break;
             default:
             {
-                eZDebug::writeWarning( "Unknown binary file type '$downloadType'", 'eZBinaryFileHandler::downloadURL' );
+                eZDebug::writeWarning( "Unknown binary file type '$downloadType'", __METHOD__ );
             } break;
         }
         $url = "/content/download/$contentObjectID/$contentObjectAttributeID/$downloadType/$name";
@@ -258,7 +258,7 @@ class eZBinaryFileHandler
      * Returns a shared instance of the eZBinaryFileHandler class
      * pr $handlerName as defined in file.ini[BinaryFileSettings]Handler
      *
-     * @param $identifier string|false Uses file.ini[BinaryFileSettings]Handler if false
+     * @param string|false $identifier Uses file.ini[BinaryFileSettings]Handler if false
      * @return eZBinaryFileHandler
      */
     static function instance( $identifier = false )
@@ -281,7 +281,7 @@ class eZBinaryFileHandler
 
             if( $instance === false )
             {
-                eZDebug::writeError( "Could not find binary file handler '$identifier'", 'eZBinaryFileHandler::instance' );
+                eZDebug::writeError( "Could not find binary file handler '$identifier'", __METHOD__ );
             }
         }
         return $instance;

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -184,7 +184,7 @@ class eZCodePageMapper
                 unset( $eZCodePageMapperCacheCodeDate );
                 $in_out_map =& $this->InputOutputMap;
                 $out_in_map =& $this->OutputInputMap;
-                eZDebug::writeDebug( 'loading cache from: ' . $cache, 'eZCodePageMapper::load' );
+                eZDebug::writeDebug( 'loading cache from: ' . $cache, __METHOD__ );
                 include( $cache );
                 if ( isset( $eZCodePageMapperCacheCodeDate ) or
                      $eZCodePageMapperCacheCodeDate == self::CACHE_CODE_DATE )
@@ -234,12 +234,12 @@ class eZCodePageMapper
     }
 
     /**
-     * Returns a shared instance of the eZCodePageMapper pr the 
+     * Returns a shared instance of the eZCodePageMapper pr the
      * $input_charset_code and $output_charset_code params.
      *
-     * @param $input_charset_code string
-     * @param $output_charset_code string
-     * @param $use_cache bool
+     * @param string $input_charset_code
+     * @param string $output_charset_code
+     * @param bool $use_cache
      * @return eZCodePageMapper
      */
     static function instance( $input_charset_code, $output_charset_code, $use_cache = true )

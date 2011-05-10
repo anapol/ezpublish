@@ -2,7 +2,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.4.0
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -96,6 +96,8 @@ mysqli_free_result( $res );
 
 // Fetch file data.
 $dfsFilePath = MOUNT_POINT_PATH . '/' . $filename;
+// Set cache time out to 100 minutes by default
+$expiry = defined( 'EXPIRY_TIMEOUT' ) ? EXPIRY_TIMEOUT : 6000;
 if ( file_exists( $dfsFilePath ) )
 {
     // Output HTTP headers.
@@ -108,8 +110,7 @@ if ( file_exists( $dfsFilePath ) )
     header( "Content-Length: $size" );
     header( "Content-Type: $mimeType" );
     header( "Last-Modified: $mdate" );
-    /* Set cache time out to 10 minutes, this should be good enough to work around an IE bug */
-    header( "Expires: ". gmdate('D, d M Y H:i:s', time() + 6000) . ' GMT' );
+    header( "Expires: " . gmdate('D, d M Y H:i:s', time() + $expiry) . ' GMT' );
     header( "Connection: close" );
     header( "X-Powered-By: eZ Publish" );
     header( "Accept-Ranges: none" );

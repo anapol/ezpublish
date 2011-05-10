@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -230,7 +230,7 @@ class eZSerializedObjectNameList
         }
         else
         {
-            eZDebug::writeWarning( "Trying to get name for language '$languageLocale' without initialized name list.", 'eZSerializedObjectNameList::hasNameInLocale' );
+            eZDebug::writeWarning( "Trying to get name for language '$languageLocale' without initialized name list.", __METHOD__ );
         }
 
         return $hasName;
@@ -257,12 +257,12 @@ class eZSerializedObjectNameList
             }
             else
             {
-                eZDebug::writeWarning( "Language locale is not specified while setting name '$name'", 'eZSerializedObjectNameList::setNameByLanguageLocale' );
+                eZDebug::writeWarning( "Language locale is not specified while setting name '$name'", __METHOD__ );
             }
         }
         else
         {
-            eZDebug::writeWarning( "Trying to set name '$name' for language '$languageLocale' without initialized name list.", 'eZSerializedObjectNameList::setNameByLanguageLocale' );
+            eZDebug::writeWarning( "Trying to set name '$name' for language '$languageLocale' without initialized name list.", __METHOD__ );
         }
     }
 
@@ -380,7 +380,7 @@ class eZSerializedObjectNameList
         }
         else
         {
-            eZDebug::writeWarning( "Can't set '$languageLocale' as default language. '$languageLocale' language doesn't exist in system", "eZSerializedObjectNameList::setDefaultLanguageByLocale" );
+            eZDebug::writeWarning( "Can't set '$languageLocale' as default language. '$languageLocale' language doesn't exist in system", __METHOD__ );
         }
 
         return $language;
@@ -452,22 +452,18 @@ class eZSerializedObjectNameList
 
     function prioritizedLanguagesJsArray()
     {
+        $langList = array();
         $languages = $this->prioritizedLanguages();
-
-        $jsArray = array();
-
         foreach ( $languages as $key => $language )
         {
-            $jsArray[] = "{ locale: '".$language->attribute( 'locale' ).
-                "', name: '".$language->attribute( 'name' )."' }";
+            $langList[] = array( 'locale' => $language->attribute( 'locale' ),
+                                 'name'   => $language->attribute( 'name' ) );
         }
 
-        if ( count( $jsArray ) > 0 )
-        {
-            $jsArray = '[ '.implode( ', ', $jsArray ).' ]';
-        }
+        if ( $langList )
+            return json_encode( $langList );
 
-        return $jsArray;
+        return '[]';
     }
 
     function languageLocaleList()

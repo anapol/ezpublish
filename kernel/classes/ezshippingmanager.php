@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -181,8 +181,7 @@ class eZShippingManager
         $className = $handlerName . 'ShippingHandler';
         if ( !class_exists ( $className ) )
         {
-            eZDebug::writeError( "Cannot instantiate non-existent class: '$className'",
-                                 'eZShippingManager::loadShippingHandler' );
+            eZDebug::writeError( "Cannot instantiate non-existent class: '$className'", __METHOD__ );
             return null;
         }
 
@@ -242,8 +241,7 @@ class eZShippingManager
         $className = $handlerName . 'BasketInfoHandler';
         if ( !class_exists ( $className ) )
         {
-            eZDebug::writeError( "Cannot instantiate non-existent class: '$className'",
-                                 'eZShippingManager::loadBasketInfoHandler' );
+            eZDebug::writeError( "Cannot instantiate non-existent class: '$className'", __METHOD__ );
             return null;
         }
 

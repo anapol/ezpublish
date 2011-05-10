@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -34,8 +34,6 @@
   \brief eZAuthor handles author lists
 
   \code
-
-  //include_once( "kernel/classes/datatypes/ezauthor/ezauthor.php" );
 
   $author = new eZAuthor( "Colour" );
   $author->addValue( "Red" );
@@ -73,7 +71,7 @@ class eZAuthor
 
     /**
      * Add an author
-     * 
+     *
      * @param int $id
      * @param string $name
      * @param string $email
@@ -93,7 +91,7 @@ class eZAuthor
 
     /**
      * Remove authors
-     * 
+     *
      * @param array $removeList List of id's of authors to remove
      */
     function removeAuthors( $removeList )
@@ -143,7 +141,7 @@ class eZAuthor
             }break;
             default:
             {
-                eZDebug::writeError( "Attribute '$name' does not exist", 'eZAuthor::attribute' );
+                eZDebug::writeError( "Attribute '$name' does not exist", __METHOD__ );
                 return null;
             }
             break;

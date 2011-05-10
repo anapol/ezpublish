@@ -2,7 +2,7 @@
 /**
  * File containing the options object for the eZExtension class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package kernel
  *
@@ -34,14 +34,14 @@
  * @property array $handlerParams
  *      The list of parameters to pass to the handler
  *      Default : null
- * 
+ *
  * @property string $aliasSection
  *      Default : null
  *
  * @property string $aliasVariable
  *      Default : null
- *      
-  * @property string $aliasOptionalIndex
+ *
+ * @property string $aliasOptionalIndex
  *      Default : null
  *
  * @throws ezcBasePropertyNotFoundException

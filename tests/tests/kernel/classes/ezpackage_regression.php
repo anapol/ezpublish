@@ -2,7 +2,7 @@
 /**
  * File containing the eZPackageRegression class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -17,29 +17,20 @@ class eZPackageRegression extends ezpDatabaseTestCase
         $this->setName( "eZPackage Regression Tests" );
     }
 
-    public function setUp()
-    {
-        parent::setUp();
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-    }
 
     /**
-    * Regression test for issue #15263
-    * Content object name/url of imported content classes aren't generated correctly
-    *
-    * @url http://issues.ez.no/15263
-    *
-    * @outline
-    * 1) Expire and force generation of class attribute cache
-    * 2) Load a test package
-    * 3) Install the package
-    * 4) Publish an object of the imported class
-    * 5) The object name / url alias shouldn't be the expected one
-    **/
+     * Regression test for issue #15263
+     * Content object name/url of imported content classes aren't generated correctly
+     *
+     * @url http://issues.ez.no/15263
+     *
+     * @outline
+     * 1) Expire and force generation of class attribute cache
+     * 2) Load a test package
+     * 3) Install the package
+     * 4) Publish an object of the imported class
+     * 5) The object name / url alias shouldn't be the expected one
+     */
     public function testIssue15263()
     {
         $adminUser = eZUser::fetchByName( 'admin' );

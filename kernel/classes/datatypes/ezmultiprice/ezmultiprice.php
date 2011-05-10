@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -382,7 +382,7 @@ class eZMultiPrice extends eZSimplePrice
         if ( !$this->updatePrice( $currencyCode, $value, $type ) &&
              !$this->addPrice( $currencyCode, $value, $type ) )
         {
-            eZDebug::writeWarning( "Unable to set price in '$currencyCode'", 'eZMultiPrice::setPrice' );
+            eZDebug::writeWarning( "Unable to set price in '$currencyCode'", __METHOD__ );
             return false;
         }
 

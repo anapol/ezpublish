@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -218,7 +218,7 @@ $node->setAttribute( 'depth', $depth );
 $node->setAttribute( 'node_id', $virtualNodeID );
 $node->setAttribute( 'sort_field', $class->attribute( 'sort_field' ) );
 $node->setAttribute( 'sort_order', $class->attribute( 'sort_order' ) );
-$node->setAttribute( 'remote_id', md5( (string)mt_rand() . (string)time() ) );
+$node->setAttribute( 'remote_id', eZRemoteIdUtility::generate( 'node' ) );
 $node->setName( $objectName );
 
 $node->setContentObject( $contentObject );

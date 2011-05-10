@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -32,9 +32,7 @@
 */
 set_time_limit( 0 );
 
-if ( !$isQuiet )
-    $cli->output( "Update content view count..."  );
-
+$cli->output( "Update content view count..."  );
 
 $dt = new eZDateTime();
 $year = $dt->year();
@@ -61,6 +59,7 @@ $fileName = $logFileIni->variable( 'AccessLogFileSettings', 'LogFileName' );
 
 $prefixes = $logFileIni->variable( 'AccessLogFileSettings', 'SitePrefix' );
 $pathPrefixes = $logFileIni->variable( 'AccessLogFileSettings', 'PathPrefix' );
+$pathPrefixesCount = count( $pathPrefixes );
 
 $ini = eZINI::instance();
 $logDir = $ini->variable( 'FileSettings', 'LogDir' );
@@ -128,7 +127,7 @@ if ( is_file( $logFilePath ) )
                     $url = preg_replace( "/\?.*/", "", $url);
                     foreach ( $prefixes as $prefix )
                     {
-                        $urlChanged = preg_replace( '/^\/' . preg_quote( $prefix, '/' ) . '\//', '/', $url );
+                        $urlChanged = preg_replace( '/^\/' . preg_quote( $prefix, '/' ) . '(\/|$)/', '/', $url );
                         if ( $urlChanged != $url )
                         {
                             $url = $urlChanged;
@@ -157,7 +156,7 @@ if ( is_file( $logFilePath ) )
                         }
                         else
                         {
-                            if ( $firstElement != "" )
+                            if ( $firstElement != "" || $url === '/' )
                             {
                                 $pathIdentificationString = $db->escapeString( $firstElement );
 
@@ -168,7 +167,7 @@ if ( is_file( $logFilePath ) )
                                 $pathPrefixIndex = 0;
                                 while ( !$result )
                                 {
-                                    if ( $pathPrefixIndex < count( $pathPrefixes ) )
+                                    if ( $pathPrefixIndex < $pathPrefixesCount )
                                     {
                                         // Try prepending each of the existing pathPrefixes, to see if one of them matches an existing node
                                         $pathIdentificationString = $db->escapeString( $pathPrefixes[$pathPrefixIndex] . '/' . $firstElement );
@@ -227,6 +226,13 @@ foreach ( $pathArray as $path )
 {
     $nodeID = eZURLAliasML::fetchNodeIDByPath( $path );
 
+    // Support for PathPrefix
+    for ( $pathPrefixIndex = 0; !$nodeID && $pathPrefixIndex < $pathPrefixesCount; ++$pathPrefixIndex )
+    {
+        // Try prepending each of the existing pathPrefixes, to see if one of them matches an existing node
+        $nodeID = eZURLAliasML::fetchNodeIDByPath( $db->escapeString( $pathPrefixes[$pathPrefixIndex] . $path ) );
+    }
+
     if ( $nodeID )
     {
         $counter = eZViewCounter::fetch( $nodeID );
@@ -248,7 +254,6 @@ if ( $fh )
 }
 
 $cli->output( "Finished at " . $dt->toString() . "\n"  );
-if ( !$isQuiet )
-    $cli->output( "View count have been updated!\n" );
+$cli->output( "View count have been updated!\n" );
 
 ?>

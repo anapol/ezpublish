@@ -2,7 +2,7 @@
 /**
  * File containing various wrapper classes used by the WebDAV tests.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -365,7 +365,6 @@ class eZWebDAVServerWrapper extends eZWebDAVServer
                 $fileName = $varDir . '/' . $logDir . '/' . $logName;
                 if ( !file_exists( $varDir . '/' . $logDir ) )
                 {
-                    //include_once( 'lib/ezfile/classes/ezdir.php' );
                     eZDir::mkdir( $varDir . '/' . $logDir, 0775, true );
                 }
 

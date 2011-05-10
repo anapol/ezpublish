@@ -8,7 +8,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -2879,7 +2879,6 @@ class eZWebDAVContentBackend extends ezcWebdavSimpleBackend implements ezcWebdav
         }
         else
         {
-            //include_once( 'kernel/classes/ezcontentobjecttreenodeoperations.php' );
             if( !eZContentObjectTreeNodeOperations::move( $sourceNode->attribute( 'node_id' ), $destinationNode->attribute( 'node_id' ) ) )
             {
                 $this->appendLogEntry( "Unable to move the node '$sourceSite':'$nodePath' to '$destinationSite':'$destinationNodePath'", 'CS:moveContent' );
@@ -2895,7 +2894,6 @@ class eZWebDAVContentBackend extends ezcWebdavSimpleBackend implements ezcWebdav
                     $contentObjectAttributes[0]->setAttribute( 'data_text', basename( $destination ) );
                     $contentObjectAttributes[0]->store();
 
-                    //include_once( 'lib/ezutils/classes/ezoperationhandler.php' );
                     $operationResult = eZOperationHandler::execute( 'content', 'publish', array( 'object_id' => $contentObjectID, 'version' => 1 ) );
                     $object->store();
         */

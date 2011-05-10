@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -697,7 +697,7 @@ class eZXMLTextType extends eZDataType
                 $objectArray = eZContentObject::fetchByRemoteID( $objectRemoteID, false );
                 if ( !is_array( $objectArray ) )
                 {
-                    eZDebug::writeWarning( "Can't fetch object with remoteID = $objectRemoteID", 'eZXMLTextType::unserialize' );
+                    eZDebug::writeWarning( "Can't fetch object with remoteID = $objectRemoteID", __METHOD__ );
                     continue;
                 }
 
@@ -721,7 +721,7 @@ class eZXMLTextType extends eZDataType
                 $nodeArray = eZContentObjectTreeNode::fetchByRemoteID( $nodeRemoteID, false );
                 if ( !is_array( $nodeArray ) )
                 {
-                    eZDebug::writeWarning( "Can't fetch node with remoteID = $nodeRemoteID", 'eZXMLTextType::unserialize' );
+                    eZDebug::writeWarning( "Can't fetch node with remoteID = $nodeRemoteID", __METHOD__ );
                     continue;
                 }
 

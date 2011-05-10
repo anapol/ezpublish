@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -32,11 +32,9 @@
 $event = eZNotificationEvent::create( 'ezcurrenttime', array() );
 
 $event->store();
-if ( !$isQuiet )
-    $cli->output( "Starting notification event processing" );
+$cli->output( "Starting notification event processing" );
 eZNotificationEventFilter::process();
 
-if ( !$isQuiet )
-    $cli->output( "Done" );
+$cli->output( "Done" );
 
 ?>

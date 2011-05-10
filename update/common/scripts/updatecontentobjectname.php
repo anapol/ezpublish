@@ -6,7 +6,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -69,18 +69,15 @@ function help()
 
 function changeSiteAccessSetting( &$siteaccess, $optionData )
 {
-    global $isQuiet;
     $cli = eZCLI::instance();
     if ( file_exists( 'settings/siteaccess/' . $optionData ) )
     {
         $siteaccess = $optionData;
-        if ( !$isQuiet )
-            $cli->notice( "Using siteaccess $siteaccess for content object name update" );
+        $cli->output( "Using siteaccess $siteaccess for content object name update" );
     }
     else
     {
-        if ( !$isQuiet )
-            $cli->notice( "Siteaccess $optionData does not exist, using default siteaccess" );
+        $cli->notice( "Siteaccess $optionData does not exist, using default siteaccess" );
     }
 }
 
@@ -265,6 +262,7 @@ $script->setAllowedDebugLevels( $allowedDebugLevels );
 $script->setUseDebugAccumulators( $useDebugAccumulators );
 $script->setUseDebugTimingPoints( $useDebugTimingpoints );
 $script->setUseIncludeFiles( $useIncludeFiles );
+$script->setIsQuiet( $isQuiet );
 
 if ( $webOutput )
     $useColors = true;

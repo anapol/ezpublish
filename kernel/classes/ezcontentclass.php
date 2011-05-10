@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -41,6 +41,12 @@ class eZContentClass extends eZPersistentObject
     const VERSION_STATUS_DEFINED = 0;
     const VERSION_STATUS_TEMPORARY = 1;
     const VERSION_STATUS_MODIFIED = 2;
+
+    /**
+     * Max length of content object name.
+     * @var int
+     */
+    const CONTENT_OBJECT_NAME_MAX_LENGTH = 255;
 
     function eZContentClass( $row )
     {
@@ -191,7 +197,7 @@ class eZContentClass extends eZPersistentObject
         unset( $this->CanInstantiateLanguages );
         unset( $this->VersionCount );
         $this->ID = null;
-        $this->RemoteID = md5( (string)mt_rand() . (string)time() );
+        $this->RemoteID = eZRemoteIdUtility::generate( 'class' );
     }
 
     /*!
@@ -229,7 +235,7 @@ class eZContentClass extends eZPersistentObject
             $nameList->initFromString( $optionalValues['name'], $languageLocale );
         else
             $nameList->initFromString( '', $languageLocale );
-            
+
         $descriptionList = new eZSerializedObjectNameList();
         if ( isset( $optionalValues['serialized_description_list'] ) )
             $descriptionList->initFromSerializedList( $optionalValues['serialized_description_list'] );
@@ -252,7 +258,7 @@ class eZContentClass extends eZPersistentObject
             "creator_id" => $userID,
             "modifier_id" => $userID,
             "created" => $dateTime,
-            'remote_id' => md5( (string)mt_rand() . (string)time() ),
+            'remote_id' => eZRemoteIdUtility::generate( 'class' ),
             "modified" => $dateTime,
             "is_container" => $contentClassDefinition[ 'fields' ][ 'is_container' ][ 'default' ],
             "always_available" => $contentClassDefinition[ 'fields' ][ 'always_available' ][ 'default' ],
@@ -271,7 +277,7 @@ class eZContentClass extends eZPersistentObject
         return $contentClass;
     }
 
-    function instantiateIn( $lang, $userID = false, $sectionID = 0, $versionNumber = false, $versionStatus = eZContentObjectVersion::STATUS_INTERNAL_DRAFT )
+    function instantiateIn( $lang, $userID = false, $sectionID = 1, $versionNumber = false, $versionStatus = eZContentObjectVersion::STATUS_INTERNAL_DRAFT )
     {
         return eZContentClass::instantiate( $userID, $sectionID, $versionNumber, $lang, $versionStatus );
     }
@@ -280,12 +286,12 @@ class eZContentClass extends eZPersistentObject
      Creates a new content object instance and stores it.
 
      \param userID user ID (optional), current user if not set (also store object id in session if $userID = false)
-     \param sectionID section ID (optional), 0 if not set
+     \param sectionID section ID (optional), 1 if not set (Standard section)
      \param versionNumber version number, create initial version if not set
      \note Transaction unsafe. If you call several transaction unsafe methods you must enclose
      the calls within a db transaction; thus within db->begin and db->commit.
     */
-    function instantiate( $userID = false, $sectionID = 0, $versionNumber = false, $languageCode = false, $versionStatus = eZContentObjectVersion::STATUS_INTERNAL_DRAFT )
+    function instantiate( $userID = false, $sectionID = 1, $versionNumber = false, $languageCode = false, $versionStatus = eZContentObjectVersion::STATUS_INTERNAL_DRAFT )
     {
         $attributes = $this->fetchAttributes();
 
@@ -463,7 +469,7 @@ class eZContentClass extends eZPersistentObject
         }
         else if ( $accessWord == 'no' )
         {
-            // Cannnot create any objects, return empty list.
+            // Cannot create any objects, return empty list.
             return $classList;
         }
         else
@@ -482,13 +488,15 @@ class eZContentClass extends eZPersistentObject
                     $languageCodeArrayPart = array_intersect( $policy['Language'], $languageCodeList );
                 }
 
-                if ( $classIDArrayPart == '*' )
+                // No class limitation for this policy AND no previous limitation(s)
+                if ( $classIDArrayPart == '*' && empty( $classIDArray ) )
                 {
                     $fetchAll = true;
                     $allowedLanguages['*'] = array_unique( array_merge( $allowedLanguages['*'], $languageCodeArrayPart ) );
                 }
-                else
+                else if ( is_array( $classIDArrayPart ) )
                 {
+                    $fetchAll = false;
                     foreach( $classIDArrayPart as $class )
                     {
                         if ( isset( $allowedLanguages[$class] ) )
@@ -752,7 +760,7 @@ class eZContentClass extends eZPersistentObject
         if ( !$remoteID &&
              $this->Version == eZContentClass::VERSION_STATUS_DEFINED )
         {
-            $this->setAttribute( 'remote_id', md5( (string)mt_rand() . (string)time() ) );
+            $this->setAttribute( 'remote_id', eZRemoteIdUtility::generate( 'class' ) );
             $this->sync( array( 'remote_id' ) );
             $remoteID = eZPersistentObject::attribute( 'remote_id', true );
         }
@@ -839,7 +847,7 @@ You will need to change the class of the node by using the swap functionality.' 
     /*!
      \note Removes class attributes
 
-     \param removeAtttributes Array of attributes to remove
+     \param removeAttributes Array of attributes to remove
      \param version Version to remove( optional )
     */
     function removeAttributes( $removeAttributes = false, $version = false )
@@ -990,7 +998,7 @@ You will need to change the class of the node by using the swap functionality.' 
      * attribute and recreates the class group entries.
      *
      * @note It will remove classes in the previous and specified version before storing.
-     * 
+     *
      * @param array $attributes array of attributes
      * @param int $version version status
      * @since Version 4.3
@@ -1022,7 +1030,7 @@ You will need to change the class of the node by using the swap functionality.' 
 
         // Recreate class member entries
         eZContentClassClassGroup::removeClassMembers( $this->ID, $version );
-        
+
         foreach( eZContentClassClassGroup::fetchGroupList( $this->ID, $previousVersion ) as $classgroup )
         {
             $classgroup->setAttribute( 'contentclass_version', $version );
@@ -1368,25 +1376,42 @@ You will need to change the class of the node by using the swap functionality.' 
         return $this->VersionCount;
     }
 
-    /*!
-     Will generate a name for the content object based on the class
-     settings for content object.
-    */
-    function contentObjectName( $contentObject, $version = false, $translation = false )
+    /**
+     * Will generate a name for the content object based on the class
+     * settings for content object limited by self::CONTENT_OBJECT_NAME_MAX_LENGTH.
+     *
+     * @param eZContentObject $contentObject
+     * @param int|false $version
+     * @param string|false $translation
+     * @return string
+     */
+    function contentObjectName( eZContentObject $contentObject, $version = false, $translation = false )
     {
         $contentObjectNamePattern = $this->ContentObjectName;
 
+        $ini = eZINI::instance();
+        $length = (int) $ini->variable('ContentSettings', 'ContentObjectNameLimit');
+        $sequence = $ini->variable('ContentSettings', 'ContentObjectNameLimitSequence');
+        if ( $length < 1 || $length > self::CONTENT_OBJECT_NAME_MAX_LENGTH )
+        {
+            $length = self::CONTENT_OBJECT_NAME_MAX_LENGTH;
+        }
         $nameResolver = new eZNamePatternResolver( $contentObjectNamePattern, $contentObject, $version, $translation );
-        $contentObjectName = $nameResolver->resolveNamePattern();
+        $contentObjectName = $nameResolver->resolveNamePattern( $length, $sequence );
 
         return $contentObjectName;
     }
 
-    /*
-     Will generate a name for the url alias based on the class
-     settings for content object.
-    */
-    function urlAliasName( $contentObject, $version = false, $translation = false )
+    /**
+     * Will generate a name for the url alias based on the class
+     * settings for content object limited by site.ini\[URLTranslator]\UrlAliasNameLimit
+     *
+     * @param eZContentObject $contentObject
+     * @param int|false $version
+     * @param string|false $translation
+     * @return string
+     */
+    function urlAliasName( eZContentObject $contentObject, $version = false, $translation = false )
     {
         if ( $this->URLAliasName )
         {
@@ -1397,8 +1422,9 @@ You will need to change the class of the node by using the swap functionality.' 
             $urlAliasNamePattern = $this->ContentObjectName;
         }
 
+        $length = (int) eZINI::instance()->variable('URLTranslator', 'UrlAliasNameLimit');
         $nameResolver = new eZNamePatternResolver( $urlAliasNamePattern, $contentObject, $version, $translation );
-        $urlAliasName = $nameResolver->resolveNamePattern();
+        $urlAliasName = $nameResolver->resolveNamePattern( $length );
 
         return $urlAliasName;
     }
@@ -1869,7 +1895,7 @@ You will need to change the class of the node by using the swap functionality.' 
 
     /**
      * Expires in-memory cache for eZContentClass.
-     * 
+     *
      * Clears cache for fetched eZContentClass objects,
      * class identifiers and class attributes.
      *
@@ -1986,7 +2012,7 @@ You will need to change the class of the node by using the swap functionality.' 
 
     /**
      * In-memory cache for class identifiers / id matching
-     **/
+     */
     private static $identifierHash = null;
 }
 

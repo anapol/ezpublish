@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -64,7 +64,10 @@ class eZOperationMemento extends eZPersistentObject
                                          'main_key' => array( 'name' => 'MainKey',
                                                               'datatype' => 'string',
                                                               'default' => '',
-                                                              'required' => true ),
+                                                              'required' => true,
+                                                              'foreign_class' => 'eZOperationMemento',
+                                                              'foreign_attribute' => 'memento_key',
+                                                              'multiplicity' => '1..*' ),
                                          'memento_data' => array( 'name' => 'MementoData',
                                                                   'datatype' => 'text',
                                                                   'default' => '',
@@ -172,7 +175,7 @@ class eZOperationMemento extends eZPersistentObject
         $string = '';
         foreach ( $parameters as $key => $value )
         {
-            if ( is_array( $value ) ) 
+            if ( is_array( $value ) )
                 $string .= $key . serialize( $value );
             else
                 $string .= $key . $value;

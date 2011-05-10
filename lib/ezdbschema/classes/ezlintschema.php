@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -281,7 +281,7 @@ class eZLintSchema extends eZDBSchemaInterface
                         $schema[$existingTableName]['fields'][$existingFieldName]['comments'] = $comments;
                         foreach ( $comments as $comment )
                         {
-                            eZDebug::writeWarning( $comment, 'eZLintSchema::fieldComment' );
+                            eZDebug::writeWarning( $comment, __METHOD__ );
                         }
                     }
                 }
@@ -382,7 +382,7 @@ class eZLintSchema extends eZDBSchemaInterface
                         $schema[$existingTableName]['indexes'][$existingIndexName]['comments'] = $comments;
                         foreach ( $comments as $comment )
                         {
-                            eZDebug::writeWarning( $comment, 'eZLintSchema::indexComment' );
+                            eZDebug::writeWarning( $comment, __METHOD__ );
                         }
                     }
                 }
@@ -399,7 +399,7 @@ class eZLintSchema extends eZDBSchemaInterface
                 $schema[$existingTableName]['comments'] = $tableComments;
                 foreach ( $tableComments as $comment )
                 {
-                    eZDebug::writeWarning( $comment, 'eZLintSchema::tableComment' );
+                    eZDebug::writeWarning( $comment, __METHOD__ );
                 }
             }
         }

@@ -2,7 +2,7 @@
 /**
  * File containing the eZProductCollectionItemOptionTest class
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -18,15 +18,15 @@ class eZProductCollectionItemOptionTest extends ezpDatabaseTestCase
     }
 
     /**
-    * Unit test for eZProductCollectionItem::cleanupList()
-    *
-    * Outline:
-    * 1) Create 40 eZProductCollectionItemOption objects with an item_id
-    *    from 1 to 4
-    * 2) Call cleanupList with (1, 2) as a parameter
-    * 4) Check that the 20 matching items have been removed
-    * 5) Check that the 20 other, non-matching items haven't been removed
-    **/
+     * Unit test for eZProductCollectionItem::cleanupList()
+     *
+     * Outline:
+     * 1) Create 40 eZProductCollectionItemOption objects with an item_id
+     *    from 1 to 4
+     * 2) Call cleanupList with (1, 2) as a parameter
+     * 4) Check that the 20 matching items have been removed
+     * 5) Check that the 20 other, non-matching items haven't been removed
+     */
     public function testCleanupList()
     {
         // Create a few collections

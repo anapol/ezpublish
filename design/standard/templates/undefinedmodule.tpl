@@ -23,8 +23,6 @@
 
 {/section}
 
-<meta name="MSSmartTagsPreventParsing" content="TRUE">
-
 <meta name="generator" content="eZ Publish" />
 
 </head>
@@ -74,7 +72,7 @@
 <br />
 <font color="white">
 <center>
-<a href="http://ez.no/developer">eZ Publish&trade;</a> copyright &copy; 1999-2010 <a href="http://ez.no">eZ Systems AS</a>
+<a href="http://ez.no/developer">eZ Publish&trade;</a> copyright &copy; 1999-2011 <a href="http://ez.no">eZ Systems AS</a>
 </center>
 </font>
 <br />

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -134,7 +134,7 @@ class eZContentClassPackageHandler extends eZPackageHandler
 
         if ( $class == null )
         {
-            eZDebug::writeNotice( "Class having remote id '$classRemoteID' not found.", 'eZContentClassPackageHandler::uninstall()' );
+            eZDebug::writeNotice( "Class having remote id '$classRemoteID' not found.", __METHOD__ );
             return true;
         }
 
@@ -248,7 +248,7 @@ class eZContentClassPackageHandler extends eZPackageHandler
                 return true;
 
             case self::ACTION_NEW:
-                $class->setAttribute( 'remote_id', md5( (string)mt_rand() . (string)time() ) );
+                $class->setAttribute( 'remote_id', eZRemoteIdUtility::generate( 'class' ) );
                 $class->store();
                 $classNameList->appendGroupName( " (imported)" );
                 break;

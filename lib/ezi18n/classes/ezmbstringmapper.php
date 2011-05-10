@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -189,8 +189,8 @@ class eZMBStringMapper
      * Returns a shared instance of the eZMBStringMapper pr the $input_charset_code
      * and $output_charset_code params.
      *
-     * @param $input_charset_code string
-     * @param $output_charset_code string
+     * @param string $input_charset_code
+     * @param string $output_charset_code
      * @return eZMBStringMapper
      */
     static function instance( $input_charset_code, $output_charset_code )

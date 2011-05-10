@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -536,7 +536,7 @@ $php->addInclude( 'lib/ezutils/classes/ezphpcreator.php' );
             else
             {
                 $text = '';
-                if ( method_exists( $value, 'serializedata' ) )
+                if ( method_exists( $value, 'serializeData' ) )
                 {
                     $serializeData = $value->serializeData();
                     $className = $serializeData['class_name'];
@@ -658,7 +658,7 @@ $php->addInclude( 'lib/ezutils/classes/ezphpcreator.php' );
         else if ( is_object( $value ) )
         {
             $text = '';
-            if ( method_exists( $value, 'serializedata' ) )
+            if ( method_exists( $value, 'serializeData' ) )
             {
                 $serializeData = $value->serializeData();
                 $className = $serializeData['class_name'];
@@ -945,8 +945,7 @@ print( $values['MyValue'] );
             }
             else if ( $variableRequired )
             {
-                eZDebug::writeError( "Variable '$variableName' is not present in cache '$path'",
-                                     'eZPHPCreator::restore' );
+                eZDebug::writeError( "Variable '$variableName' is not present in cache '$path'", __METHOD__ );
             }
             else
             {
@@ -985,8 +984,7 @@ print( $values['MyValue'] );
         }
         else
         {
-            eZDebug::writeError( "Failed to open file '" . $this->PHPDir . '/' . $this->PHPFile . "'",
-                                 'eZPHPCreator::store' );
+            eZDebug::writeError( "Failed to open file '" . $this->PHPDir . '/' . $this->PHPFile . "'", __METHOD__ );
             return false;
         }
     }

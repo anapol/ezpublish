@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -64,7 +64,7 @@ class eZExecution
             if ( is_callable( $handler ) )
                 call_user_func( $handler );
             else
-                eZDebug::writeError('Could not call cleanup handler, is it a static public function?', 'eZExecution::cleanup');
+                eZDebug::writeError('Could not call cleanup handler, is it a static public function?', __METHOD__ );
         }
     }
 
@@ -151,7 +151,7 @@ class eZExecution
                 call_user_func( $handler );
             else
 
-                eZDebug::writeError('Could not call fatal error handler, is it a static public function?', 'eZExecution::uncleanShutdownHandler');
+                eZDebug::writeError('Could not call fatal error handler, is it a static public function?', __METHOD__ );
         }
     }
 

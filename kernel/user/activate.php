@@ -5,7 +5,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -43,13 +43,14 @@ else if ( $http->hasPostVariable( 'HashSaltAppend' ) )
 // Check if key exists
 $accountActivated = false;
 $alreadyActive = false;
+$isPending = false;
 $accountKey = $hash ? eZUserAccountKey::fetchByKey( $hash ) : false;
 
 if ( $accountKey )
 {
     $accountActivated = true;
     $userID = $accountKey->attribute( 'user_id' );
-    
+
     $userContentObject = eZContentObject::fetch( $userID );
     if ( !$userContentObject instanceof eZContentObject )
     {
@@ -74,13 +75,22 @@ if ( $accountKey )
         eZUserOperationCollection::activation( $userID, $hash, true );
     }
 
-    // Log in user
-    $user = eZUser::fetch( $userID );
+    // execute operation to publish the user object
+    $publishResult = eZOperationHandler::execute( 'user' , 'register', array( 'user_id'=> $userID ) );
+    if( $publishResult['status'] === eZModuleOperationInfo::STATUS_HALTED )
+    {
+        $isPending = true;
+    }
+    else
+    {
+        // Log in user
+        $user = eZUser::fetch( $userID );
 
-    if ( $user === null )
-        return $Module->handleError( eZError::KERNEL_NOT_FOUND, 'kernel' );
+        if ( $user === null )
+            return $Module->handleError( eZError::KERNEL_NOT_FOUND, 'kernel' );
 
-    $user->loginCurrent();
+        $user->loginCurrent();
+    }
 }
 elseif( $mainNodeID )
 {
@@ -88,7 +98,7 @@ elseif( $mainNodeID )
     if ( $userContentObject instanceof eZContentObject )
     {
         $userSetting = eZUserSetting::fetch( $userContentObject->attribute( 'id' ) );
-    
+
         if ( $userSetting !== null && $userSetting->attribute( 'is_enabled' ) )
         {
             $alreadyActive = true;
@@ -103,6 +113,7 @@ $tpl = eZTemplate::factory();
 $tpl->setVariable( 'module', $Module );
 $tpl->setVariable( 'account_activated', $accountActivated );
 $tpl->setVariable( 'already_active', $alreadyActive );
+$tpl->setVariable( 'is_pending' , $isPending );
 
 // This line is deprecated, the correct name of the variable should
 // be 'account_activated' as shown above.

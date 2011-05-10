@@ -2,7 +2,7 @@
 /**
  * File containing the eZAutoloadGenerator class.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPL v2
  * @version //autogentag//
  * @package kernel
@@ -138,6 +138,11 @@ class eZAutoloadGenerator
      */
     const OUTPUT_PROGRESS_PHASE2 = 2;
 
+    /**
+     * The name of the file which contains default exclude directories for the
+     * autoload generator.
+     */
+    const DEFAULT_EXCLUDE_FILE = '.autoloadignore';
 
     /**
      * Constructs class to generate autoload arrays.
@@ -252,13 +257,34 @@ class eZAutoloadGenerator
                  {
                     chmod( $filePath, 0777 );
                  }
-                 
+
              }
              else
              {
                  throw new Exception( __METHOD__ . ": The file {$filePath} is not writable by the system." );
              }
          }
+    }
+
+    /**
+     * Adds exclude directories specified in the default excludes files, to the exclude array.
+     *
+     * If the default exclude file '.autoloadignore' does not exist, the
+     * function will just return the user specified exclude directories. This function relies on the options
+     * object being available in the instance.
+     *
+     * @return array The exclude directories
+     */
+    protected function handleDefaultExcludeFile()
+    {
+        $defaultExcludeFile = $this->options->basePath . DIRECTORY_SEPARATOR . self::DEFAULT_EXCLUDE_FILE;
+        if ( !file_exists( $defaultExcludeFile ) )
+        {
+            return $this->options->excludeDirs;
+        }
+
+        $defaultExcludeArray = explode( "\n", trim( file_get_contents( $defaultExcludeFile ) ) );
+        return array_merge( $defaultExcludeArray, $this->options->excludeDirs );
     }
 
     /**
@@ -271,7 +297,7 @@ class eZAutoloadGenerator
     protected function fetchFiles()
     {
         $path = $this->options->basePath;
-        $excludeDirs = $this->options->excludeDirs;
+        $excludeDirs = $this->handleDefaultExcludeFile();
 
         // make sure ezcBaseFile::findRecursive and the exclusion filters we pass to it
         // work correctly on systems with another file seperator than the forward slash
@@ -363,13 +389,13 @@ class eZAutoloadGenerator
 
     /**
      * Uses the walker in ezcBaseFile to find files.
-     * 
+     *
      * This also uses the callback to get progress information about the file search.
      *
-     * @param string $sourceDir 
-     * @param array $includeFilters 
+     * @param string $sourceDir
+     * @param array $includeFilters
      * @param array $excludeFilters
-     * @param eZAutoloadGenerator $gen 
+     * @param eZAutoloadGenerator $gen
      * @return array
      */
     public static function findRecursive( $sourceDir, array $includeFilters = array(), array $excludeFilters = array(), eZAutoloadGenerator $gen )
@@ -394,15 +420,15 @@ class eZAutoloadGenerator
     }
 
     /**
-     * Callback used ezcBaseFile 
+     * Callback used ezcBaseFile
      *
-     * @param string $ezpAutoloadFileFindContext 
-     * @param string $sourceDir 
-     * @param string $fileName 
-     * @param string $fileInfo 
+     * @param string $ezpAutoloadFileFindContext
+     * @param string $sourceDir
+     * @param string $fileName
+     * @param string $fileInfo
      * @return void
      */
-    
+
     public static function findRecursiveCallback( ezpAutoloadFileFindContext $context, $sourceDir, $fileName, $fileInfo )
     {
         if ( $fileInfo['mode'] & 0x4000 )
@@ -718,7 +744,7 @@ class eZAutoloadGenerator
 /**
  * Autoloader definition for eZ Publish $description files.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPL v2
  * @version //autogentag//
  * @package kernel
@@ -1014,12 +1040,12 @@ END;
 
     /**
      * Calls updateProgress on the output object.
-     * 
+     *
      * If progress output is not enabled or the output object is not set, this
      * method will not do anything.
      *
-     * @param int $phase 
-     * @param string $array 
+     * @param int $phase
+     * @param string $array
      * @return void
      */
     protected function updateProgressOutput( $phase )
@@ -1033,11 +1059,11 @@ END;
 
     /**
      * Increment counters used for statistics in the progress output.
-     * 
+     *
      * If the output object is not set, the method will not do anything.
      *
-     * @param int $phase 
-     * @param array $stat 
+     * @param int $phase
+     * @param array $stat
      * @return void
      */
     protected function incrementProgressStat( $phase, $stat )
@@ -1054,7 +1080,7 @@ END;
     /**
      * Initializes progress output for <var>$phase</var>
      *
-     * @param int $phase 
+     * @param int $phase
      * @return void
      */
     protected function startProgressOutput( $phase )
@@ -1070,7 +1096,7 @@ END;
     /**
      * Stops progress output for <var>$phase</var>
      *
-     * @param int $phase 
+     * @param int $phase
      * @return void
      */
     protected function stopProgressOutput( $phase )
@@ -1086,7 +1112,7 @@ END;
     /**
      * Fetches statistics array for $phase form the output object.
      *
-     * @param int $phase 
+     * @param int $phase
      * @return void
      */
     protected function getStatArray( $phase )
@@ -1101,8 +1127,8 @@ END;
     /**
      * Updates internal statistics data for <var>$phase</var>, with new array <var>$data</var>.
      *
-     * @param int $phase 
-     * @param array $data 
+     * @param int $phase
+     * @param array $data
      * @return void
      */
     protected function setStatArray( $phase, $data )
@@ -1116,16 +1142,63 @@ END;
 
     /**
      * Sets the object to handle out from the autoload generation.
-     * 
+     *
      * Currently this is only handled for the CLI.
      *
      * @see ezpAutoloadCliOutput
-     * @param object $outputObject 
+     * @param object $outputObject
      * @return void
      */
     public function setOutputObject( $outputObject )
     {
         $this->output = $outputObject;
     }
+
+    /**
+     * Create phpunit configuration file adding whitelist from kernel autoload file
+     *
+     * It writes file phpunit.xml in ./tests directory
+     *
+     * @return DOMDocument;
+     */
+    public function buildPHPUnitConfigurationFile()
+    {
+        
+          if ( $this->mask == self::MODE_KERNEL )
+          {
+              $this->log('Creating phpunit configuration file.');
+
+              $autoloadArray = @include 'autoload/ezp_kernel.php';
+
+              $baseDir = getcwd();
+              
+              $dom = new DOMDocument( '1.0', 'utf-8' );
+              $dom->formatOutput = true;
+
+              $root = $dom->createElement( 'phpunit' );
+              $filter = $dom->createElement( 'filter' );
+              $blacklist = $dom->createElement( 'blacklist' );
+              $whitelist = $dom->createElement( 'whitelist' );
+              $directory = $dom->createElement('directory', $baseDir . DIRECTORY_SEPARATOR . 'tests');
+
+              foreach ( $autoloadArray as $class => $filename )
+              {
+                  $file = $dom->createElement( 'file', $baseDir . DIRECTORY_SEPARATOR . $filename );
+                  $whitelist->appendChild($file);
+              }
+
+              $blacklist->appendChild($directory);
+              $filter->appendChild($blacklist);
+              $filter->appendChild($whitelist);
+              $root->appendChild($filter);
+              $dom->appendChild($root);
+
+              file_put_contents($baseDir . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'phpunit.xml', $dom->saveXML());
+
+              return $dom;
+          }
+
+     }
+      
 }
 ?>

@@ -2,7 +2,7 @@
 /**
  * File containing the eZWebDAVBackendContentRegressionTest class.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPLv2
  * @package tests
  */
@@ -29,7 +29,7 @@ require_once( 'wrappers.php' );
  * - the extension ezsiteaccesshelper is called to enable the created siteaccess
  *   in ezp/siteaccess/override/site.ini.append.php
  */
-class eZWebDAVBackendContentRegressionTest extends ezpTestRegressionTest
+class eZWebDAVBackendContentRegressionTest extends ezpDatabaseRegressionTest
 {
     /**
      * Setting needed to keep the global variables working between the tests.

@@ -7,7 +7,7 @@
 // ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 // SOFTWARE NAME: eZ Publish
 // SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -107,9 +107,7 @@ class eZExtensionPackageCreator extends eZPackageCreationHandler
 
     function loadExtensionName( $package, $http, $step, &$persistentData, $tpl )
     {
-        $siteINI = eZINI::instance();
-        $extensionDir = $siteINI->variable( 'ExtensionSettings', 'ExtensionDirectory' );
-        $extensionList = eZDir::findSubItems( $extensionDir );
+        $extensionList = eZDir::findSubItems( eZExtension::baseDirectory(), 'dl' );
         $tpl->setVariable( 'extension_list', $extensionList );
     }
 

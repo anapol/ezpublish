@@ -2,7 +2,7 @@
 /**
  * File containing the eZClusterFileHandler class.
  *
- * @copyright Copyright (C) 1999-2010 eZ Systems AS. All rights reserved.
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
  * @license http://ez.no/licenses/gnu_gpl GNU GPL v2
  * @version //autogentag//
  * @package kernel
@@ -147,13 +147,13 @@ class eZClusterFileHandler
     }
 
     /**
-    * Removes a file from the generating list
-    * @param eZDBFileHandler|eZDFSFileHandler $file
-    *        Cluster file handler instance
-    *        Note that this method expect a version of the handler where the filePath is the REAL one, not the .generating
-    *
-    * @todo Clustering: apply the eZClusterFileHandlerInterface to all cluster handlers
-    */
+     * Removes a file from the generating list
+     * @param eZDBFileHandler|eZDFSFileHandler $file
+     *        Cluster file handler instance
+     *        Note that this method expect a version of the handler where the filePath is the REAL one, not the .generating
+     *
+     * @todo Clustering: apply the eZClusterFileHandlerInterface to all cluster handlers
+     */
     public static function removeGeneratingFile( $file )
     {
         if ( !( $file instanceof eZDBFileHandler ) && !( $file instanceof eZDFSFileHandler ) )
@@ -162,6 +162,23 @@ class eZClusterFileHandler
         if ( isset( self::$generatingFiles[$file->filePath] ) )
             unset( self::$generatingFiles[$file->filePath] );
     }
+
+    /**
+     * Performs required operations before forking a process
+     *
+     * - disconnects DB based cluster handlers from the database
+     */
+    public static function preFork()
+    {
+        $clusterHandler = self::instance();
+
+        // disconnect DB based cluster handlers from the database
+        if ( $clusterHandler instanceof ezpDatabaseBasedClusterFileHandler )
+        {
+            $clusterHandler->disconnect();
+        }
+    }
+
     /**
      * Global list of currently generating files. Used by handlers that support stalecache.
      * @var array(filename => eZClusterFileHandlerInterface)
