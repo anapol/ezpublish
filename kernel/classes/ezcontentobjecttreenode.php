@@ -1,35 +1,12 @@
 <?php
-//
-// Definition of eZContentObjectTreeNode class
-//
-// Created on: <10-Jul-2002 19:28:22 sp>
-//
-// ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
-// SOFTWARE NAME: eZ Publish
-// SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
-// SOFTWARE LICENSE: GNU General Public License v2.0
-// NOTICE: >
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of version 2.0  of the GNU General
-//   Public License as published by the Free Software Foundation.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//
-//   You should have received a copy of version 2.0 of the GNU General
-//   Public License along with this program; if not, write to the Free
-//   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-//   MA 02110-1301, USA.
-//
-//
-// ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
-//
-
-/*! \file
-*/
+/**
+ * File containing the eZContentObjectTreeNode class.
+ *
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
+ * @license http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License v2
+ * @version //autogentag//
+ * @package kernel
+ */
 
 /*!
   \class eZContentObjectTreeNode ezcontentobjecttreenode.php
@@ -4935,7 +4912,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
     // This code is automatically generated from templates/classlistfrompolicy.ctpl
     // code-template::auto-generated:END class-list-from-policy
 
-    // code-template::create-block: can-instantiate-class-list, group-filter, object-policy-list, name-create, object-creation, object-sql-creation
+    // code-template::create-block: can-instantiate-class-list, group-filter, object-policy-list, name-create, object-creation, object-sql-creation, current-subtree-limitation
     // code-template::auto-generated:START can-instantiate-class-list
     // This code is automatically generated from templates/classcreatelist.ctpl
     // DO NOT EDIT THIS CODE DIRECTLY, CHANGE THE TEMPLATE FILE INSTEAD
@@ -5793,11 +5770,11 @@ class eZContentObjectTreeNode extends eZPersistentObject
             // Set audit params.
             $objectID = $node->attribute( 'contentobject_id' );
             $objectName = $node->attribute( 'name' );
-            eZAudit::writeAudit( 'content-hide', array( 'Node ID' => $nodeID, 
-                                                        'Object ID' => $objectID, 
-                                                        'Content Name' => $objectName, 
+            eZAudit::writeAudit( 'content-hide', array( 'Node ID' => $nodeID,
+                                                        'Object ID' => $objectID,
+                                                        'Content Name' => $objectName,
                                                         'Time' => $time,
-                                                        'Comment' => 'Hided the current node: eZContentObjectTreeNode::hideSubTree()' ) );
+                                                        'Comment' => 'Node has been hidden: eZContentObjectTreeNode::hideSubTree()' ) );
         }
 
         $db->begin();
@@ -5860,11 +5837,11 @@ class eZContentObjectTreeNode extends eZPersistentObject
             $objectID = $node->attribute( 'contentobject_id' );
             $objectName = $node->attribute( 'name' );
 
-            eZAudit::writeAudit( 'content-hide', array( 'Node ID' => $nodeID, 
-                                                        'Object ID' => $objectID, 
-                                                        'Content Name' => $objectName, 
+            eZAudit::writeAudit( 'content-hide', array( 'Node ID' => $nodeID,
+                                                        'Object ID' => $objectID,
+                                                        'Content Name' => $objectName,
                                                         'Time' => $time,
-                                                        'Comment' => 'Unhided the current node: eZContentObjectTreeNode::unhideSubTree()' ) );
+                                                        'Comment' => 'Node has been unhidden: eZContentObjectTreeNode::unhideSubTree()' ) );
         }
 
         $db = eZDB::instance();
