@@ -449,8 +449,11 @@ if ( $OmitSectionSetting !== true )
 {
     $sectionID = $object->attribute( 'section_id' );
     $section = eZSection::fetch( $sectionID );
-    $res->setKeys( array( array( 'section', $object->attribute( 'section_id' ) ),
-                          array( 'section_identifier', $section->attribute( 'identifier' ) ) ) );
+    if ( $section )
+    {
+        $res->setKeys( array( array( 'section', $object->attribute( 'section_id' ) ),
+                              array( 'section_identifier', $section->attribute( 'identifier' ) ) ) );
+    }
 }
 
 $object->setCurrentLanguage( $EditLanguage );
