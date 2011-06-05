@@ -4997,7 +4997,7 @@ class eZContentObjectTreeNode extends eZPersistentObject
                     $fetchAll = true;
                     $allowedLanguages['*'] = array_unique( array_merge( $allowedLanguages['*'], $languageCodeArrayPart ) );
                 }
-                else if ( is_array( $classIDArrayPart ) && $this->hasCurrentSubtreeLimitation( $policy ) )
+                else
                 {
                     $fetchAll = false;
                     foreach( $classIDArrayPart as $class )
