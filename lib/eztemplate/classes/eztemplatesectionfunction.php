@@ -1,32 +1,12 @@
 <?php
-//
-// Definition of eZTemplateSectionFunction class
-//
-// Created on: <01-Mar-2002 13:50:33 amos>
-//
-// ## BEGIN COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
-// SOFTWARE NAME: eZ Publish
-// SOFTWARE RELEASE: 4.1.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2011 eZ Systems AS
-// SOFTWARE LICENSE: GNU General Public License v2.0
-// NOTICE: >
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of version 2.0  of the GNU General
-//   Public License as published by the Free Software Foundation.
-//
-//   This program is distributed in the hope that it will be useful,
-//   but WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//   GNU General Public License for more details.
-//
-//   You should have received a copy of version 2.0 of the GNU General
-//   Public License along with this program; if not, write to the Free
-//   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-//   MA 02110-1301, USA.
-//
-//
-// ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
-//
+/**
+ * File containing the eZTemplateSectionFunction class.
+ *
+ * @copyright Copyright (C) 1999-2011 eZ Systems AS. All rights reserved.
+ * @license http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License v2
+ * @version //autogentag//
+ * @package lib
+ */
 
 /*!
   \class eZTemplateSectionFunction eztemplatesectionfunction.php
@@ -113,81 +93,6 @@ class eZTemplateSectionFunction
                                             'transform-children' => false,
                                             'tree-transformation' => true,
                                             'transform-parameters' => true ) );
-    }
-
-    function functionTemplateStatistics( $functionName, &$node, $tpl, $resourceData, $namespace, &$stats )
-    {
-        if ( $functionName != $this->Name )
-            return false;
-        $newNamespace = $namespace;
-        $parameters = eZTemplateNodeTool::extractFunctionNodeParameters( $node );
-        if ( isset( $parameters['name'] ) )
-        {
-            $nameData = $parameters['name'];
-            $nameDataInspection = eZTemplateCompiler::inspectVariableData( $tpl,
-                                                                           $nameData, false,
-                                                                           $resourceData );
-            if ( $nameDataInspection['is-constant'] and
-                 !$nameDataInspection['has-operators'] and
-                 !$nameDataInspection['has-attributes'] )
-            {
-                $parameterNamespace = $nameDataInspection['new-data'][0][1];
-                $newNamespace = $tpl->mergeNamespace( $namespace, $parameterNamespace );
-            }
-        }
-        $parameterNames = array( 'loop', 'show', 'var', 'last-value', 'reverse', 'sequence', 'max', 'offset' );
-        foreach ( $parameterNames as $parameterName )
-        {
-            if ( isset( $parameters[$parameterName] ) )
-            {
-                eZTemplateCompiler::calculateVariableNodeStatistics( $tpl, $parameters[$parameterName], false, $resourceData, $namespace, $stats );
-            }
-        }
-
-        if ( !isset( $parameters['var'] ) )
-        {
-            if ( isset( $parameters['loop'] ) )
-            {
-                $newVariables = array( 'key', 'item', 'index', 'number' );
-                foreach ( $newVariables as $newVariableName )
-                {
-                    eZTemplateCompiler::setVariableStatistics( $stats, $newNamespace, $newVariableName, array( 'is_created' => true,
-                                                                                                               'is_removed' => true ) );
-                }
-            }
-            if ( isset( $parameters['sequence'] ) )
-            {
-                $newVariables = array( 'sequence' );
-                foreach ( $newVariables as $newVariableName )
-                {
-                    eZTemplateCompiler::setVariableStatistics( $stats, $newNamespace, $newVariableName, array( 'is_created' => true,
-                                                                                                               'is_removed' => true ) );
-                }
-            }
-        }
-        else
-        {
-            if ( isset( $parameters['loop'] ) )
-            {
-                $varDataInspection = eZTemplateCompiler::inspectVariableData( $tpl,
-                                                                              $parameters['var'], false,
-                                                                              $resourceData );
-                if ( $varDataInspection['is-constant'] and
-                     !$varDataInspection['has-operators'] and
-                     !$varDataInspection['has-attributes'] )
-                {
-                    $varName = $varDataInspection['new-data'][0][1];
-                    eZTemplateCompiler::setVariableStatistics( $stats, $newNamespace, $varName, array( 'is_created' => true,
-                                                                                                       'is_removed' => true ) );
-                }
-            }
-        }
-
-        $functionChildren = eZTemplateNodeTool::extractFunctionNodeChildren( $node );
-        if ( is_array( $functionChildren ) )
-        {
-            eZTemplateCompiler::calculateVariableStatisticsChildren( $tpl, $functionChildren, $resourceData, $newNamespace, $stats );
-        }
     }
 
     function templateNodeTransformation( $functionName, &$node,
