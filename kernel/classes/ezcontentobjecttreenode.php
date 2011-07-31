@@ -4015,10 +4015,10 @@ class eZContentObjectTreeNode extends eZPersistentObject
     function removeNodeFromTree( $moveToTrash = true )
     {
         $nodeID = $this->attribute( 'node_id' );
+        $object = $this->object();
+        $assignedNodes = $object->attribute( 'assigned_nodes' );
         if ( $nodeID == $this->attribute( 'main_node_id' ) )
         {
-            $object = $this->object();
-            $assignedNodes = $object->attribute( 'assigned_nodes' );
             if ( count( $assignedNodes ) > 1 )
             {
                 $newMainNode = false;
@@ -4069,6 +4069,10 @@ class eZContentObjectTreeNode extends eZPersistentObject
         else
         {
             $this->removeThis();
+            if ( count( $assignedNodes ) > 1 )
+            {
+                eZSearch::addObject( $object );
+            }
         }
     }
 
@@ -4925,17 +4929,33 @@ class eZContentObjectTreeNode extends eZPersistentObject
      */
     protected function hasCurrentSubtreeLimitation( array $policy )
     {
-        if ( !isset( $policy['Subtree'] ) )
+        // No Subtree nor Node limitation, so we consider that it is potentially OK to create content under current subtree
+        if ( !isset( $policy['Subtree'] ) && !isset( $policy['Node'] ) )
         {
-            return false;
+            return true;
         }
 
-        $pathString = $this->attribute( 'path_string' );
-        foreach ( $policy['Subtree'] as $subtreeString )
+        // First check subtree limitations
+        if ( isset( $policy['Subtree'] ) )
         {
-            if ( strpos( $pathString, $subtreeString ) !== false )
+            foreach ( $policy['Subtree'] as $subtreeString )
             {
-                return true;
+                if ( strpos( $this->attribute( 'path_string' ), $subtreeString ) !== false )
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Then check node limitations
+        if ( isset( $policy['Node'] ) )
+        {
+            foreach ( $policy['Node'] as $subtreeString )
+            {
+                if ( strpos( $this->attribute( 'path_string' ), $subtreeString ) !== false )
+                {
+                    return true;
+                }
             }
         }
 
