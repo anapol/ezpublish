@@ -223,6 +223,8 @@ if ( $Module->isCurrentAction( 'CollectInformation' ) )
     {
         $collection->sync();
 
+        eZContentCacheManager::clearObjectViewCache( $ObjectID );
+
         $sendEmail = eZInformationCollection::sendOutEmail( $object );
         $redirectToNodeID = false;
 
