@@ -195,10 +195,36 @@ class eZMultiPriceType extends eZDataType
         $setMainPriceName = $base . "_price_set_main_currency_value_" . $contentObjectAttribute->attribute( "id" );
         $setMainPrice = $http->hasPostVariable( $setMainPriceName ) ? $http->postVariable( $setMainPriceName ) : false;
         // remove all prices
-        if ( $setMainPrice != false && $setMainPrice != false ) {
+        if ( $setMainPriceCode != false ) {
             foreach( $multiprice->priceList() as $currencyCode => $value )
                 $multiprice->setAutoPrice( $currencyCode, false );
-            $multiprice->setCustomPrice( $setMainPriceCode, $setMainPrice );
+            if ( $setMainPrice != false && $setMainPrice != "" ) {
+                $multiprice->setCustomPrice( $setMainPriceCode, $setMainPrice );
+
+                $multiprice->updateAutoPriceList();
+        
+                $vatType = $http->postVariable( $base . '_ezmultiprice_vat_id_' . $contentObjectAttribute->attribute( 'id' ) );
+                $vatExInc = $http->postVariable( $base . '_ezmultiprice_inc_ex_vat_' . $contentObjectAttribute->attribute( 'id' ) );
+                $multiprice->setAttribute( 'selected_vat_type', $vatType );
+                $multiprice->setAttribute( 'is_vat_included', $vatExInc );
+        
+                $data_text = $vatType . ',' . $vatExInc;
+                $contentObjectAttribute->setAttribute( 'data_text', $data_text );
+            } else {
+                $multiprice->updateAutoPriceList();
+        
+                /*
+                $vatType = $http->postVariable( $base . '_ezmultiprice_vat_id_' . $contentObjectAttribute->attribute( 'id' ) );
+                $vatExInc = $http->postVariable( $base . '_ezmultiprice_inc_ex_vat_' . $contentObjectAttribute->attribute( 'id' ) );
+                $multiprice->setAttribute( 'selected_vat_type', $vatType );
+                $multiprice->setAttribute( 'is_vat_included', $vatExInc );
+                */
+                $data_text = null;
+                $contentObjectAttribute->setAttribute( 'data_text', $data_text );
+            }
+
+    
+            return true;
         }
         else if ( $http->hasPostVariable( $priceArrayName ) )
         {
@@ -206,19 +232,19 @@ class eZMultiPriceType extends eZDataType
 
             foreach ( $customPriceList as $currencyCode => $value )
                 $multiprice->setCustomPrice( $currencyCode, $value );
+
+            $multiprice->updateAutoPriceList();
+    
+            $vatType = $http->postVariable( $base . '_ezmultiprice_vat_id_' . $contentObjectAttribute->attribute( 'id' ) );
+            $vatExInc = $http->postVariable( $base . '_ezmultiprice_inc_ex_vat_' . $contentObjectAttribute->attribute( 'id' ) );
+            $multiprice->setAttribute( 'selected_vat_type', $vatType );
+            $multiprice->setAttribute( 'is_vat_included', $vatExInc );
+    
+            $data_text = $vatType . ',' . $vatExInc;
+            $contentObjectAttribute->setAttribute( 'data_text', $data_text );
+    
+            return true;
         }
-
-        $multiprice->updateAutoPriceList();
-
-        $vatType = $http->postVariable( $base . '_ezmultiprice_vat_id_' . $contentObjectAttribute->attribute( 'id' ) );
-        $vatExInc = $http->postVariable( $base . '_ezmultiprice_inc_ex_vat_' . $contentObjectAttribute->attribute( 'id' ) );
-        $multiprice->setAttribute( 'selected_vat_type', $vatType );
-        $multiprice->setAttribute( 'is_vat_included', $vatExInc );
-
-        $data_text = $vatType . ',' . $vatExInc;
-        $contentObjectAttribute->setAttribute( 'data_text', $data_text );
-
-        return true;
     }
 
     /*!
@@ -330,7 +356,7 @@ class eZMultiPriceType extends eZDataType
 
     function hasObjectAttributeContent( $contentObjectAttribute )
     {
-        return true;
+        return (bool)($contentObjectAttribute->attribute( 'data_text' ));
     }
 
     function toString( $contentObjectAttribute )
