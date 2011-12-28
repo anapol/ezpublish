@@ -25,7 +25,7 @@
                 action: 'ezajaxuploader::uploadform::ezobjectrelationlist'
             },
             upload: {
-                action: 'ezajaxuploader::upload::ezobjectrelationlist',
+                action: 'ezajaxuploader::upload::ezobjectrelationlist?ContentType=html',
                 form: 'form.ajaxuploader-upload'
             },
             location: {
@@ -73,8 +73,6 @@
                     priority = tds.item(5).one('input');
                     priority.set('value', parseInt(priority.get('value')) + 1);
 
-                    box.one('input[name*=_data_object_relation_list_ajax_filled_]').set('value', 1);
-
                     box.one('.ezobject-relation-remove-button').removeClass('button-disabled').addClass('button').set('disabled', false);
                     box.all('.ezobject-relation-no-relation').addClass('hide');
 
@@ -95,7 +93,7 @@
             width: 650
         };
 
-        YUI().use('node', 'overlay', 'dom-base', 'io-ez', 'io-form', 'io-upload-iframe', 'json-parse', 'anim', function (Y) {
+        YUI(YUI3_config).use('node', 'overlay', 'dom-base', 'io-ez', 'io-form', 'io-upload-iframe', 'json-parse', 'anim', function (Y) {
             Y.on('domready', function() {
                 var win = new eZModalWindow(windowConf, Y),
                     tokenNode = Y.one('#ezxform_token_js');
