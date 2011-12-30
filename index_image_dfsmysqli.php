@@ -25,6 +25,7 @@ if ( !defined( 'STORAGE_PORT' ) )
 {
     define( 'STORAGE_PORT', '' );
 }
+
 if ( !defined( 'STORAGE_SOCKET' ) )
 {
     define( 'STORAGE_SOCKET', '' );
@@ -39,17 +40,19 @@ while ( $tries < $maxTries )
         break;
     ++$tries;
 }
+
 if ( $tries > $maxTries )
 {
     _die( "Unable to connect to database server.\n" );
 }
+
 if ( !$db )
     _die( "Unable to connect to storage server" );
 
 if ( !mysqli_set_charset( $db, defined( 'STORAGE_CHARSET' ) ? STORAGE_CHARSET : 'utf8' ) )
     _die( "Failed to set character set.\n" );
 
-$filename = ltrim( $_SERVER['REQUEST_URI'], '/');
+$filename = ltrim( $_SERVER['REQUEST_URI'], '/' );
 if ( ( $queryPos = strpos( $filename, '?' ) ) !== false )
     $filename = substr( $filename, 0, $queryPos );
 
@@ -64,7 +67,7 @@ if ( !( $metaData = mysqli_fetch_assoc( $res ) ) ||
 {
     header( $_SERVER['SERVER_PROTOCOL'] . " 404 Not Found" );
 ?>
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE html>
 <HTML><HEAD>
 <TITLE>404 Not Found</TITLE>
 </HEAD><BODY>
@@ -104,5 +107,9 @@ if ( file_exists( $dfsFilePath ) )
     $fp = fopen( $dfsFilePath, 'r' );
     fpassthru( $fp );
     fclose( $fp );
+}
+else
+{
+    _die( "Server error: DFS File not found." );
 }
 ?>

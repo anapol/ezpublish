@@ -30,6 +30,7 @@ while ( $tries < $maxTries )
         break;
     ++$tries;
 }
+
 if ( !$db )
     _die( "Unable to connect to storage server.\n" );
 
@@ -39,7 +40,7 @@ if ( !mysqli_select_db( $db, STORAGE_DB ) )
 if ( !mysqli_set_charset( $db, defined( 'STORAGE_CHARSET' ) ? STORAGE_CHARSET : 'utf8' ) )
     _die( "Failed to set character set.\n" );
 
-$filename = ltrim( $_SERVER['REQUEST_URI'], '/');
+$filename = ltrim( $_SERVER['REQUEST_URI'], '/' );
 if ( ( $queryPos = strpos( $filename, '?' ) ) !== false )
     $filename = substr( $filename, 0, $queryPos );
 
@@ -54,7 +55,7 @@ if ( !( $metaData = mysqli_fetch_array( $res, MYSQLI_ASSOC ) ) ||
 {
     header( $_SERVER['SERVER_PROTOCOL'] . " 404 Not Found" );
 ?>
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE html>
 <HTML><HEAD>
 <TITLE>404 Not Found</TITLE>
 </HEAD><BODY>

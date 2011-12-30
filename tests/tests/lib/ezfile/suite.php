@@ -16,6 +16,8 @@ class eZFileTestSuite extends ezpTestSuite
         $this->setName( "eZFile Test Suite" );
         $this->addTestSuite( 'eZDirTestInsideRoot' );
         $this->addTestSuite( 'eZDirTestOutsideRoot' );
+        $this->addTestSuite( 'eZFileDownloadTest' );
+        $this->addTestSuite( 'eZFileRenameTest' );
     }
 
     public static function suite()

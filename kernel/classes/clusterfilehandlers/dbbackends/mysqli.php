@@ -231,7 +231,7 @@ class eZDBFileHandlerMysqliBackend
             $fname .= "::_purgeByLike($like, $onlyExpired)";
         else
             $fname = "_purgeByLike($like, $onlyExpired)";
-        $sql = "DELETE FROM " . TABLE_METADATA . " WHERE name LIKE " . $this->_quote( $like );
+        $sql = "DELETE FROM " . TABLE_METADATA . " WHERE name LIKE " . $this->_quote( $like, true );
         if ( $expiry !== false )
             $sql .= " AND mtime < " . (int)$expiry;
         elseif ( $onlyExpired )
@@ -281,7 +281,7 @@ class eZDBFileHandlerMysqliBackend
 
     function _deleteByLikeInner( $like, $fname )
     {
-        $sql = "UPDATE " . TABLE_METADATA . " SET mtime=-ABS(mtime), expired=1\nWHERE name like ". $this->_quote( $like );
+        $sql = "UPDATE " . TABLE_METADATA . " SET mtime=-ABS(mtime), expired=1\nWHERE name like ". $this->_quote( $like, true );
         if ( !$res = $this->_query( $sql, $fname ) )
         {
             return $this->_fail( "Failed to delete files by like: '$like'" );
@@ -360,7 +360,7 @@ class eZDBFileHandlerMysqliBackend
             }
             else
             {
-                $where = "WHERE name LIKE '$commonPath/$dirItem/$commonSuffix%'";
+                $where = "WHERE name LIKE ".$this->_quote( "$commonPath/$dirItem/$commonSuffix%", true );
             }
             $sql = "UPDATE " . TABLE_METADATA . " SET mtime=-ABS(mtime), expired=1\n$where";
             if ( !$res = $this->_query( $sql, $fname ) )
@@ -503,7 +503,7 @@ class eZDBFileHandlerMysqliBackend
 
         if ( ! $uniqueName === true )
         {
-            eZFile::rename( $tmpFilePath, $filePath );
+            eZFile::rename( $tmpFilePath, $filePath, false, eZFile::CLEAN_ON_FAILURE | eZFile::APPEND_DEBUG_ON_FAILURE );
         }
         else
         {
@@ -584,30 +584,83 @@ class eZDBFileHandlerMysqliBackend
     }
 
     /**
-     * \deprecated This function should not be used since it cannot handle reading errors.
-     *             For the PHP 5 port this should be removed.
+     * Sends a binary file's content to the client
+     *
+     * @param string $filePath File path
+     * @param int $startOffset Starting offset
+     * @param false|int $length Length to transmit, false means everything
+     * @param false|string $fname The function name that started the query
      */
-    function _passThrough( $filePath, $fname = false )
+    function _passThrough( $filePath, $startOffset = 0, $length = false, $fname = false )
     {
         if ( $fname )
             $fname .= "::_passThrough($filePath)";
         else
             $fname = "_passThrough($filePath)";
 
-        $metaData = $this->_fetchMetadata( $filePath, $fname );
-        if ( !$metaData )
-            return false;
+        $where = array();
+        $dbChunkSize = $this->dbparams['chunk_size'];
+        $dbStartOffset = ( $startOffset != 0 ) ? (int) ( floor( $startOffset / $dbChunkSize ) * $dbChunkSize ) : 0;
+        if ( $dbStartOffset !== 0 )
+        {
+            $where[] = "offset >= {$dbStartOffset}";
+        }
 
-        $sql = "SELECT filedata FROM " . TABLE_DATA . " WHERE name_hash=" . $this->md5( $filePath ) . " ORDER BY offset";
-        if ( !$res = $this->_query( $sql, $fname ) )
+        if ( $length !== false )
+        {
+            $where[] = "offset <= " . ( $length + $startOffset - 1 );
+            $endOffset = $length + $startOffset - 1;
+        }
+        else
+        {
+            $metaData = $this->_fetchMetadata( $filePath, $fname );
+            if ( !$metaData )
+            {
+                return false;
+            }
+            $endOffset = $metaData['size'] - 1;
+            unset( $metaData );
+        }
+
+        if ( !$res =
+            $this->_query(
+                "SELECT offset, filedata FROM " . TABLE_DATA . " WHERE name_hash=" . $this->_md5( $filePath ) .
+                ( !empty( $where ) ? " AND " . implode( " AND ", $where ) : "" ) . " " .
+                "ORDER BY offset",
+                $fname
+            ) )
         {
             eZDebug::writeError( "Failed to fetch file data for file '$filePath'.", __METHOD__ );
             return false;
         }
 
-        while ( $row = mysqli_fetch_row( $res ) )
-            echo $row[0];
-
+        while ( $row = mysqli_fetch_assoc( $res ) )
+        {
+            // The first byte to send is part of this first chunk
+            if ( $row['offset'] < $startOffset )
+            {
+                echo substr(
+                    $row['filedata'],
+                    $startOffset - $row['offset'],
+                    // we need the +1 as this is a length, not an offset
+                    $endOffset - $startOffset + 1
+                );
+            }
+            // The last byte to send is part of this last chunk
+            else if ( $row['offset'] + $dbChunkSize > $endOffset )
+            {
+                echo substr(
+                    $row['filedata'],
+                    0,
+                    // we need the +1 as this is a length, not an offset
+                    $endOffset - $row['offset'] + 1
+                );
+            }
+            else
+            {
+                echo $row['filedata'];
+            }
+        }
         mysqli_free_result( $res );
         return true;
     }
@@ -1311,18 +1364,32 @@ class eZDBFileHandlerMysqliBackend
         return $res;
     }
 
-    /*!
-     Make sure that $value is escaped and qouted according to type and returned as a string.
-     The returned value can directly be put into SQLs.
+    /**
+     * Make sure that $value is escaped and qouted according to type and returned
+     * as a string.
+     *
+     * @param string $value a SQL parameter to escape
+     * @param bool $escapeUnderscoreWildcards Set to true to escape underscores as well to avoid them to act as wildcards
+     *                                        Highly recommended for LIKE statements !
+     * @return string a string that can safely be used in SQL queries
      */
-    function _quote( $value )
+    function _quote( $value, $escapeUnderscoreWildcards = false )
     {
         if ( $value === null )
+        {
             return 'NULL';
+        }
         elseif ( is_integer( $value ) )
+        {
             return (string)$value;
+        }
         else
-            return "'" . mysqli_real_escape_string( $this->db, $value ) . "'";
+        {
+           if ( $escapeUnderscoreWildcards )
+                return "'" . addcslashes( mysqli_real_escape_string( $this->db, $value ), "_" ) . "'";
+           else
+                return "'" . mysqli_real_escape_string( $this->db, $value ) . "'";
+        }
     }
 
     /*!

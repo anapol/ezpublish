@@ -130,17 +130,17 @@ class eZModuleOperationInfo
             return null;
         }
         $operationDefinition = $this->OperationList[$operationName];
-        if ( !isset( $operationName['default_call_method'] ) )
+        if ( !isset( $operationDefinition['default_call_method'] ) )
         {
             eZDebug::writeError( "No call method defined for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
-        if ( !isset( $operationName['body'] ) )
+        if ( !isset( $operationDefinition['body'] ) )
         {
             eZDebug::writeError( "No body for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
         }
-        if ( !isset( $operationName['parameters'] ) )
+        if ( !isset( $operationDefinition['parameters'] ) )
         {
             eZDebug::writeError( "No parameters defined for operation '$operationName' in module '$moduleName'", __METHOD__ );
             return null;
@@ -167,7 +167,6 @@ class eZModuleOperationInfo
             {
                 $keyArray = $this->makeOperationKeyArray( $operationDefinition, $operationParameters );
                 $http = eZHTTPTool::instance();
-                $keyArray['session_key'] = $http->getSessionKey();
                 $mainMemento = null;
                 if ( $this->UseTriggers )
                     $mainMemento = eZOperationMemento::fetchMain( $keyArray );
@@ -179,6 +178,7 @@ class eZModuleOperationInfo
                     if ( isset( $mementoOperationData['loop_run'] ) )
                         $bodyCallCount['loop_run'] = $mementoOperationData['loop_run'];
                 }
+
 
                 $mementoList = null;
                 if ( $this->UseTriggers )
@@ -649,7 +649,6 @@ class eZModuleOperationInfo
         {
             $keyArray = $this->makeKeyArray( $operationKeys, $operationParameterDefinitions, $operationParameters );
             $http = eZHTTPTool::instance();
-            $keyArray['session_key'] = $http->getSessionKey();
             $mementoData['loop_run'] = $bodyCallCount['loop_run'];
             $memento = eZOperationMemento::create( $keyArray, $mementoData, true );
             $this->Memento = $memento;
